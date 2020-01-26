@@ -1,0 +1,82 @@
+options:
+    bcprefix: &9&lINFO &7|
+    name: &6&lSLOGIC &7|
+
+command /autobc [<text>] [<text>] [<text>]:
+    permission: bc.admin
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &cUse /autobc <add/set/remove/delete/send/queue/list>"
+            exit
+        else if arg-1 is "add":
+            if arg-2 is not set:
+                send "{@name} &cUse /autobc add <text>"
+            else:
+                set {_part2} to arg-2 if arg-2 is set else " "
+                set {_part3} to arg-3 if arg-3 is set else " "
+                set {_msg} to "&7%{_part2}% %{_part3}%"
+                add {_msg} to {broadcasts::*}
+                send "{@name} &7Added to auto broadcasts" to player
+        else if arg-1 is "remove" or "delete":
+            if arg-2 is not set:
+                send "{@name} &cUse /autobc remove/delete <number>"
+            else:
+                set {_in} to arg-2 parsed as integer
+                if {_in} is not set:
+                    parse error is set:
+                        send "{@name} &cLine 1 is invalid: %last parse error%"
+                    else:
+                        send "{@name} &cPlease provide a valid integer for argument 2"
+                else:
+                    if {broadcasts::%{_in}%} is not set:
+                        send "{@name} &cThat broadcast does not exist"
+                    else:
+                        delete {broadcasts::%{_shift}%}
+                        send "{@name} &7Removed auto broadcast &6%arg-2%" to player
+        else if arg-1 is "set":
+            if arg-2 or arg-3 is not set:
+                send "{@name} &cUse /autobc set <number> <text>"
+            else:
+                set {_in} to arg-2 parsed as integer
+                if {_in} is not set:
+                    parse error is set:
+                        send "{@name} &cLine 1 is invalid: %last parse error%"
+                    else:
+                        send "{@name} &cPlease provide a valid integer for argument 2"
+                else:
+                    set {broadcasts::%{_in}%} to arg-3
+                    send "{@name} &7Set broadcast &6%arg-2% &7to &r%arg-3%"
+        else if arg-1 is "send":
+            if arg-2 is not set:
+                send "{@name} &cUse /autobc send <number>"
+            else:
+                set {_in} to arg-2 parsed as integer
+                if {_in} is not set:
+                    parse error is set:
+                        send "{@name} &cLine 1 is invalid: %last parse error%"
+                    else:
+                        send "{@name} &cPlease provide a valid integer for argument 2"
+                else:
+                    if {broadcasts::%{_in}%} is not set:
+                        send "{@name} &cThat broadcast does not exist"
+                    else:
+                        send "{@bcprefix} %colored {broadcasts::%{_in}%}%" to all players
+        else if arg-1 is "queue":
+            send "maybe soon if you make it nerd" to player
+        else if arg-1 is "list":
+            if {broadcasts::*} is set:
+                send centered "{@name} &7Broadcasts%nl%" to player
+                loop {broadcasts::*}:
+                    send centered "&6%loop-index%&7. %colored loop-value%" to player
+                # set {_bclist} to join colored {broadcasts::*} with " %nl%"
+                # send centered {_bclist} to player
+            else:
+                send "{@name} &cNo broadcasts to show" 
+
+every 3 minutes:
+    set {bcindex} to 1 if {bcindex} is not set
+    if {broadcasts::*} is not set:
+        stop
+    else:
+        send "{@bcprefix} %colored {broadcasts::%{bcindex}%}%" to all players
+        set {bcindex} to ({bcindex} + 1) if {bcindex} < size of {broadcasts::*} else 1

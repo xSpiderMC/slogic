@@ -1,0 +1,36 @@
+- [x] **MOSTLY DONE** - Standing on the point gives you points which you use to upgrade your gear and armor.
+- [x] The more people on the point the less points you get. or it divides by the amount of people on the hill?
+- [ ] Buy multipliers on buycraft store?
+- [ ] Have teams/guilds that you can team up with? 
+- [ ] Custom enchants? 
+- [x] **WORKING** - Points on kill
+- [x] **Should be working** Be able to pick your color
+- [x] **SORTA DONE** - have your own spawn island color
+- [ ] crystals give you mana to use on special abilities  
+- [ ] only certain crystals give mana, have limit
+- [ ] all crystals have chance to spawn beacon/particle effect that shows they will give mana for a certain time
+- [ ] combine mana with coins to buy special items
+- [ ] one shot bow uses mana
+- [ ] sell items back
+- [ ] defend the hill from zombies and use points to upgrade gear
+- [x] **SHOULD BE DONE** - Fix negative hill multipliers, getting correct amount of players
+- [ ] find the things you'll forget are broken
+- [ ] achievemnts
+- [ ] prestiging and xp and levels... maybe
+- [ ] having a bank to store points
+- [ ] more points on your person you get more targeted?
+- [x] when item breaks it downgrades
+- [x] add sound on kill
+- [x] killstreaks - **works, for now**
+- [ ] scoreboard with stats and things or stats command
+- [ ] ore to get points?
+- [ ] random events to gain points, ex: go to certain area and type what's on sign in chat
+- [ ] ranks names currently are: VIP, (not decided), (notdecided) - could be knight, quuen, king or - Brook, Knight, Bishop, Queen, King [For ranks maybe?] 
+- [ ] combat log
+- [x] fix tutorial (might be buggy)
+- [ ] random events with different rewards
+- [ ] autobroadcast
+- [ ] Balance items, ~~leather armor gets 1 shot by diamond sharpness 1~~
+- [ ] dye leather armor
+- [ ] void death instant
+- [ ] capture towers for passive income

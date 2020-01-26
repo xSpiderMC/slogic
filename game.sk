@@ -1,0 +1,628 @@
+options:
+    name: &6&lSLOGIC &7|
+    nopoints: &6&lSLOGIC &7| &cYou don't have enough points to purchase this!
+
+on first join:
+    set join message to "&7[&6%size of all offline players%&7] &7Welcome &9%event-player%"
+    tutorial(event-player)
+    set {points::%uuid of event-player%} to 0
+    set the helmet of event-player to unbreakable leather helmet
+    set the chestplate of event-player to unbreakable leather chestplate
+    set the leggings of event-player to unbreakable leather leggings
+    set the boots of event-player to unbreakable leather boots
+    give unbreakable wooden sword to event-player
+        
+on enter of region "hill":
+    set {onhill::%uuid of event-player%} to true
+    set {onhillamount} to ({onhillamount} + 1) if {onhillamount} > 0 else 1
+on exit of region "hill":
+    set {onhill::%uuid of event-player%} to false
+    set {onhillamount} to ({onhillamount} - 1) if {onhillamount} > 0 else 1
+
+on load:
+    set {onhillamount} to 0
+    delete {onhill} if {onhill} is set
+
+on food level change:
+    cancel event
+
+every second:
+    set {_nmultiplier} to product(0.1, {onhillamount})
+    loop all players:
+        if {onhill::%uuid of loop-player%} is true:
+            set {points::%uuid of loop-player%} to ({points::%uuid of loop-player%} + 2) if {onhillamount} is 1 else ({points::%uuid of loop-player%} + (2 - {_nmultiplier}))
+        send action bar "&7Current point balance: &6%{points::%uuid of loop-player%}%" to loop-player 
+
+on respawn:
+    if {autojoin.%player's uuid%} is true:
+        if {autojoincolor.%player's uuid%} is set:
+            if {autojoincolor.%player's uuid%} = "green":
+                teleport player to location(42.5, 64, 0.5, world "arena", 90, 0.5)
+            else if {autojoincolor.%player's uuid%} = "black":
+                teleport player to location(29.7, 65, 29.7, world "arena", 135, 0.5)
+            else if {autojoincolor.%player's uuid%} = "red":
+                teleport player to location(3.5, 68, 48.7, world "arena", 180, 0.5)
+            else if {autojoincolor.%player's uuid%} = "yellow":
+                teleport player to location(-30.7, 66, 39.7, world "arena", -135.5, 0.5)
+            else if {autojoincolor.%player's uuid%} = "purple":
+                teleport player to location(-39.5, 66, 8.5, world "arena", -90, 0.5)
+            else if {autojoincolor.%player's uuid%} = "orange":
+                teleport player to location(-29.7, 69, -21.7, world "arena", -45.5, 0.5)
+            else if {autojoincolor.%player's uuid%} = "blue":
+                teleport player to location(1.5, 67, -48.7, world "arena", -0.0, 0.5)
+            else if {autojoincolor.%player's uuid%} = "brown":
+                teleport player to location(32.7, 66, -31.7, world "arena", 44.5, 0.5)
+        else:
+            send "{@name} &cYou have auto join enabled but do not have a color selected, use /join to select a color" to player
+
+on death of player:
+    send "&6&lDEATH &7%victim's name%" to all players where [input is not victim]
+    if {onhill::%player's uuid%} is true:
+        set {onhillamount} to {onhillamount} - 1
+        delete {onhill::%player's uuid%}
+    if event-damagecause is attack:
+        send "&6&lDEATH &7by &6%attacker's name%" to victim
+        set {_u} to uuid of victim
+        set {_au} to uuid of attacker
+        set {_am} to {points::%{_u}%}
+        set {_removeamt} to product(0.05, {_am})
+        remove {_removeamt} from {points::%{_u}%}
+        send "&c&lUH OH &7You lost &6%{_removeamt}% &7points &6(5%%) &7of your points" to victim
+        add {_removeamt} to {points::%{_au}%}
+        send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to attacker
+        play sound "ENTITY_ARROW_HIT_PLAYER" to attacker
+        add 1 to {killstreak::%uuid of attacker%}
+        if {killstreak::%uuid of attacker%} = 5:
+            send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, you will be rewarded with &6200 points&7!" to all players
+            set {bounty::%uuid of attacker%} to 200
+        else if {killstreak::%uuid of attacker%} = 10:
+            send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, The bounty has been increaed to &6500 points&7!" to all players
+            set {bounty::%uuid of attacker%} to 500
+        else if {killstreak::%uuid of attacker%} = 15:
+            send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, The bounty has been increaed to &6800 points&7!" to all players
+            set {bounty::%uuid of attacker%} to 800
+        else if {killstreak::%uuid of attacker%} = 20:
+            send "&4&lBOUNTY &7| The kings has ordered &6%attacker% &7dead, The bounty has been increaed to &61100 points&7!" to all players
+            set {bounty::%uuid of attacker%} to 1100
+        if {bounty::%uuid of victim%} > 0:
+            if {killstreak::%uuid of victim%} >= 5:
+                send "&4&lBOUNTY &7| &6%attacker% &7has claimed the king's bounty of &6%{bounty::%uuid of victim%}% &7on &6%victim%&7!" to all players
+                add {bounty::%uuid of victim%} to {points::%uuid of attacker%}
+                set {bounty::%uuid of victim%} to 0
+                set {killstreak::%uuid of victim%} to 0
+        else:
+            delete {bounty::%uuid of victim%}
+            delete {killstreak::%uuid of victim%}
+    else:
+        if damage was caused by void:
+            if {%victim%.lastattacker} is set:
+                if {%victim%.attacktime} was less than 8 seconds ago:
+                    send "&6&lDEATH &7by &6%{%victim%.lastattacker}'s name%" to victim
+                    set {_u} to uuid of victim
+                    set {_au} to uuid of {%victim%.lastattacker}
+                    set {_am} to {points::%{_u}%}
+                    set {_removeamt} to product(0.05, {_am})
+                    remove {_removeamt} from {points::%{_u}%}
+                    send "&c&lUH OH &7You lost &6%{_removeamt}% &7points &6(5%%) &7of your points" to victim
+                    add {_removeamt} to {points::%{_au}%}
+                    send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to {%victim%.lastattacker}
+                    play sound "ENTITY_ARROW_HIT_PLAYER" to attacker
+                    add 1 to {killstreak::%{_au}%}
+                    if {killstreak::%{_au}%} = 5:
+                        send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, you will be rewarded with &6200 points&7!" to all players
+                        set {bounty::%{_au}%} to 200
+                    else if {killstreak::%{_au}%} = 10:
+                        send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, The bound has been increaed to &6500 points&7!" to all players
+                        set {bounty::%{_au}%} to 500
+                    else if {killstreak::%{_au}%} = 15:
+                        send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, The bounty has been increaed to &6800 points&7!" to all players
+                        set {bounty::%{_au}%} to 800
+                    else if {killstreak::%{_au}%} = 20:
+                        send "&4&lBOUNTY &7| The kings has ordered &6%{%victim%.lastattacker}% &7dead, The bounty has been increaed to &61100 points&7!" to all players
+                        set {bounty::%{_au}%} to 1100
+                    if {bounty::%uuid of victim%} > 0:
+                        if {killstreak::%uuid of victim%} >= 5:
+                            send "&4&lBOUNTY &7| &6%{%victim%.lastattacker}% &7has claimed the king's bounty of &6%{bounty::%uuid of victim%}% &7on &6%victim%&7!" to all players
+                            add {bounty::%uuid of victim%} to {points::%{_au}%}
+                            set {bounty::%uuid of victim%} to 0
+                            set {killstreak::%uuid of victim%} to 0
+                else:
+                    delete {%victim%.lastattacker}
+                    delete {%victim%.attacktime}
+                    send "&6&lDEATH &7%victim's name%" to victim
+    wait 2 tick
+    force victim to respawn
+
+command /ksinfo <offline player>:
+    trigger:
+        send "Killstreak: %{killstreak::%uuid of arg-1%}%"
+        send "Bounty: %{bounty::%uuid of arg-1%}%"
+
+command /ksset <integer> <integer>:
+    permission: points.admin
+    trigger:
+        set {killstreak::%uuid of player%} to arg-1
+        set {bounty::%uuid of player%} to arg-2
+
+
+on damage of player:
+    if attacker is player:
+        set {%victim%.lastattacker} to attacker
+        set {%victim%.attacktime} to now
+    
+command /tutorial:
+    description: Learn how to play the game
+    trigger:
+        if {intutorial.%uuid of player%} is true:
+            teleport player to {spawn}
+            reveal player from all players
+            delete {intutorial.%uuid of player%}
+        else:
+            tutorial(player)
+
+
+command /points [<text>] [<player>] [<number>]:
+    description: Allows you to view your points and admins to modify 
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &7Your points: &6%{points::%uuid of player%}%" to player
+        else if player has permission "points.admin":
+            if arg-2 is not set:
+                send "{@name} &cYou need to specify a player" to player
+            else if arg-1 is "reset":
+                send "{@name} &7Resetting &6%arg-2%&7's points" to player
+                set {onhill::%uuid of arg-2%} to false
+                set {points::%uuid of arg-2%} to 0
+            else if arg-1 is "show" or "amount":
+                send "{@name} &6%arg-2% &7has &6%{points::%uuid of arg-2%}% &7points" to player
+            else if arg-3 is not set:
+                send "{@name} &cYou need to specify an amount" to player
+            else:
+                if arg-1 is "give" or "add":
+                    send "{@name} &7Adding &6%arg-3% &7to &6%arg-2%&7's points" to player
+                    add arg-3 to {points::%uuid of arg-2%}
+                    send "{@name} &7You have been given &6%arg-3% &7point(s)." to arg-2
+                else if arg-1 is "remove":
+                    send "{@name} &7Removing &6%arg-3% &7points from &c%arg-2%" to player
+                    remove arg-3 from {points::%uuid of arg-2%}
+                else if arg-1 is "set":
+                    send "{@name} &7Set &6%arg-2%&7's points to &6%arg-3%" to player
+                    set {points::%uuid of arg-2%} to arg-3
+
+
+command /pstatus:
+    trigger:
+        send "{@name} &7Current Status: &6Onhill &7- &c%{onhill::%uuid of player%}%" to player
+        send "&7'On hill' amount: &6%{onhillamount}%" to player
+        send "&7Negative Multiplier: &6%product(0.1, {onhillamount})%" to player
+        send "&7Amount given: &6%2 - ({onhillamount} * 0.1)% &7(Only acurate for more than 1 player)"
+
+command /ahill <integer>:
+    permission: points.admin
+    trigger:
+        send "{@name} &7Setting the amount on hill to &6%arg-1%" to player
+        set {onhillamount} to arg-1
+
+command /shop:
+    usage: /shop
+    description: Opens the shop that allows you to buy items
+    executable by: players
+    trigger:
+        openMenu(player, "main")
+
+on tool break:
+    send "{@name} &6Your tool or armor broke! &7It has been downgraded by 1 tier."
+    if event-item is wooden sword:
+        give unbreakable wooden sword to event-player
+    else if item is diamond sword:
+        if item is enchanted with sharpness 1:
+            give diamond sword to player
+        else:
+            give iron sword of sharpness 1 to player
+    else if item is iron sword:
+        if item is enchanted with sharpness 1:
+            give iron sword to player
+        else:
+            give stone sword of sharpness 1 to player
+    else if item is stone sword:
+        if item is enchanted with sharpness 1:
+            give stone sword to player
+        else:
+            give wooden sword of sharpness 1 to player
+    else if item is diamond helmet:
+        set helmet of player to iron helmet
+    else if item is diamond chestplate:
+        set chestplate of player to iron chestplate
+    else if item is diamond leggings:
+        set leggings of player to iron leggings
+    else if item is diamond boots:
+        set boots of player to iron boots
+    else if item is iron helmet:
+        set helmet of player to unbreakable leather helmet
+    else if item is iron chestplate:
+        set chestplate of player to unbreakable leather chestplate
+    else if item is iron leggings:
+        set leggings of player to unbreakable leather leggings
+    else if item is iron boots:
+        set boots of player to unbreakable leather boots
+    else if item is leather helmet:
+        set helmet of player to unbreakable leather helmet
+    else if item is leather chestplate:
+        set chestplate of player to unbreakable leather chestplate
+    else if item is leather leggings:
+        set leggings of player to unbreakable leather leggings
+    else if item is leather boots:
+        set boots of player to unbreakable leather boots
+     
+command /fix <text>:
+    usage: &c/fix <hand/all>
+    description: Fix your held item
+    executable by: players
+    aliases: repair
+    trigger:
+        set {_up} to uuid of player
+        if arg-1 is "hand":
+            if durability of player's tool is 0:
+                send "{@name} &cThis item is already fully repaired" to player
+                stop
+            else:
+                if player's tool is wooden sword:
+                    if player's tool is enchanted with sharpness 1:
+                        #Sharpness 1 Wooden Sword Repair - 100
+                        if {points::%{_up}%} >= 100:
+                            repair tool of player
+                            remove 100 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6100 &7points."
+                        else:
+                            send "{@name} &cInsufficent points: You need 100 points to do this"
+                    else:
+                        exit 1 conditional
+                else if player's held item is stone sword:
+                    #Sharp 1 Stone Sword Repair - 200
+                    if player's tool is enchanted with sharpness 1:
+                        if {points::%{_up}%} >= 200:
+                            repair tool of player
+                            remove 125 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
+                        else:
+                            send "{@name} &cInsufficent points: You need 200 points to do this"
+                    else:
+                        #Stone Sword Repair
+                        if {points::%{_up}%} >= 150:
+                            repair tool of player
+                            remove 150 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6150 &7points."
+                        else:
+                            send "{@name} &cInsufficent points: You need 150 points to do this" 
+                else if player's held item is iron sword:
+                    #Sharp 1 Iron Sword Repair  
+                    if player's tool is enchanted with sharpness 1:
+                        if {points::%{_up}%} >= 300:
+                            repair tool of player
+                            remove 300 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6300 &7points."
+                        else:
+                            send "{@name} &cInsufficent points: You need 300 points to do this"
+                    else:
+                        #Iron Sword Repair
+                        if {points::%{_up}%} >= 250:
+                            repair tool of player
+                            remove 300 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6300 &7points."
+                        else:
+                            send "{@name} &cInsufficent points: You need 300 points to do this"
+                else if player's held item is diamond sword:
+                    #Sharpness 1 Diamond Repair
+                    if player's tool is enchanted with sharpness 1:
+                        if {points::%{_up}%} >= 500:
+                            repair tool of player
+                            remove 800 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6800 &7points."
+                        else:
+                            send "{@name} &cInsufficent points: You need 800 points to do this"
+                    else:
+                        #Diamond Sword Repair
+                        if {points::%{_up}%} >= 450:
+                            repair tool of player
+                            remove 500 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
+                        else:
+                            send "{@name} &cInsufficent points: You need 500 points to do this"
+                #Armor
+                else if player's held item is diamond helmet:
+                    if {points::%{_up}%} >= 500:
+                        repair tool of player
+                        remove 500 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 500 points to do this"
+                else if player's held item is diamond chestplate:
+                    if {points::%{_up}%} >= 500:
+                        repair tool of player
+                        remove 500 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 500 points to do this"
+                else if player's held item is diamond leggings:
+                    if {points::%{_up}%} >= 500:
+                        repair tool of player
+                        remove 500 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 500 points to do this"
+                else if player's held item is diamond boots:
+                    if {points::%{_up}%} >= 500:
+                        repair tool of player
+                        remove 500 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 500 points to do this"
+                #Iron Armor
+                else if player's held item is iron helmet:
+                    if {points::%{_up}%} >= 200:
+                        repair tool of player
+                        remove 200 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 200 points to do this"
+                else if player's held item is iron chestplate:
+                    if {points::%{_up}%} >= 250:
+                        repair tool of player
+                        remove 250 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6250 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 250 points to do this"
+                else if player's held item is iron leggings:
+                    if {points::%{_up}%} >= 250:
+                        repair tool of player
+                        remove 250 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6250 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 250 points to do this"
+                else if player's held item is iron boots:
+                    if {points::%{_up}%} >= 200:
+                        repair tool of player
+                        remove 200 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 200 points to do this"
+                else:
+                    send "{@name} &cThis item cannot be repaired."
+                    stop
+        else if arg-1 is "all":
+            send "SoonTM - yell at spiderlogical if it isn't done soon"
+            stop
+        else:
+            send "{@name} &cUsage: /fix <hand/all>"
+            stop
+        
+command /join:
+    usage: /join
+    description: Opens a menu that allows the player to select a spawning point
+    executable by: players
+    cooldown: 10 second
+    cooldown message: &cYou need to wait 10 seconds before using this command again
+    cooldown bypass: game.join.bc
+    trigger:
+        if player is not in world "arena":
+            send "{@name} &cYou must be in the arena world first! Enter the portal at spawn"
+            stop
+        else if player is in region "innerarena":
+            send "{@name} &cYou cannot be inside the arena when you use this command"
+            stop
+        else if player's y location is less than 40:
+            send "{@name} &cYou cannot use this while falling into the void."
+            stop
+        else:
+            open virtual chest inventory with 1 rows named "&7Select an island color" to player
+            format gui slot 0 of player with lime wool named "&aGreen Island" to run:
+                teleport player to location(42.5, 64, 0.5, world "arena", 90, 0.5)
+                set {autojoincolor.%player's uuid%} to "green"
+            format gui slot 1 of player with black wool named "&8Black Island" to run:
+                teleport player to location(29.7, 65, 29.7, world "arena", 135, 0.5)
+                set {autojoincolor.%player's uuid%} to "black"
+            format gui slot 2 of player with red wool named "&cRed Island" to run:
+                teleport player to location(3.5, 68, 48.7, world "arena", 180, 0.5)
+                set {autojoincolor.%player's uuid%} to "red"
+            format gui slot 3 of player with yellow wool named "&eYellow Island" to run:
+                teleport player to location(-30.7, 66, 39.7, world "arena", -135.5, 0.5)
+                set {autojoincolor.%player's uuid%} to "yellow"
+            format gui slot 4 of player with purple wool named "&5Purple Island" to run:
+                teleport player to location(-39.5, 66, 8.5, world "arena", -90, 0.5)
+                set {autojoincolor.%player's uuid%} to "purple"
+            format gui slot 5 of player with orange wool named "&6Orange Island" to run:
+                teleport player to location(-29.7, 69, -21.7, world "arena", -45.5, 0.5)
+                set {autojoincolor.%player's uuid%} to "orange"
+            format gui slot 6 of player with blue wool named "&bBlue Island" to run:
+                teleport player to location(1.5, 67, -48.7, world "arena", -0.0, 0.5)
+                set {autojoincolor.%player's uuid%} to "blue"
+            format gui slot 7 of player with brown wool named "&8Brown Island" to run:
+                teleport player to location(32.7, 66, -31.7, world "arena", 44.5, 0.5)
+                set {autojoincolor.%player's uuid%} to "brown"
+command /autojoin:
+    usage: /autojoin
+    description: Toggles auto joining the game
+    executable by: players
+    aliases: aj, togglejoin, tj
+    trigger:
+        set {autojoin.%player's uuid%} to true if {autojoin.%player's uuid%} is false else false
+        if {autojoin.%player's uuid%} is true:
+            send "{@name} &7Toggled autojoin &aon" to player
+        else:
+            send "{@name} &7Toggled autojoin &coff" to player
+
+function openMenu(p: Player, type: String):
+    set {_up} to uuid of {_p}
+    if {_type} is "main":
+        open virtual chest inventory with size 3 named "&c&lShop" to {_p}
+        format gui slot (all integers between 0 and 26) of {_p} with light gray stained glass pane named " "
+        format gui slot 11 of {_p} with golden chestplate named "&7&lArmor" to run function openMenu({_p}, "page 1")
+        #WEAPONS ---------------------------------------------------------------------------------------------
+        format gui slot 13 of {_p} with diamond sword named "&7&lWeapons" to run function openMenu({_p}, "page 2")
+        #POTIONS ----------------------------------------------------------------------------------------------
+        set {_potion} to potion with nbt "{HideFlags:32}"
+        set {_potion}'s name to "&7&lPotions and Misc"
+        format gui slot 15 of {_p} with {_potion} to run function openMenu({_p}, "page 3")
+
+    if {_type} is "page 1":
+        open virtual chest inventory with size 6 named "&c&lShop &7- &a&lArmor" to {_p}
+        #IRON ARMOR -------------------------------------------------------------------------------------
+        format gui slot 12 of {_p} with iron helmet named "&eIron Helmet" with lore "&6200 points" to run:
+            if {points::%{_up}%} is greater than or equal to 200:
+                remove 200 from {points::%{_up}%}
+                give {_p} iron helmet
+                send "{@name} &7Successfully bought &6Iron Helmet" to {_p}      
+            else:
+                send "{@nopoints}" to {_p}
+        format gui slot 21 of {_p} with iron chestplate named "&eIron Chestplate" with lore "&6600 points" to run:
+            if {points::%{_up}%} is greater than or equal to 600:
+                remove 600 from {points::%{_up}%}     
+                give {_p} iron chestplate
+                send "{@name} &7Successfully bought &6Iron Chestplate" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        format gui slot 30 of {_p} with iron leggings named "&eIron Leggings" with lore "&6600 points" to run:
+            if {points::%{_up}%} is greater than or equal to 600:
+                remove 600 from {points::%{_up}%}
+                give {_p} iron leggings
+                send "{@name} &7Successfully bought &6Iron Leggings" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        format gui slot 39 of {_p} with iron boots named "&eIron Boots" with lore "&6200 points" to run:
+            if {points::%{_up}%} is greater than or equal to 200:
+                remove 200 from {points::%{_up}%}
+                give {_p} iron boots
+                send "{@name} &7Successfully bought &6Iron Boots" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        #DIAMOND ARMOR -----------------------------------------------------------------------------------
+        format gui slot 14 of {_p} with diamond helmet named "&eDiamond Helmet" with lore "&6800 points" to run:
+            if {points::%{_up}%} is greater than or equal to 800:
+                remove 800 from {points::%{_up}%}
+                give {_p} diamond helmet
+                send "{@name} &7Successfully bought &6Diamond Helmet" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        format gui slot 23 of {_p} with diamond chestplate named "&eDiamond Chestplate" with lore "&61200 points" to run:
+            if {points::%{_up}%} is greater than or equal to 1200:
+                remove 1200 from {points::%{_up}%}
+                give {_p} diamond chestplate
+                send "{@name} &7Successfully bought &6Diamond Chestplate" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        format gui slot 32 of {_p} with diamond leggings named "&eDiamond Leggings" with lore "&61200 points" to run:
+            if {points::%{_up}%} is greater than or equal to 1200:
+                remove 1200 from {points::%{_up}%}
+                give {_p} diamond leggings
+                send "{@name} &7Successfully bought &6Diamond Leggings" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        format gui slot 41 of {_p} with diamond boots named "&eDiamond Boots" with lore "&6800 points" to run:
+            if {points::%{_up}%} is greater than or equal to 800:
+                remove 800 from {points::%{_up}%}
+                give {_p} diamond boots
+                send "{@name} &7Successfully bought &6Diamond Boots" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        #BACK TO MAIN MENU 
+        format gui slot 49 of {_p} with arrow named "&6Go Back" to run function openMenu({_p}, "main")
+    #WEAPONS
+    else if {_type} is "page 2":
+        open virtual chest inventory with size 6 named "&c&lShop &7- &a&lWeapons" to {_p}
+        format gui slot (all integers between 0 and 54) of {_p} with light gray stained glass pane named " "
+        #SHARP 1 WOODEN SWORD
+        format gui slot 10 of {_p} with wooden sword of sharpness 1 named "&eWooden Sword" with lore "&6300 points" to run:
+            if {points::%{_up}%} is greater than or equal to 300:
+                remove 300 from {points::%{_up}%}
+                give {_p} wooden sword of sharpness 1
+                send "{@name} &7Successfully bought &6Wooden Sword (Sharpness 1)" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        #STONE SWORD
+        format gui slot 12 of {_p} with stone sword named "&eStone Sword" with lore "&6500 points" to run:
+            if {points::%{_up}%} is greater than or equal to 500:
+                remove 500 from {points::%{_up}%}
+                give {_p} stone sword
+                send "{@name} &7Successfully bought &6Stone Sword" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        #SHARP 1 STONE SWORD
+        format gui slot 21 of {_p} with stone sword of sharpness 1 named "&eStone Sword" with lore "&6700 points" to run:
+            if {points::%{_up}%} is greater than or equal to 700:
+                remove 700 from {points::%{_up}%}
+                give {_p} stone sword of sharpness 1
+                send "{@name} &7Successfully bought &6Stone Sword (Sharpness 1)" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        #IRON SWORD
+        format gui slot 14 of {_p} with iron sword named "&eIron Sword" with lore "&6900 points" to run:
+            if {points::%{_up}%} is greater than or equal to 900:
+                remove 900 from {points::%{_up}%}
+                give {_p} iron sword
+                send "{@name} &7Successfully bought &6Iron Sword" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        #SHARP 1 IRON SWORD
+        format gui slot 23 of {_p} with iron sword of sharpness 1 named "&eIron Sword" with lore "&61100 points" to run:
+            if {points::%{_up}%} is greater than or equal to 1100:
+                remove 1100 from {points::%{_up}%}
+                give {_p} iron sword of sharpness 1
+                send "{@name} &7Successfully bought &6Iron Sword (Sharpness 1)" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        #DIAMOND SWORD
+        format gui slot 16 of {_p} with diamond sword named "&eDiamond Sword" with lore "&61500 points" to run:
+            if {points::%{_up}%} is greater than or equal to 1500:
+                remove 1500 from {points::%{_up}%}
+                give {_p} diamond sword
+                send "{@name} &7Successfully bought &6Diamond Sword" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        #SHARP 1 DIAMOND SWORD
+        format gui slot 25 of {_p} with diamond sword of sharpness 1 named "&eDiamond Sword" with lore "&65000 points" to run:
+            if {points::%{_up}%} is greater than or equal to 5000:
+                remove 5000 from {points::%{_up}%}
+                give {_p} diamond sword of sharpness 1
+                send "{@name} &7Successfully bought &6Diamond Sword (Sharpness 1)" to {_p}
+            else:
+                send "{@nopoints}" to {_p}
+        #BACK TO MAIN MENU
+        format gui slot 49 of {_p} with arrow named "&cBack" to run function openMenu({_p}, "main")
+    else if {_type} is "page 3":
+        open virtual chest inventory with size 6 named "&c&lShop &7- &a&lPotions and Misc" to {_p}
+        format gui slot (all integers between 0 and 54) of {_p} with light gray stained glass pane named " "
+        format gui slot 49 of {_p} with arrow named "&cBack" to run function openMenu({_p}, "main")
+
+
+function tutorial(p: Player):
+    send "{@name} &7If you'd like to exit the tutorial type &6/tutorial &7(again)" to {_p}
+    set {_up} to uuid of {_p}
+    set {intutorial.%{_up}%} to true
+    hide {_p} from all players if {intutorial.%{_up}%} is true
+    teleport {_p} to location(-2.6, 72, -8.5, world "Spawn", -158, 35) if {intutorial.%{_up}%} is true
+    send title "&6&lWelcome to SLOGIC" with subtitle "&7Here is a tutorial to get you started" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
+    wait 5 seconds
+    send title "&6&lGetting Started" with subtitle "&7To enter the arena world, walk through the portal" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
+    wait 5 seconds
+    teleport {_p} to location(68.5, 86, 1.4, world "Arena", 90, 8) if {intutorial.%{_up}%} is true
+    send title "&6&lJoining the action" with subtitle "&7Use &6/join &7to enter the arena, %nl%picking a color will set that as the color for &6/autojoin" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
+    wait 5 seconds
+    send title "&6&lAuto Joining the action" with subtitle "&7Picking a color will set that as the color for &6/autojoin" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
+    wait 5 seconds
+    teleport {_p} to location(9.5, 88, 7.5, world "Arena", 132, 56) if {intutorial.%{_up}%} is true
+    send title "&6&lGaining points" with subtitle "&7Get onto the point to gain points. " to {_p} for 5 seconds if {intutorial.%{_up}%} is true
+    wait 5 seconds
+    send title "&6&lGaining points" with subtitle "&7The more people on the hill, the less points you'll get" to {_p} for 5 seconds if {intutorial.%{_up}%} is true 
+    wait 5 seconds
+    send title "&6&lSpending points" with subtitle "&7Use &6/shop &7to spend your points" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
+    wait 5 seconds
+    send title "&6&lSpending points" with subtitle "&7Use &6/fix &7to fix your gear, it costs points" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
+    wait 5 seconds
+    send title "&6&lQuestions?" with subtitle "&7Ask a staff member or join our discord!" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
+    wait 5 seconds
+    send title "&6&lEnjoy!" with subtitle "&7Make sure to read our ingame rules with &6/rules " to {_p} for 3 seconds if {intutorial.%{_up}%} is true
+    reveal {_p} from all players
+    teleport {_p} to {spawn} if {intutorial.%{_up}%} is true
+    delete {intutorial.%{_up}%}
+    
+
