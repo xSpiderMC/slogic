@@ -216,39 +216,7 @@ command /clan [<text>] [<text>]:
                 send "&6&o• {@main_color}/clan leave {@second_color}&oAllows you to leave your clan."
                 send "&6&o• {@main_color}/clan chat {@second_color}&oToggles clan chat mode."
                 send "&6&o• {@main_color}/clan kick <player> {@second_color}&oKicks a player from your clan."
-                send "&6&o• {@main_color}/clan sethome {@second_color}&oSets a clan home for everyone."
-                send "&6&o• {@main_color}/clan home {@second_color}&oTeleports players to your clan home."
                 send ""
-
-command /sethome [<text>]:
-	trigger:
-		loop all players in radius 30 of player:
-			if {clans::%player%} is set:
-				if {clans::%player%} is not {clans::%loop-player%}:
-					send "&cYou are too close to players who are not in your clan!"
-					stop
-				else:
-					if arg-1 is set:
-						make player execute command "/essentials:sethome %arg-1%"
-						stop
-					else:
-						make player execute command "/essentials:sethome"
-						stop
-
-
-			else:
-				if loop-player is not player:
-					send "&cYou are too close to players who are not in your clan!"
-					stop
-				else:
-					if arg-1 is set:
-						make player execute command "/essentials:sethome %arg-1%"
-						stop
-					else:
-						make player execute command "/essentials:sethome"
-						stop
-
-
 on damage:
 	if {clans::%victim%} is set:
 		if {clans::%victim%} is {clans::%attacker%}:
