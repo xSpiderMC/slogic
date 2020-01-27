@@ -16,11 +16,9 @@ command /clan [<text>] [<text>]:
             send "{@prefix} {@prefix_end} {@main_color}/clan leave {@second_color}&oAllows you to leave your clan."
             send "{@prefix} {@prefix_end} {@main_color}/clan chat {@second_color}&oToggles clan chat mode."
             send "{@prefix} {@prefix_end} {@main_color}/clan kick <player> {@second_color}&oKicks a player from your clan."
-            send "{@prefix} {@prefix_end} {@main_color}/clan sethome {@second_color}&oSets a clan home for everyone."
-            send "{@prefix} {@prefix_end} {@main_color}/clan home {@second_color}&oTeleports players to your clan home."
             send ""
         else:
-            if arg-1 is "create" or "disband" or "join" or "leave" or "chat" or "invite" or "info" or "kick" or "home" or "sethome":
+            if arg-1 is "create" or "disband" or "join" or "leave" or "chat" or "invite" or "info" or "kick":
                 if arg-1 is "create":
                     if arg-2 is not set:
                         send "{@prefix} {@prefix_end} {@main_color}/clan create <name>"
@@ -127,34 +125,6 @@ command /clan [<text>] [<text>]:
                                     delete {invited::%arg-2%::%player%}
                                 else:
                                     send "{@prefix} {@prefix_end} {@second_color}You weren't invited to this clan!"
-                if arg-1 is "home":
-                    if {clans::%player%} is not set:
-                        send "{@prefix} {@prefix_end} {@second_color}You aren't in a clan!"
-                    else:
-                        if {clanshome::%{clans::%{clans::%player%}%::owner}%} is not set:
-                            send "{@prefix} {@prefix_end} {@second_color}Your clan doesn't have a home!"
-                        else:
-                            teleport player to {clanshome::%{clans::%{clans::%player%}%::owner}%}
-                            send "{@prefix} {@prefix_end} {@second_color}You teleported to your clan home!"
-                if arg-1 is "sethome":
-                    if {clans::%player%} is not set:
-                        send "{@prefix} {@prefix_end} {@second_color}You aren't in a clan!"
-                    else:
-                        loop all players in radius 30 of player:
-                            if {clans::%loop-player%} is not set:
-                                send "&cYou are too close to players who are not in your clan!"
-                                stop
-                            if {clans::%loop-player%} is set:
-                                if {clans::%loop-player%} is not {clans::%player%}:
-                                    send "&cYou are too close to players who are not in your clan!"
-                                    stop
-                                else:
-                                    if {clans::%{clans::%player%}%::owner} is not the player:
-                                        send "{@prefix} {@prefix_end} {@second_color}You must be the Clan Leader!"
-                                    else:
-                                        set {clanshome::%{clans::%{clans::%player%}%::owner}%} to location of player
-                                        send "{@prefix} {@prefix_end} {@second_color}Your Clan home has been set!"
-				
                 if arg-1 is "info":
                     if arg-2 is not set:
                         if {clans::%player%} is not set:
