@@ -236,5 +236,5 @@ on chat:
 			broadcast "&8[&6%{clans::%player%}%&8] &f%player's prefix%{@second_color}%player% %player's suffix% &9» %message%"
 			stop
 		else:
-			broadcast "&f%player's prefix%{@second_color}%player% %player's suffix% &9»&r {@second_color}%message%"
+			broadcast "&f%player's prefix% %player% %player's suffix% &9»&r %message%"
 			stop
