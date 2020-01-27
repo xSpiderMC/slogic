@@ -210,12 +210,12 @@ command /clan [<text>] [<text>]:
                                     send "{@prefix} {@prefix_end} {@second_color}You cannot kick yourself."
             else:
                 send ""
-                send "&6&o• {@main_color}/clan create <name> {@second_color}&oCreates a clan."
-                send "&6&o• {@main_color}/clan invite <player> {@second_color}&oInvites a player to your clan"
-                send "&6&o• {@main_color}/clan join <name> {@second_color}&oAllows you to join clans."
-                send "&6&o• {@main_color}/clan leave {@second_color}&oAllows you to leave your clan."
-                send "&6&o• {@main_color}/clan chat {@second_color}&oToggles clan chat mode."
-                send "&6&o• {@main_color}/clan kick <player> {@second_color}&oKicks a player from your clan."
+                send "{@prefix} {@prefix_end} {@main_color}/clan create <name> {@second_color}&oCreates a clan."
+                send "{@prefix} {@prefix_end} {@main_color}/clan invite <player> {@second_color}&oInvites a player to your clan"
+                send "{@prefix} {@prefix_end} {@main_color}/clan join <name> {@second_color}&oAllows you to join clans."
+                send "{@prefix} {@prefix_end} {@main_color}/clan leave {@second_color}&oAllows you to leave your clan."
+                send "{@prefix} {@prefix_end} {@main_color}/clan chat {@second_color}&oToggles clan chat mode."
+                send "{@prefix} {@prefix_end} {@main_color}/clan kick <player> {@second_color}&oKicks a player from your clan."
                 send ""
 on damage:
 	if {clans::%victim%} is set:
