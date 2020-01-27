@@ -11,11 +11,11 @@
 - [ ] all crystals have chance to spawn beacon/particle effect that shows they will give mana for a certain time
 - [ ] combine mana with coins to buy special items
 - [ ] one shot bow uses mana
-- [ ] sell items back
+- [ ] sell items back ?
 - [ ] defend the hill from zombies and use points to upgrade gear
 - [x] **SHOULD BE DONE** - Fix negative hill multipliers, getting correct amount of players
 - [ ] find the things you'll forget are broken
-- [ ] achievemnts
+- [x] achievements **started, currently have a few**
 - [ ] prestiging and xp and levels... maybe
 - [ ] having a bank to store points
 - [ ] more points on your person you get more targeted?
@@ -29,8 +29,11 @@
 - [ ] combat log
 - [x] fix tutorial (might be buggy)
 - [ ] random events with different rewards
-- [ ] autobroadcast
+- [x] autobroadcast **works but listing position in queue might be funny with removing them**
 - [ ] Balance items, ~~leather armor gets 1 shot by diamond sharpness 1~~
 - [ ] dye leather armor
 - [ ] void death instant
 - [ ] capture towers for passive income
+- [ ] be able to just tier up gear instead of buying new things
+- [ ] gamble points
+- [ ] duels / other minigames
