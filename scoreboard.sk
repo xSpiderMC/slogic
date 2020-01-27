@@ -1,0 +1,20 @@
+every second:
+  loop all players:
+    wipe loop-player's sidebar
+    set name of sidebar of loop-value to "&6&lSLOGIC"
+    set score "&f-----------------" in sidebar of loop-value to 8
+    set score "&e&l➜&6&l Player:" in sidebar of loop-value to 7
+    set score "&7%loop-player%" in sidebar of loop-value to 6
+    set score "&7" in sidebar of loop-value to 5
+    set score "&e&l➜&6&l Points:" in sidebar of loop-value to 4
+    set score "&7%{points::%uuid of %player%}%" in sidebar of loop-value to 3
+    set score "" in sidebar of loop-value to 2
+    set score "&e&l➜&6&l Kills:" in sidebar of loop-value to 1
+    set score "&7%{kills::uuid of player}%" in sidebar of loop-value to 0
+    set score "&3" in sidebar of loop-value to -1
+    set score "&6&oslogic.minehut.gg" in sidebar of loop-value to -5
+    set score "&m-----------------" in sidebar of loop-value to -6
+
+on first join:
+  set {kills::uuid of player} to 0
+  set {points::%uuid of %player%}
