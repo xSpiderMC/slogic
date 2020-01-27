@@ -3,6 +3,7 @@ options:
     name: &6&lSLOGIC &7|
 
 command /autobc [<text>] [<text>] [<text>]:
+    aliases: autobroadcast, abc
     permission: bc.admin
     trigger:
         if arg-1 is not set:
