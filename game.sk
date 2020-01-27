@@ -75,6 +75,11 @@ on death of player:
         if {killstreak::%uuid of attacker%} = 5:
             send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, you will be rewarded with &6200 points&7!" to all players
             set {bounty::%uuid of attacker%} to 200
+            if {Achievements::killstreak1::%{_au}%} is not set: 
+                send "&a&kK&r&a>>   &aAchievement Unlocked: &6Killer Streaker!   &a<<&kK&r" to {%victim%.lastattacker}
+                set {Achievements::killstreak1::%{_au}%} to 0
+                play sound "ENTITY_ARROW_HIT_PLAYER" to {%victim%.lastattacker}
+                add 100 to {points::%{_au}%}
         else if {killstreak::%uuid of attacker%} = 10:
             send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, The bounty has been increaed to &6500 points&7!" to all players
             set {bounty::%uuid of attacker%} to 500
@@ -106,11 +111,16 @@ on death of player:
                     send "&c&lUH OH &7You lost &6%{_removeamt}% &7points &6(5%%) &7of your points" to victim
                     add {_removeamt} to {points::%{_au}%}
                     send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to {%victim%.lastattacker}
-                    play sound "ENTITY_ARROW_HIT_PLAYER" to attacker
+                    play sound "ENTITY_ARROW_HIT_PLAYER" to {%victim%.lastattacker}
                     add 1 to {killstreak::%{_au}%}
                     if {killstreak::%{_au}%} = 5:
                         send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, you will be rewarded with &6200 points&7!" to all players
                         set {bounty::%{_au}%} to 200
+                        if {Achievements::killstreak1::%{_au}%} is not set: 
+                            send "&a&kK&r&a>>   &aAchievement Unlocked: &6Killer Streaker!   &a<<&kK&r" to {%victim%.lastattacker}
+                            set {Achievements::killstreak1::%{_au}%} to 0
+                            play sound "ENTITY_ARROW_HIT_PLAYER" to {%victim%.lastattacker}
+                            add 100 to {points::%{_au}%}
                     else if {killstreak::%{_au}%} = 10:
                         send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, The bound has been increaed to &6500 points&7!" to all players
                         set {bounty::%{_au}%} to 500

@@ -56,6 +56,10 @@ command /achievements:
             create a gui slot 3 of player with orange stained glass pane named "&aSpider Killer! &6[Legendary]" with lore "&7||&7Status: &2&l✓ &7|| &6Kill SpiderLogical!"
         else:
             create a gui slot 3 of player with black stained glass pane named "&aSpider Killer &6[Legendary]" with lore "&7||&7Status: &2&lx &7|| &6Kill SpiderLogical!"
+        if {Achievements::killstreak1::%player's uuid%} is set:
+            create a gui slot 4 of player with yellow stained glass pane named "&aKiller Streaker! &a[Uncommon]" with lore "&7||&7Status: &2&l✓ &7|| &6Kill 5 player's in a row!"
+        else:
+            create a gui slot 4 of player with black stained glass pane named "&aKiller Streaker &a[Uncommon]" with lore "&7||&7Status: &2&lx &7|| &6Kill 5 player's in a row!"
 
 command /setach [<offline player>] [<text>] [<boolean>]:
     permission: points.admin
@@ -70,23 +74,30 @@ command /setach [<offline player>] [<text>] [<boolean>]:
             if arg-2 is "firstjoin":
                 if arg-3 is true:
                     set {Achievements::FirstJoin::%player's uuid%} to 0
-                    send "{@name} &7Setting &6%arg-1% &7's first join achievement to &6true" to player
+                    send "{@name} &7Setting &6%arg-1%&7's first join achievement to &6true" to player
                 else:
                     delete {Achievements::FirstJoin::%player's uuid%}
-                    send "{@name} &7Setting &6%arg-1% &7's first join achievement to &6false" to player
+                    send "{@name} &7Setting &6%arg-1%&7's first join achievement to &6false" to player
             else if arg-2 is "firsthill":
                 if arg-3 is true:
                     set {Achievements::FirstTimeonHill::%player's uuid%} to 0
-                    send "{@name} &7Setting &6%arg-1% &7's first time on hill achievement to &6true" to player
+                    send "{@name} &7Setting &6%arg-1%&7's first time on hill achievement to &6true" to player
                 else:
                     delete {Achievements::FirstTimeonHill::%player's uuid%}
-                    send "{@name} &7Setting &6%arg-1% &7's first time on hill achievement to &6false" to player
+                    send "{@name} &7Setting &6%arg-1%&7's first time on hill achievement to &6false" to player
             else if arg-2 is "spiderkiller":
                 if arg-3 is true:
                     set {Achievements::YouKilledSpiderlogical::%player's uuid%} to 0
-                    send "{@name} &7Setting &6%arg-1% &7's spider killer achievement to &6true" to player
+                    send "{@name} &7Setting &6%arg-1%&7's spider killer achievement to &6true" to player
                 else:
                     delete {Achievements::YouKilledSpiderlogical::%player's uuid%}
-                    send "{@name} &7Setting &6%arg-1% &7's spider killer achievement to &6false" to player
+                    send "{@name} &7Setting &6%arg-1%&7's spider killer achievement to &6false" to player
+            else if arg-2 is "killstreak":
+                if arg-3 is true:
+                    set {Achievements::killstreak1::%player's uuid%} to 0
+                    send "{@name} &7Setting &6%arg-1%&7's 5 kill streak achievement to &6true" to player
+                else:
+                    delete {Achievements::killstreak1::%player's uuid%}
+                    send "{@name} &7Setting &6%arg-1%&7's 5 kill streak achievement to &6false" to player
             else:
                 send "{@name} &cAchievement not found"
