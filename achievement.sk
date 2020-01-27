@@ -1,0 +1,92 @@
+options:
+    name: &6&lSLOGIC &7|
+
+on join:
+    if {Achievements::FirstJoin::%player's uuid%} is not set:
+        set {Achievements::FirstJoin::%player's uuid%} to 0
+        send "&a&kK&r&a>>   &aAchievement Unlocked: &6Joining the server!!   &a<<&kK&r" to player
+        play sound "ENTITY_ARROW_HIT_PLAYER" to player
+    else: 
+        stop
+
+on enter of region "hill":
+    if {Achievements::FirstTimeonHill::%player's uuid%} is not set: 
+        set {Achievements::FirstTimeonHill::%player's uuid%} to 0
+        send "&a&kK&r&a>>   &aAchievement Unlocked: &6First Time on Hill!   &a<<&kK&r" to player
+        play sound "ENTITY_ARROW_HIT_PLAYER" to player
+    else: 
+        stop
+
+on region enter:
+    if "%event-region%" contains "arenaspawn":
+        if {Achievements::FirstJoinInGame::%player's uuid%} is not set: 
+            send "&a&kK&r&a>>   &aAchievement Unlocked: &6Into the game   &a<<&kK&r" to player
+            set {Achievements::FirstJoinInGame::%player's uuid%} to 0
+            play sound "ENTITY_ARROW_HIT_PLAYER" to player
+        else: 
+            stop
+on death:
+    name of the victim is "Spiderlogical"
+    if {Achievements::YouKilledSpiderlogical::%attacker's uuid%} is not set: 
+        send "&a&kK&r&a>>   &aAchievement Unlocked: &6Spider Killer!   &a<<&kK&r" to attacker
+        set {Achievements::YouKilledSpiderlogical::%attacker's uuid%} to 0
+        play sound "ENTITY_ARROW_HIT_PLAYER" to attacker
+        add 500 to {points::%uuid of attacker%} 
+    else: 
+        stop
+
+command /achievements:
+    trigger:
+        open virtual chest inventory with size 6 named "&aAchievements:" to player
+        wait 1 tick
+    
+        if {Achievements::FirstJoin::%player's uuid%} is set:
+            create a gui slot 0 of player with green stained glass pane named "&aFirst Server join" with lore "&7||&7Status: &2&l✓ &7|| &6Join the server!"
+        else:
+            create a gui slot 0 of player with black stained glass pane named "&aFirst Server join" with lore "&7||&7Status: &2&lx &7|| &6Join the server!"
+        if {Achievements::FirstTimeonHill::%player's uuid%} is set:
+            create a gui slot 1 of player with green stained glass pane named "&aFirst time on the Hill!" with lore "&7||&7Status: &2&l✓ &7|| &6Get on the Hill!"
+        else:
+            create a gui slot 1 of player with black stained glass pane named "&aFirst time on the Hill!" with lore "&7||&7Status: &2&lx &7|| &6Get on the Hill!"
+        if {Achievements::FirstJoinInGame::%player's uuid%} is set:
+            create a gui slot 2 of player with green stained glass pane named "&aJoin a game!" with lore "&7||&7Status: &2&l✓ &7|| &6Go into a game!"
+        else:
+            create a gui slot 2 of player with black stained glass pane named "&aJoin a game!" with lore "&7||&7Status: &2&lx &7|| &6Go into a game!"
+        if {Achievements::YouKilledSpiderlogical::%player's uuid%} is set:
+            create a gui slot 3 of player with orange stained glass pane named "&aSpider Killer! &6[Legendary]" with lore "&7||&7Status: &2&l✓ &7|| &6Kill SpiderLogical!"
+        else:
+            create a gui slot 3 of player with black stained glass pane named "&aSpider Killer &6[Legendary]" with lore "&7||&7Status: &2&lx &7|| &6Kill SpiderLogical!"
+
+command /setach [<offline player>] [<text>] [<boolean>]:
+    permission: points.admin
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &cYou need to provide a player"
+        else if arg-2 is not set:
+            send "{@name} &cYou need to provide an achievemnt"
+        else if arg-3 is not set:
+            send "{@name} &cYou need to provide true/false"
+        else:
+            if arg-2 is "firstjoin":
+                if arg-3 is true:
+                    set {Achievements::FirstJoin::%player's uuid%} to 0
+                    send "{@name} &7Setting &6%arg-1% &7's first join achievement to &6true" to player
+                else:
+                    delete {Achievements::FirstJoin::%player's uuid%}
+                    send "{@name} &7Setting &6%arg-1% &7's first join achievement to &6false" to player
+            else if arg-2 is "firsthill":
+                if arg-3 is true:
+                    set {Achievements::FirstTimeonHill::%player's uuid%} to 0
+                    send "{@name} &7Setting &6%arg-1% &7's first time on hill achievement to &6true" to player
+                else:
+                    delete {Achievements::FirstTimeonHill::%player's uuid%}
+                    send "{@name} &7Setting &6%arg-1% &7's first time on hill achievement to &6false" to player
+            else if arg-2 is "spiderkiller":
+                if arg-3 is true:
+                    set {Achievements::YouKilledSpiderlogical::%player's uuid%} to 0
+                    send "{@name} &7Setting &6%arg-1% &7's spider killer achievement to &6true" to player
+                else:
+                    delete {Achievements::YouKilledSpiderlogical::%player's uuid%}
+                    send "{@name} &7Setting &6%arg-1% &7's spider killer achievement to &6false" to player
+            else:
+                send "{@name} &cAchievement not found"
