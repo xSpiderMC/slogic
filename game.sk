@@ -31,8 +31,19 @@ every second:
     loop all players:
         if {onhill::%uuid of loop-player%} is true:
             set {points::%uuid of loop-player%} to ({points::%uuid of loop-player%} + 2) if {onhillamount} is 1 else ({points::%uuid of loop-player%} + (2 - {_nmultiplier}))
-        send action bar "&7Current point balance: &6%{points::%uuid of loop-player%}%" to loop-player 
-
+            wipe loop-player's sidebar
+            set name of sidebar of loop-player to "&6&lSLOGIC"
+            set score "&e&l➜&6&l Player:" in sidebar of loop-player to 7
+            set score "&7%loop-player%" in sidebar of loop-player to 6
+            set score "&7" in sidebar of loop-player to 5
+            set score "&e&l➜&6&l Points:" in sidebar of loop-player to 4
+            set score "&7%{points::%uuid of loop-player%}%" in sidebar of loop-player to 3
+            set score "" in sidebar of loop-player to 2
+            set score "&e&l➜&6&l Kills:" in sidebar of loop-player to 1
+            set score "&7%{stats.kills.%loop-player%}%" in sidebar of loop-player to 0
+            set score "&3" in sidebar of loop-player to -1
+            set score "&6&oslogic.minehut.gg" in sidebar of loop-player to -5
+            set score "&7-----------------" in sidebar of loop-player to -6
 on respawn:
     if {autojoin.%player's uuid%} is true:
         if {autojoincolor.%player's uuid%} is set:
@@ -71,6 +82,35 @@ on death of player:
         add {_removeamt} to {points::%{_au}%}
         send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to attacker
         play sound "ENTITY_ARROW_HIT_PLAYER" to attacker
+        
+        wipe attacker's sidebar
+        set name of sidebar of attacker to "&6&lSLOGIC"
+        set score "&e&l➜&6&l Player:" in sidebar of attacker to 7
+        set score "&7%attacker%" in sidebar of attacker to 6
+        set score "&7" in sidebar of attacker to 5
+        set score "&e&l➜&6&l Points:" in sidebar of attacker to 4
+        set score "&7%{points::%{_au}%}%" in sidebar of attacker to 3
+        set score "" in sidebar of attacker to 2
+        set score "&e&l➜&6&l Kills:" in sidebar of attacker to 1
+        set score "&7%{stats.kills.%attacker%}%" in sidebar of attacker to 0
+        set score "&3" in sidebar of attacker to -1
+        set score "&6&oslogic.minehut.gg" in sidebar of attacker to -5
+        set score "&7&m-----------------" in sidebar of attacker to -6
+        
+        wipe victim's sidebar
+        set name of sidebar of victim to "&6&lSLOGIC"
+        set score "&e&l➜&6&l Player:" in sidebar of victim to 7
+        set score "&7%victim%" in sidebar of victim to 6
+        set score "&7" in sidebar of victim to 5
+        set score "&e&l➜&6&l Points:" in sidebar of victim to 4
+        set score "&7%{points::%{_u}%}%" in sidebar of victim to 3
+        set score "" in sidebar of victim to 2
+        set score "&e&l➜&6&l Kills:" in sidebar of victim to 1
+        set score "&7%{stats.kills.%victim%}%" in sidebar of victim to 0
+        set score "&3" in sidebar of victim to -1
+        set score "&6&oslogic.minehut.gg" in sidebar of victim to -5
+        set score "&7&m-----------------" in sidebar of victim to -6
+        
         add 1 to {killstreak::%uuid of attacker%}
         if {killstreak::%uuid of attacker%} = 5:
             send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, you will be rewarded with &6200 points&7!" to all players
