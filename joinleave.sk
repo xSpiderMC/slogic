@@ -1,7 +1,9 @@
 on join:
     set join message to "&7[&a+&7] &9%player%"
     if player is op:
+        wait 1 second
         make player execute command "/rg toggle-bypass"
+    
     wipe player's sidebar
     set name of sidebar of player to "&6&lSLOGIC"
     set score "&e&l➜&6&l Player:" in sidebar of player to 7
