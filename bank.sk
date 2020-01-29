@@ -1,0 +1,7 @@
+on citizen right click:
+    if npc's name is "&6Banker":
+        open virtual chest inventory with 4 rows named "&6&lBank" to player
+        format gui slot (all integers between 0 and 35) of player with gray stained glass pane
+        format gui slot 11 of player with barrel named "&6Deposit Points"
+        format gui slot 13 of player with dropper named "&6Withdraw Points"
+        format gui slot 15 of player with gold nugget named "&6Pay" with lore "&7Pay points to other players"
