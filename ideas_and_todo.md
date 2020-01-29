@@ -22,7 +22,8 @@
 - [x] when item breaks it downgrades
 - [x] add sound on kill
 - [x] killstreaks - **works, for now**
-- [ ] scoreboard with stats and things or stats command
+- [x] scoreboard with stats **more info could be added later, ex killstreak**
+- [ ] stats command
 - [ ] ore to get points?
 - [ ] random events to gain points, ex: go to certain area and type what's on sign in chat
 - [ ] ranks names currently are: VIP, (not decided), (notdecided) - could be knight, quuen, king or - Brook, Knight, Bishop, Queen, King [For ranks maybe?] 
