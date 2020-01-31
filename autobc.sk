@@ -32,7 +32,7 @@ command /autobc [<text>] [<text>] [<text>]:
                     if {broadcasts::%{_in}%} is not set:
                         send "{@name} &cThat broadcast does not exist"
                     else:
-                        delete {broadcasts::%{_shift}%}
+                        delete {broadcasts::%{_in}%}
                         send "{@name} &7Removed auto broadcast &6%arg-2%" to player
         else if arg-1 is "set":
             if arg-2 or arg-3 is not set:
