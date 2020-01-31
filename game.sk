@@ -4,6 +4,7 @@ options:
 
 on first join:
     set join message to "&7[&6%size of all offline players%&7] &7Welcome &9%event-player%"
+    wait 1 tick
     tutorial(event-player)
     set {points::%uuid of event-player%} to 0
     set the helmet of event-player to unbreakable leather helmet
