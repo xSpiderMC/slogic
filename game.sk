@@ -200,6 +200,8 @@ on damage of player:
     if attacker is player:
         set {%victim%.lastattacker} to attacker
         set {%victim%.attacktime} to now
+        if {invulnerable.%victim's uuid%} is true:
+            cancel event
     
 command /tutorial:
     description: Learn how to play the game
