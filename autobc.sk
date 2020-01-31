@@ -15,8 +15,8 @@ command /autobc [<text>] [<text>] [<text>]:
             else:
                 set {_part2} to arg-2 if arg-2 is set else " "
                 set {_part3} to arg-3 if arg-3 is set else " "
-                set {_msg} to "&7%{_part2}% %{_part3}%"
-                add {_msg} to {broadcasts::*}
+                set {_msg} to "%{_part2}% %{_part3}%"
+                add "&c%{_msg}%" to {broadcasts::*}
                 send "{@name} &7Added to auto broadcasts" to player
         else if arg-1 is "remove" or "delete":
             if arg-2 is not set:
@@ -61,7 +61,7 @@ command /autobc [<text>] [<text>] [<text>]:
                     if {broadcasts::%{_in}%} is not set:
                         send "{@name} &cThat broadcast does not exist"
                     else:
-                        send "{@bcprefix} %colored {broadcasts::%{_in}%}%" to all players
+                        send "{@bcprefix} %formatted {broadcasts::%{_in}%}%" to all players
         else if arg-1 is "queue":
             send "maybe soon if you make it nerd" to player
         else if arg-1 is "list":
@@ -79,5 +79,5 @@ every 3 minutes:
     if {broadcasts::*} is not set:
         stop
     else:
-        send "{@bcprefix} %colored {broadcasts::%{bcindex}%}%" to all players
+        send "{@bcprefix} %formatted {broadcasts::%{bcindex}%}%" to all players
         set {bcindex} to ({bcindex} + 1) if {bcindex} < size of {broadcasts::*} else 1
