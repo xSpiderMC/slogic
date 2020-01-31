@@ -1,7 +1,101 @@
+options:
+    name: &6&lSLOGIC &7|
+
 on citizen right click:
     if npc's name is "&6Banker":
+        set {bankbal::%uuid of player%} to 0 if {bankbal::%uuid of player%} is not set
         open virtual chest inventory with 4 rows named "&6&lBank" to player
         format gui slot (all integers between 0 and 35) of player with gray stained glass pane
-        format gui slot 11 of player with barrel named "&6Deposit Points"
-        format gui slot 13 of player with dropper named "&6Withdraw Points"
+        format gui slot 11 of player with barrel named "&6Deposit Points" with lore "&7Current balance: &6%{bankbal::%uuid of player%}%" to close then run function toggleDep(player, true)
+        format gui slot 13 of player with dropper named "&6Withdraw Points" with lore "&7Current balance: &6%{bankbal::%uuid of player%}%" to close then run function toggleWith(player, true)
         format gui slot 15 of player with gold nugget named "&6Pay" with lore "&7Pay points to other players"
+        format gui slot 31 of player with barrier named "&cClose" to close
+
+function toggleDep(p: player, b: boolean):
+    set {_up} to uuid of {_p}
+    set {bankdep.%{_up}%} to {_b}
+    send "{@name} How much would you like to deposit? (type cancel to cancel)" to {_p}
+
+function toggleWith(p: player, b: boolean):
+    set {_up} to uuid of {_p}
+    set {bankwith.%{_up}%} to {_b}
+    send "{@name} How much would you like to withdraw? (type cancel to cancel)" to {_p}
+    
+
+on chat:
+    if {bankdep.%uuid of player%} is true:
+        cancel event
+        if message is "cancel":
+            send "{@name} &7Canceling"
+            delete {bankdep.%uuid of player%} 
+            exit
+        else:
+            set {_in} to message parsed as number
+            if {_in} is not set:
+                parse error is set:
+                    send "{@name} &cLine 1 is invalid: %last parse error%"
+                else:
+                    send "{@name} &cPlease provide a valid amount"
+            else:
+                if {_in} > {points::%uuid of player%}:
+                    play sound "ENTITY_VILLAGER_NO" to player
+                    send "{@name} &cThat amount is greater than your current balance"
+                    delete {bankdep.%uuid of player%}
+                    exit
+                else:
+                    set {bankbal::%uuid of player%} to {bankbal::%uuid of player%} + {_in}
+                    set {points::%uuid of player%} to {points::%uuid of player%} - {_in}
+                    wipe player's sidebar
+                    set name of sidebar of player to "&6&lSLOGIC"
+                    set score "&e&l➜&6&l Player:" in sidebar of player to 7
+                    set score "&7%player%" in sidebar of player to 6
+                    set score "&7" in sidebar of player to 5
+                    set score "&e&l➜&6&l Points:" in sidebar of player to 4
+                    set score "&7%{points::%uuid of player%}%" in sidebar of player to 3
+                    set score "" in sidebar of player to 2
+                    set score "&e&l➜&6&l Kills:" in sidebar of player to 1
+                    set score "&7%{stats.kills.%player%}%" in sidebar of player to 0
+                    set score "&3" in sidebar of player to -1
+                    set score "&6&oslogic.minehut.gg" in sidebar of player to -5
+                    set score "&7-----------------" in sidebar of player to -6
+                    send "{@name} &7Deposited &6%{_in}% &7points into your bank"
+                    play sound "ENTITY_ARROW_HIT_PLAYER" to player
+            delete {bankdep.%uuid of player%}
+    
+    else if {bankwith.%uuid of player%} is true:
+        cancel event
+        if message is "cancel":
+            delete {bankdep.%uuid of player%} 
+            exit
+        else:
+            set {_in} to message parsed as number
+            if {_in} is not set:
+                parse error is set:
+                    send "{@name} &cLine 1 is invalid: %last parse error%"
+                else:
+                    send "{@name} &cPlease provide a valid amount"
+            else:
+                if {_in} > {bankbal::%uuid of player%}:
+                    play sound "ENTITY_VILLAGER_NO" to player
+                    send "{@name} &cThat amount is greater than your current bank balance"
+                    delete {bankwith.%uuid of player%}
+                    exit
+                else:
+                    set {bankbal::%uuid of player%} to {bankbal::%uuid of player%} - {_in}
+                    set {points::%uuid of player%} to {points::%uuid of player%} + {_in}
+                    wipe player's sidebar
+                    set name of sidebar of player to "&6&lSLOGIC"
+                    set score "&e&l➜&6&l Player:" in sidebar of player to 7
+                    set score "&7%player%" in sidebar of player to 6
+                    set score "&7" in sidebar of player to 5
+                    set score "&e&l➜&6&l Points:" in sidebar of player to 4
+                    set score "&7%{points::%uuid of player%}%" in sidebar of player to 3
+                    set score "" in sidebar of player to 2
+                    set score "&e&l➜&6&l Kills:" in sidebar of player to 1
+                    set score "&7%{stats.kills.%player%}%" in sidebar of player to 0
+                    set score "&3" in sidebar of player to -1
+                    set score "&6&oslogic.minehut.gg" in sidebar of player to -5
+                    set score "&7-----------------" in sidebar of player to -6
+                    send "{@name} &7Withdrew &6%{_in}% &7points from your bank"
+                    play sound "ENTITY_ARROW_HIT_PLAYER" to player
+            delete {bankwith.%uuid of player%}
