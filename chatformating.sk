@@ -10,7 +10,7 @@ on chat:
         set chat format to "%{_prefix}%%player's displayname% &9» &f%message%&r"
     else if group of event-player is "friend":
         set chat format to "%{_prefix}%%event-player's displayname% &9» &d%message%&r"
-    else if group of event-player is "vip":
+    else if group of event-player is "knight":
         set chat format to "%{_prefix}%%event-player's displayname% &9» &r%message%&r"
     else:
         set chat format to "%{_prefix}% &7%player's displayname% &9» &7%message%&r"
