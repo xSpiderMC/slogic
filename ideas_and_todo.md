@@ -17,7 +17,7 @@
 - [ ] find the things you'll forget are broken
 - [x] achievements **started, currently have a few**
 - [ ] prestiging and xp and levels... maybe
-- [ ] having a bank to store points
+- [x] having a bank to store points
 - [ ] more points on your person you get more targeted?
 - [x] when item breaks it downgrades
 - [x] add sound on kill
