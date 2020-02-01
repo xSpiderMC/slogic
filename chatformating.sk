@@ -7,10 +7,10 @@ on chat:
     else if group of event-player is "dev" or "manager":
         set chat format to "%{_prefix}%%player's displayname% &9» &c%colored message%&r"
     else if group of event-player is "jrmod" or "moderator" or "srmod" or "builder":
-        set chat format to "%{_prefix}%%player's displayname% &9» &f%message%&r"
+        set chat format to "%{_prefix}%%player's displayname% &9» &b%message%&r"
     else if group of event-player is "friend":
         set chat format to "%{_prefix}%%event-player's displayname% &9» &d%message%&r"
-    else if group of event-player is "knight":
+    else if group of event-player is "knight" or "earlyaccess":
         set chat format to "%{_prefix}%%event-player's displayname% &9» &r%message%&r"
     else:
         set chat format to "%{_prefix}% &7%player's displayname% &9» &7%message%&r"
