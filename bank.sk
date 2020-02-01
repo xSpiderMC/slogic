@@ -8,7 +8,7 @@ on citizen right click:
         format gui slot (all integers between 0 and 35) of player with gray stained glass pane
         format gui slot 11 of player with barrel named "&6Deposit Points" with lore "&7Current balance: &6%{bankbal::%uuid of player%}%" to close then run function toggleDep(player, true)
         format gui slot 13 of player with dropper named "&6Withdraw Points" with lore "&7Current balance: &6%{bankbal::%uuid of player%}%" to close then run function toggleWith(player, true)
-        format gui slot 15 of player with gold nugget named "&6Pay" with lore "&7Pay points to other players"
+        format gui slot 15 of player with gold nugget named "&6Bank Transfer" with lore "&7Send points to other bank accounts (uses your bank balance)" and "&7Current balance: &6%{bankbal::%uuid of player%}%" to close then run function togglePay(player)
         format gui slot 31 of player with barrier named "&cClose" to close
 
 function toggleDep(p: player, b: boolean):
@@ -21,6 +21,9 @@ function toggleWith(p: player, b: boolean):
     set {bankwith.%{_up}%} to {_b}
     send "{@name} How much would you like to withdraw? (type cancel to cancel)" to {_p}
     
+
+function togglePay(p: player):
+    send "{@name} Use /pay <username> <amount>" to {_p}
 
 on chat:
     if {bankdep.%uuid of player%} is true:
@@ -65,6 +68,7 @@ on chat:
     else if {bankwith.%uuid of player%} is true:
         cancel event
         if message is "cancel":
+            send "{@name} &7Canceling"
             delete {bankdep.%uuid of player%} 
             exit
         else:
@@ -99,3 +103,19 @@ on chat:
                     send "{@name} &7Withdrew &6%{_in}% &7points from your bank"
                     play sound "ENTITY_ARROW_HIT_PLAYER" to player
             delete {bankwith.%uuid of player%}
+
+command /pay [<offline player>] [<number>]:
+    aliases: transfer, send
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &cYou need to provide a player to transfer points"
+        else if arg-2 is not set:
+            send "{@name} &cYou need to provide an amount of points"
+        else:
+            set {bankbal::%uuid of player%} to {bankbal::%uuid of player%} - arg-2
+            set {bankbal::%uuid of arg-1%} to {bankbal::%uuid of arg-1%} + arg-2
+            send "{@name} &7Transfered &6%arg-2% &7points to &6%arg-1%"
+            play sound "ENTITY_ARROW_HIT_PLAYER" to player
+            if arg-1 is online:
+                send "{@name} &6%player% &7transfered &6%arg-2% &7points to your account"
+                play sound "ENTITY_ARROW_HIT_PLAYER" to arg-1
