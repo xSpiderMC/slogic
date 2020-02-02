@@ -641,7 +641,7 @@ function tutorial(p: Player):
     wait 5 seconds
     send title "&6&lGaining points" with subtitle "&7The more people on the hill, the less points you'll get" to {_p} for 5 seconds if {intutorial.%{_up}%} is true 
     wait 5 seconds
-    teleport {_p} to location(14, 66, -20, world "Arena", 40, 12) if {intutorial.%{_up}%} is true
+    teleport {_p} to location(14.5, 66, -20.5, world "Arena", 40, 12) if {intutorial.%{_up}%} is true
     send title "&6&lGaining points" with subtitle "&7Just starting out? You can mine some ore!" to {_p} for 5 seconds if {intutorial.%{_up}%} is true 
     wait 5 seconds
     send title "&6&lSpending points" with subtitle "&7Use &6/shop &7to spend your points" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
