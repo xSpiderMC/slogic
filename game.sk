@@ -12,6 +12,7 @@ on first join:
     set the leggings of event-player to unbreakable leather leggings
     set the boots of event-player to unbreakable leather boots
     give unbreakable wooden sword to event-player
+    give unbreakable stone pickaxe to event-player
         
 on enter of region "hill":
     set {onhill::%uuid of event-player%} to true
@@ -91,7 +92,7 @@ on death of player:
             send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, The bounty has been increaed to &6800 points&7!" to all players
             set {bounty::%uuid of attacker%} to 800
         else if {killstreak::%uuid of attacker%} = 20:
-            send "&4&lBOUNTY &7| The kings has ordered &6%attacker% &7dead, The bounty has been increaed to &61100 points&7!" to all players
+            send "&4&lBOUNTY &7| The king has ordered &6%attacker% &7dead, The bounty has been increased to &61100 points&7!" to all players
             set {bounty::%uuid of attacker%} to 1100
         if {bounty::%uuid of victim%} > 0:
             if {killstreak::%uuid of victim%} >= 5:
@@ -133,7 +134,7 @@ on death of player:
                         send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, The bounty has been increaed to &6800 points&7!" to all players
                         set {bounty::%{_au}%} to 800
                     else if {killstreak::%{_au}%} = 20:
-                        send "&4&lBOUNTY &7| The kings has ordered &6%{%victim%.lastattacker}% &7dead, The bounty has been increaed to &61100 points&7!" to all players
+                        send "&4&lBOUNTY &7| The king has ordered &6%{%victim%.lastattacker}% &7dead, The bounty has been increased to &61100 points&7!" to all players
                         set {bounty::%{_au}%} to 1100
                     if {bounty::%uuid of victim%} > 0:
                         if {killstreak::%uuid of victim%} >= 5:
@@ -171,6 +172,9 @@ on damage of player:
 command /tutorial:
     description: Learn how to play the game
     trigger:
+        if player is in region "innerarena":
+            send "{@name} &cYou cannot be inside the arena when you use this command"
+            stop
         if {intutorial.%uuid of player%} is true:
             teleport player to {spawn}
             reveal player from all players
@@ -636,6 +640,9 @@ function tutorial(p: Player):
     send title "&6&lGaining points" with subtitle "&7Get onto the point to gain points. " to {_p} for 5 seconds if {intutorial.%{_up}%} is true
     wait 5 seconds
     send title "&6&lGaining points" with subtitle "&7The more people on the hill, the less points you'll get" to {_p} for 5 seconds if {intutorial.%{_up}%} is true 
+    wait 5 seconds
+    teleport {_p} to location(14, 66, -20, world "Arena", 40, 12) if {intutorial.%{_up}%} is true
+    send title "&6&lGaining points" with subtitle "&7Just starting out? You can mine some ore!" to {_p} for 5 seconds if {intutorial.%{_up}%} is true 
     wait 5 seconds
     send title "&6&lSpending points" with subtitle "&7Use &6/shop &7to spend your points" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
     wait 5 seconds

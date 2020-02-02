@@ -1,0 +1,49 @@
+on block break:
+    if event-world is "arena":
+        if {abuild.%player's uuid%} is false:
+            cancel event
+        if event-block is gold ore:
+            set {points::%uuid of player%} to {points::%uuid of player%} + 1.5
+            add event-block to {orelist::*}
+            set event-block to bedrock
+            play sound "ENTITY_ARROW_HIT_PLAYER" to player
+            refreshScoreboard(player)
+            wait 5 seconds
+            set event-block to gold ore
+        else if event-block is gold block:
+            set {points::%uuid of player%} to {points::%uuid of player%} + 5
+            add event-block to {goldblocks::*}
+            set event-block to bedrock
+            play sound "ENTITY_ARROW_HIT_PLAYER" to player
+            refreshScoreboard(player)
+            wait 10 seconds
+            set event-block to gold block
+            
+
+on load:
+    if {orelist::*} is set:
+        loop {orelist::*}:
+            set {orelist::%loop-value%} to gold ore
+    else if {goldblocks::*} is set:
+        loop {goldblocks::*}:
+            set {goldblocks::%loop-value%} to gold block
+
+command /pick:
+    trigger:
+        if player's inventory contains stone pickaxe:
+            send "&6&lSLOGIC &7| &cYou already have a pickaxe!"
+        else:
+            give unbreakable stone pickaxe to player
+            send "&6&lSLOGIC &7| Here's your pickaxe!"
+
+command /buildmode [<text>]:
+    permission: points.admin
+    trigger:
+        if arg-1 is not set:
+            send "&6&lSLOGIC &7| &c/buildmode <on/off>"
+        else if arg-1 is "on":
+            send "&6&lSLOGIC &7| toggled building in arena &6on"
+            set {abuild.%player's uuid%} to true
+        else if arg-1 is "off":
+            send "&6&lSLOGIC &7| toggled building in arena &6off"
+            set {abuild.%player's uuid%} to false

@@ -111,11 +111,13 @@ command /pay [<offline player>] [<number>]:
             send "{@name} &cYou need to provide a player to transfer points"
         else if arg-2 is not set:
             send "{@name} &cYou need to provide an amount of points"
+        else if arg-2 <= 0:
+            send "{@name} &cYou cannot give 0 points or negative points"
         else:
             set {bankbal::%uuid of player%} to {bankbal::%uuid of player%} - arg-2
             set {bankbal::%uuid of arg-1%} to {bankbal::%uuid of arg-1%} + arg-2
             send "{@name} &7Transfered &6%arg-2% &7points to &6%arg-1%"
             play sound "ENTITY_ARROW_HIT_PLAYER" to player
             if arg-1 is online:
-                send "{@name} &6%player% &7transfered &6%arg-2% &7points to your account"
+                send "{@name} &6%player% &7transfered &6%arg-2% &7points to your account" to arg-1
                 play sound "ENTITY_ARROW_HIT_PLAYER" to arg-1

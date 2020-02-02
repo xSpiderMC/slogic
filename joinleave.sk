@@ -3,19 +3,7 @@ on join:
     if player is op:
         wait 1 second
         make player execute command "/rg toggle-bypass"
-    
-    wipe player's sidebar
-    set name of sidebar of player to "&6&lSLOGIC"
-    set score "&e&l➜&6&l Player:" in sidebar of player to 7
-    set score "&7%player%" in sidebar of player to 6
-    set score "&7" in sidebar of player to 5
-    set score "&e&l➜&6&l Points:" in sidebar of player to 4
-    set score "&7%{points::%uuid of player%}%" in sidebar of player to 3
-    set score "" in sidebar of player to 2
-    set score "&e&l➜&6&l Kills:" in sidebar of player to 1
-    set score "&7%{stats.kills.%player%}%" in sidebar of player to 0
-    set score "&3" in sidebar of player to -1
-    set score "&6&oslogic.minehut.gg" in sidebar of player to -5
-    set score "&7-----------------" in sidebar of player to -6
+    refreshScoreboard(player)
+    set {abuild.%player's uuid%} to false
 on quit:
     set quit message to "&7[&c-&7] &9%player%"
