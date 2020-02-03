@@ -113,6 +113,8 @@ command /pay [<offline player>] [<number>]:
             send "{@name} &cYou need to provide an amount of points"
         else if arg-2 <= 0:
             send "{@name} &cYou cannot give 0 points or negative points"
+        else if arg-2 > {bankbal::%uuid of player%}:
+            send "{@name} &cYou cannot give more points than your current bank balance"
         else:
             set {bankbal::%uuid of player%} to {bankbal::%uuid of player%} - arg-2
             set {bankbal::%uuid of arg-1%} to {bankbal::%uuid of arg-1%} + arg-2
@@ -121,3 +123,31 @@ command /pay [<offline player>] [<number>]:
             if arg-1 is online:
                 send "{@name} &6%player% &7transfered &6%arg-2% &7points to your account" to arg-1
                 play sound "ENTITY_ARROW_HIT_PLAYER" to arg-1
+
+command /bank [<text>] [<offline player>] [<number>]:
+    permission: points.admin
+    description: Allows you to view your bank and admins to modify 
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &7Your bank balance: &6%{bankbal::%uuid of player%}%" to player
+        else if player has permission "points.admin":
+            if arg-2 is not set:
+                send "{@name} &cYou need to specify a player" to player
+            else if arg-1 is "reset":
+                send "{@name} &7Resetting &6%arg-2%&7's bank" to player
+                set {bankbal::%uuid of arg-2%} to 0
+            else if arg-1 is "show" or "amount":
+                send "{@name} &6%arg-2% &7has &6%{bankbal::%uuid of arg-2%}% &7points in their bank" to player
+            else if arg-3 is not set:
+                send "{@name} &cYou need to specify an amount" to player
+            else:
+                if arg-1 is "give" or "add":
+                    send "{@name} &7Adding &6%arg-3% &7to &6%arg-2%&7's bank" to player
+                    add arg-3 to {bankbal::%uuid of arg-2%}
+                    send "{@name} &7You have been given &6%arg-3% &7point(s) in your bank." to arg-2
+                else if arg-1 is "remove":
+                    send "{@name} &7Removing &6%arg-3% &7points from &6%arg-2%&7's bank balance" to player
+                    remove arg-3 from {bankbal::%uuid of arg-2%}
+                else if arg-1 is "set":
+                    send "{@name} &7Set &6%arg-2%&7's bank points to &6%arg-3%" to player
+                    set {bankbal::%uuid of arg-2%} to arg-3

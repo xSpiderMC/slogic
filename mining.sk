@@ -2,22 +2,27 @@ on block break:
     if event-world is "arena":
         if {abuild.%player's uuid%} is false:
             cancel event
-        if event-block is gold ore:
-            set {points::%uuid of player%} to {points::%uuid of player%} + 1.5
-            add event-block to {orelist::*}
-            set event-block to bedrock
-            play sound "ENTITY_ARROW_HIT_PLAYER" to player
-            refreshScoreboard(player)
-            wait 5 seconds
-            set event-block to gold ore
-        else if event-block is gold block:
-            set {points::%uuid of player%} to {points::%uuid of player%} + 5
-            add event-block to {goldblocks::*}
-            set event-block to bedrock
-            play sound "ENTITY_ARROW_HIT_PLAYER" to player
-            refreshScoreboard(player)
-            wait 10 seconds
-            set event-block to gold block
+        if player's gamemode is survival:
+            if event-block is gold ore:
+                set {points::%uuid of player%} to {points::%uuid of player%} + 1.5
+                set {_xp} to genXP("ore")
+                addXP(player, {_xp})
+                add event-block to {orelist::*}
+                set event-block to bedrock
+                play sound "ENTITY_ARROW_HIT_PLAYER" to player
+                refreshScoreboard(player)
+                wait 5 seconds
+                set event-block to gold ore
+            else if event-block is gold block:
+                set {points::%uuid of player%} to {points::%uuid of player%} + 5
+                set {_xp} to genXP("gblock")
+                addXP(player, {_xp})
+                add event-block to {goldblocks::*}
+                set event-block to bedrock
+                play sound "ENTITY_ARROW_HIT_PLAYER" to player
+                refreshScoreboard(player)
+                wait 10 seconds
+                set event-block to gold block
             
 
 on load:

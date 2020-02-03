@@ -1,16 +1,32 @@
 on chat:
     set {_prefix} to coloured the prefix of event-player
+    set {_lvl} to {level::%uuid of player%}
+    set {_lvlcolor} to levelColor({_lvl})
     if the group of event-player is "default":
-        set chat format to "%{_prefix}%%player's displayname% &9» &7%message%&r"
+        set chat format to "&7[<%{_lvlcolor}%>%{_lvl}%&7] %{_prefix}%%player's displayname% &8» &7%message%&r"
     else if group of event-player is "admin":
-        set chat format to "%{_prefix}%%player's displayname% &9» &6%colored message%&r"
+        set chat format to "&7[<%{_lvlcolor}%>%{_lvl}%&7] %{_prefix}%%player's displayname% &8» &6%colored message%&r"
     else if group of event-player is "dev" or "manager":
-        set chat format to "%{_prefix}%%player's displayname% &9» &c%colored message%&r"
-    else if group of event-player is "jrmod" or "moderator" or "srmod" or "builder":
-        set chat format to "%{_prefix}%%player's displayname% &9» &b%message%&r"
+        set chat format to "&7[<%{_lvlcolor}%>%{_lvl}%&7] %{_prefix}%%player's displayname% &8» &c%colored message%&r"
+    else if group of event-player is "jrmod" or "moderator" or "srmod":
+        set chat format to "&7[<%{_lvlcolor}%>%{_lvl}%&7] %{_prefix}%%player's displayname% &8» &b%message%&r"
+    else if group of event-player is "builder":
+        set chat format to "&7[<%{_lvlcolor}%>%{_lvl}%&7] %{_prefix}%%player's displayname% &8» &r%message%&r"
     else if group of event-player is "friend":
-        set chat format to "%{_prefix}%%event-player's displayname% &9» &d%message%&r"
+        set chat format to "&7[<%{_lvlcolor}%>%{_lvl}%&7] %{_prefix}%%event-player's displayname% &8» &d%message%&r"
     else if group of event-player is "knight" or "earlyaccess":
-        set chat format to "%{_prefix}%%event-player's displayname% &9» &r%message%&r"
+        set chat format to "&7[<%{_lvlcolor}%>%{_lvl}%&7] %{_prefix}%%event-player's displayname% &8» &r%message%&r"
     else:
-        set chat format to "%{_prefix}% &7%player's displayname% &9» &7%message%&r"
+        set chat format to "&7[<%{_lvlcolor}%>%{_lvl}%&7] %{_prefix}% &7%player's displayname% &8» &7%message%&r"
+
+function levelColor(int: integer) :: text:
+    if {_int} <= 20:
+        return "dark gray"
+    else if {_int} <= 30:
+        return "light green"
+    else if {_int} <= 40:
+        return "yellow"
+    else if {_int} <= 75:
+        return "dark red"
+    else if {_int} <= 100:
+        return "gold"

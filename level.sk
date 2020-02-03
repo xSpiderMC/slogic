@@ -1,0 +1,75 @@
+options:
+    name: &6&lSLOGIC &7|
+
+
+command /level [<text>] [<offline player>] [<integer>]:
+    description: Allows you to view your level and admins to modify
+    permission: points.admin 
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &7Your level: &6%{level::%uuid of player%}%" to player
+        else if player has permission "points.admin":
+            if arg-2 is not set:
+                send "{@name} &cYou need to specify a player" to player
+            else if arg-1 is "reset":
+                send "{@name} &7Resetting &6%arg-2%&7's level" to player
+                set {level::%uuid of arg-2%} to 0
+            else if arg-1 is "show" or "amount":
+                send "{@name} &6%arg-2% &7is level &6%{level::%uuid of arg-2%}%" to player
+            else if arg-3 is not set:
+                send "{@name} &cYou need to specify a level" to player
+            else:
+                if arg-1 is "give" or "add":
+                    send "{@name} &7Adding &6%arg-3% &7level(s) to &6%arg-2%" to player
+                    add arg-3 to {level::%uuid of arg-2%}
+                    send "{@name} &7You have been given &6%arg-3% &7levels(s)." to arg-2
+                else if arg-1 is "remove":
+                    send "{@name} &7Removing &6%arg-3% &7level(s) from &6%arg-2%" to player
+                    remove arg-3 from {level::%uuid of arg-2%}
+                else if arg-1 is "set":
+                    send "{@name} &7Set &6%arg-2%&7 level to &6%arg-3%" to player
+                    set {level::%uuid of arg-2%} to arg-3
+
+command /axp [<offline player>] [<number>]:
+    permission: points.admin
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &cYou need to provide a player" to player
+        else if arg-2 is not set:
+            send "{@name} &cYou need to provide an amount" to player
+        else:
+            addXP(arg-1, arg-2)
+    
+
+command /lxp:
+    trigger:
+        send "{@name} &7You currently have &6%{xp::%uuid of player%}% &7xp %nl%{@name} &7You are currently level &6%{level::%uuid of player%}%"
+
+function addXP(p: player, n: number):
+    set {_up} to uuid of {_p}
+    add {_n} to {xp::%{_up}%}
+    if {xp::%{_up}%} >= 50:
+        set {xp::%{_up}%} to 0
+        add 1 to {level::%{_up}%}
+        play sound "ENTITY_PLAYER_LEVELUP" to {_p}
+        set {Achievements::levelup::%{_up}%} to 0 if {Achievements::levelup::%{_up}%} is not set
+        send "&a&kK&r&a>>   &aAchievement Unlocked: &6Levelup!   &a<<&kK&r" to {_p} if {Achievements::levelup::%{_up}%} is not set
+    send action bar "&7Gained &6%{_n}% &7xp" to {_p}
+
+function genXP(type: text) :: number:
+    if {_type} is "ore":
+        set {_ran} to random number from 0.4 to 0.6
+        return {_ran}
+    else if {_type} is "gblock":
+        set {_ran} to random number from 0.6 to 0.9
+        return {_ran}
+    else if {_type} is "hill":
+        return 0.3
+    else if {_type} is "kill":
+        return random number between 0.9 and 1.2
+    else if {_type} is "bplace":
+        return random integer between 6 and 8
+    else if {_type} is "bclaim":
+        return random integer between 4 and 6
+
+

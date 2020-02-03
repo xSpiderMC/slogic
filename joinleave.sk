@@ -1,9 +1,18 @@
 on join:
-    set join message to "&7[&a+&7] &9%player%"
+    if {vanish.%player%} is true:
+        set join message to ""
+        hide player from all players where [input doesn't have permission "staff.vanish"]
+    else:
+        set join message to "&7[&a+&7] &9%player%"
     if player is op:
         wait 1 second
         make player execute command "/rg toggle-bypass"
     refreshScoreboard(player)
     set {abuild.%player's uuid%} to false
+    set {level::%uuid of player%} to 0 if {level::%uuid of player%} is not set
 on quit:
-    set quit message to "&7[&c-&7] &9%player%"
+    if {vanish.%player%} is true:
+        set quit message to ""
+    else:
+        set quit message to "&7[&c-&7] &9%player%"
+    delete {autojoin.%player's uuid%}

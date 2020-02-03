@@ -7,6 +7,8 @@ on first join:
     wait 1 tick
     tutorial(event-player)
     set {points::%uuid of event-player%} to 0
+    set {stats.kills.%uuid of player%} to 0 if {stats.kills.%uuid of player%} is not set
+    set {level::%uuid of player%} to 0 if {level::%uuid of player%} is not set
     set the helmet of event-player to unbreakable leather helmet
     set the chestplate of event-player to unbreakable leather chestplate
     set the leggings of event-player to unbreakable leather leggings
@@ -34,6 +36,8 @@ every second:
         if {onhill::%uuid of loop-player%} is true:
             set {points::%uuid of loop-player%} to ({points::%uuid of loop-player%} + 2) if {onhillamount} is 1 else ({points::%uuid of loop-player%} + (2 - {_nmultiplier}))
             refreshScoreboard(loop-player)
+            set {_xp} to genXP("hill")
+            addXP(loop-player, {_xp})
 on respawn:
     if {autojoin.%player's uuid%} is true:
         if {autojoincolor.%player's uuid%} is set:
@@ -72,7 +76,8 @@ on death of player:
         add {_removeamt} to {points::%{_au}%}
         send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to attacker
         play sound "ENTITY_ARROW_HIT_PLAYER" to attacker
-        
+        set {_xp} to genXP("kill")
+        addXP(attacker, {_xp})
         refreshScoreboard(attacker)
         refreshScoreboard(victim)
 
@@ -80,6 +85,8 @@ on death of player:
         if {killstreak::%uuid of attacker%} = 5:
             send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, you will be rewarded with &6200 points&7!" to all players
             set {bounty::%uuid of attacker%} to 200
+            set {_xp} to genXP("bplace")
+            addXP(attacker, {_xp})
             if {Achievements::killstreak1::%{_au}%} is not set: 
                 send "&a&kK&r&a>>   &aAchievement Unlocked: &6Killer Streaker!   &a<<&kK&r" to {%victim%.lastattacker}
                 set {Achievements::killstreak1::%{_au}%} to 0
@@ -88,16 +95,24 @@ on death of player:
         else if {killstreak::%uuid of attacker%} = 10:
             send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, The bounty has been increaed to &6500 points&7!" to all players
             set {bounty::%uuid of attacker%} to 500
+            set {_xp} to genXP("bplace")
+            addXP(attacker, {_xp})
         else if {killstreak::%uuid of attacker%} = 15:
             send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, The bounty has been increaed to &6800 points&7!" to all players
             set {bounty::%uuid of attacker%} to 800
+            set {_xp} to genXP("bplace")
+            addXP(attacker, {_xp})
         else if {killstreak::%uuid of attacker%} = 20:
             send "&4&lBOUNTY &7| The king has ordered &6%attacker% &7dead, The bounty has been increased to &61100 points&7!" to all players
             set {bounty::%uuid of attacker%} to 1100
+            set {_xp} to genXP("bplace")
+            addXP(attacker, {_xp})
         if {bounty::%uuid of victim%} > 0:
             if {killstreak::%uuid of victim%} >= 5:
                 send "&4&lBOUNTY &7| &6%attacker% &7has claimed the king's bounty of &6%{bounty::%uuid of victim%}% &7on &6%victim%&7!" to all players
                 add {bounty::%uuid of victim%} to {points::%uuid of attacker%}
+                set {_xp} to genXP("bclaim")
+                addXP(attacker, {_xp})
                 set {bounty::%uuid of victim%} to 0
                 set {killstreak::%uuid of victim%} to 0
                 refreshScoreboard(attacker)
@@ -118,10 +133,14 @@ on death of player:
                     add {_removeamt} to {points::%{_au}%}
                     send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to {%victim%.lastattacker}
                     play sound "ENTITY_ARROW_HIT_PLAYER" to {%victim%.lastattacker}
+                    set {_xp} to genXP("kill")
+                    addXP(attacker, {_xp})
                     add 1 to {killstreak::%{_au}%}
                     if {killstreak::%{_au}%} = 5:
                         send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, you will be rewarded with &6200 points&7!" to all players
                         set {bounty::%{_au}%} to 200
+                        set {_xp} to genXP("bplace")
+                        addXP(attacker, {_xp})
                         if {Achievements::killstreak1::%{_au}%} is not set: 
                             send "&a&kK&r&a>>   &aAchievement Unlocked: &6Killer Streaker!   &a<<&kK&r" to {%victim%.lastattacker}
                             set {Achievements::killstreak1::%{_au}%} to 0
@@ -130,16 +149,24 @@ on death of player:
                     else if {killstreak::%{_au}%} = 10:
                         send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, The bound has been increaed to &6500 points&7!" to all players
                         set {bounty::%{_au}%} to 500
+                        set {_xp} to genXP("bplace")
+                        addXP(attacker, {_xp})
                     else if {killstreak::%{_au}%} = 15:
                         send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, The bounty has been increaed to &6800 points&7!" to all players
                         set {bounty::%{_au}%} to 800
+                        set {_xp} to genXP("bplace")
+                        addXP(attacker, {_xp})
                     else if {killstreak::%{_au}%} = 20:
                         send "&4&lBOUNTY &7| The king has ordered &6%{%victim%.lastattacker}% &7dead, The bounty has been increased to &61100 points&7!" to all players
                         set {bounty::%{_au}%} to 1100
+                        set {_xp} to genXP("bplace")
+                        addXP(attacker, {_xp})
                     if {bounty::%uuid of victim%} > 0:
                         if {killstreak::%uuid of victim%} >= 5:
                             send "&4&lBOUNTY &7| &6%{%victim%.lastattacker}% &7has claimed the king's bounty of &6%{bounty::%uuid of victim%}% &7on &6%victim%&7!" to all players
                             add {bounty::%uuid of victim%} to {points::%{_au}%}
+                            set {_xp} to genXP("bclaim")
+                            addXP(attacker, {_xp})
                             set {bounty::%uuid of victim%} to 0
                             set {killstreak::%uuid of victim%} to 0
                             refreshScoreboard({%victim%.lastattacker})
@@ -147,8 +174,6 @@ on death of player:
                     delete {%victim%.lastattacker}
                     delete {%victim%.attacktime}
                     send "&6&lDEATH &7%victim's name%" to victim
-    wait 2 tick
-    force victim to respawn
 
 command /ksinfo <offline player>:
     trigger:
@@ -183,7 +208,7 @@ command /tutorial:
             tutorial(player)
 
 
-command /points [<text>] [<player>] [<number>]:
+command /points [<text>] [<offline player>] [<number>]:
     description: Allows you to view your points and admins to modify 
     trigger:
         if arg-1 is not set:
@@ -423,6 +448,7 @@ command /fix <text>:
             send "{@name} &cUsage: /fix <hand/all>"
             stop
         
+
 command /join:
     usage: /join
     description: Opens a menu that allows the player to select a spawning point
@@ -431,6 +457,9 @@ command /join:
     cooldown message: &cYou need to wait 10 seconds before using this command again
     cooldown bypass: game.join.bc
     trigger:
+        if {intutorial.%uuid of player%} is true:
+            send "{@name} &cYou can't use this command while in the tutorial"
+            stop
         if player is not in world "arena":
             send "{@name} &cYou must be in the arena world first! Enter the portal at spawn"
             stop
@@ -625,8 +654,9 @@ function tutorial(p: Player):
     send "{@name} &7If you'd like to exit the tutorial type &6/tutorial &7(again)" to {_p}
     set {_up} to uuid of {_p}
     set {intutorial.%{_up}%} to true
+    set {invulnerable.%{_up}%} to true
     hide {_p} from all players if {intutorial.%{_up}%} is true
-    teleport {_p} to location(-2.6, 72, -8.5, world "Spawn", -158, 35) if {intutorial.%{_up}%} is true
+    teleport {_p} to location(-10.5, 75, -14.3, world "Spawn", -158, 35) if {intutorial.%{_up}%} is true
     send title "&6&lWelcome to SLOGIC" with subtitle "&7Here is a tutorial to get you started" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
     wait 5 seconds
     send title "&6&lGetting Started" with subtitle "&7To enter the arena world, walk through the portal" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
@@ -636,12 +666,12 @@ function tutorial(p: Player):
     wait 5 seconds
     send title "&6&lAuto Joining the action" with subtitle "&7Picking a color will set that as the color for &6/autojoin" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
     wait 5 seconds
-    teleport {_p} to location(9.5, 88, 7.5, world "Arena", 132, 56) if {intutorial.%{_up}%} is true
+    teleport {_p} to location(0.5, 79, 13.5, world "Arena", 179, 42) if {intutorial.%{_up}%} is true
     send title "&6&lGaining points" with subtitle "&7Get onto the point to gain points. " to {_p} for 5 seconds if {intutorial.%{_up}%} is true
     wait 5 seconds
     send title "&6&lGaining points" with subtitle "&7The more people on the hill, the less points you'll get" to {_p} for 5 seconds if {intutorial.%{_up}%} is true 
     wait 5 seconds
-    teleport {_p} to location(14.5, 66, -20.5, world "Arena", 40, 12) if {intutorial.%{_up}%} is true
+    teleport {_p} to location(-27.4, 65, -6.5, world "Arena", -150, 20) if {intutorial.%{_up}%} is true
     send title "&6&lGaining points" with subtitle "&7Just starting out? You can mine some ore!" to {_p} for 5 seconds if {intutorial.%{_up}%} is true 
     wait 5 seconds
     send title "&6&lSpending points" with subtitle "&7Use &6/shop &7to spend your points" to {_p} for 5 seconds if {intutorial.%{_up}%} is true
@@ -654,6 +684,7 @@ function tutorial(p: Player):
     reveal {_p} from all players
     teleport {_p} to {spawn} if {intutorial.%{_up}%} is true
     delete {intutorial.%{_up}%}
+    delete {invulnerable.%{_up}%}
     
 
 on inventory close:

@@ -60,6 +60,11 @@ command /achievements:
             create a gui slot 4 of player with yellow stained glass pane named "&aKiller Streaker! &a[Uncommon]" with lore "&7||&7Status: &2&l✓ &7|| &6Kill 5 player's in a row!"
         else:
             create a gui slot 4 of player with black stained glass pane named "&aKiller Streaker &a[Uncommon]" with lore "&7||&7Status: &2&lx &7|| &6Kill 5 player's in a row!"
+        if {Achievements::levelup::%player's uuid%} is set:
+            create a gui slot 5 of player with green stained glass pane named "&aLevelup!" with lore "&7||&7Status: &2&l✓ &7|| &6Level up!!"
+        else:
+            create a gui slot 5 of player with black stained glass pane named "&aLevelup!" with lore "&7||&7Status: &2&lx &7|| &6Level up!"
+
 
 command /setach [<offline player>] [<text>] [<boolean>]:
     permission: points.admin
@@ -99,5 +104,13 @@ command /setach [<offline player>] [<text>] [<boolean>]:
                 else:
                     delete {Achievements::killstreak1::%player's uuid%}
                     send "{@name} &7Setting &6%arg-1%&7's 5 kill streak achievement to &6false" to player
+            else if arg-2 is "levelup":
+                if arg-3 is true:
+                    set {Achievements::levelup::%player's uuid%} to 0
+                    send "{@name} &7Setting &6%arg-1%&7's level up achievement to &6true" to player
+                else:
+                    delete {Achievements::levelup::%player's uuid%}
+                    send "{@name} &7Setting &6%arg-1%&7's level up achievement to &6false" to player
             else:
                 send "{@name} &cAchievement not found"
+            
