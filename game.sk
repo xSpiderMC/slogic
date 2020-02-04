@@ -7,8 +7,9 @@ on first join:
     wait 1 tick
     tutorial(event-player)
     set {points::%uuid of event-player%} to 0
-    set {stats.kills.%uuid of player%} to 0 if {stats.kills.%uuid of player%} is not set
+    set {kills::%uuid of player%} to 0 if {kills::%uuid of player%} is not set
     set {level::%uuid of player%} to 0 if {level::%uuid of player%} is not set
+    set {deaths::%uuid of player%} to 0 if {deaths::%uuid of player%} is not set
     set the helmet of event-player to unbreakable leather helmet
     set the chestplate of event-player to unbreakable leather chestplate
     set the leggings of event-player to unbreakable leather leggings
@@ -78,6 +79,8 @@ on death of player:
         play sound "ENTITY_ARROW_HIT_PLAYER" to attacker
         set {_xp} to genXP("kill")
         addXP(attacker, {_xp})
+        add 1 to {kills::%uuid of attacker%}
+        add 1 to {deaths::%uuid of victim%}
         refreshScoreboard(attacker)
         refreshScoreboard(victim)
 
@@ -133,8 +136,11 @@ on death of player:
                     add {_removeamt} to {points::%{_au}%}
                     send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to {%victim%.lastattacker}
                     play sound "ENTITY_ARROW_HIT_PLAYER" to {%victim%.lastattacker}
+                    add 1 to {kills::%{_au}%}
+                    add 1 to {deaths::%uuid of victim%}
                     set {_xp} to genXP("kill")
                     addXP(attacker, {_xp})
+                    refreshScoreboard({%victim%.lastattacker})
                     add 1 to {killstreak::%{_au}%}
                     if {killstreak::%{_au}%} = 5:
                         send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, you will be rewarded with &6200 points&7!" to all players
@@ -523,6 +529,7 @@ function openMenu(p: Player, type: String):
     if {_type} is "page 1":
         open virtual chest inventory with size 6 named "&c&lShop &7- &a&lArmor" to {_p}
         #IRON ARMOR -------------------------------------------------------------------------------------
+        format gui slot (all integers between 0 and 54) of {_p} with light gray stained glass pane named " "
         format gui slot 12 of {_p} with iron helmet named "&eIron Helmet" with lore "&6200 points" to run:
             if {points::%{_up}%} is greater than or equal to 200:
                 remove 200 from {points::%{_up}%}
@@ -551,49 +558,14 @@ function openMenu(p: Player, type: String):
                 send "{@name} &7Successfully bought &6Iron Boots" to {_p}
             else:
                 send "{@nopoints}" to {_p}
-        #DIAMOND ARMOR -----------------------------------------------------------------------------------
-        format gui slot 14 of {_p} with diamond helmet named "&eDiamond Helmet" with lore "&6800 points" to run:
-            if {points::%{_up}%} is greater than or equal to 800:
-                remove 800 from {points::%{_up}%}
-                give {_p} diamond helmet
-                send "{@name} &7Successfully bought &6Diamond Helmet" to {_p}
-            else:
-                send "{@nopoints}" to {_p}
-        format gui slot 23 of {_p} with diamond chestplate named "&eDiamond Chestplate" with lore "&61200 points" to run:
-            if {points::%{_up}%} is greater than or equal to 1200:
-                remove 1200 from {points::%{_up}%}
-                give {_p} diamond chestplate
-                send "{@name} &7Successfully bought &6Diamond Chestplate" to {_p}
-            else:
-                send "{@nopoints}" to {_p}
-        format gui slot 32 of {_p} with diamond leggings named "&eDiamond Leggings" with lore "&61200 points" to run:
-            if {points::%{_up}%} is greater than or equal to 1200:
-                remove 1200 from {points::%{_up}%}
-                give {_p} diamond leggings
-                send "{@name} &7Successfully bought &6Diamond Leggings" to {_p}
-            else:
-                send "{@nopoints}" to {_p}
-        format gui slot 41 of {_p} with diamond boots named "&eDiamond Boots" with lore "&6800 points" to run:
-            if {points::%{_up}%} is greater than or equal to 800:
-                remove 800 from {points::%{_up}%}
-                give {_p} diamond boots
-                send "{@name} &7Successfully bought &6Diamond Boots" to {_p}
-            else:
-                send "{@nopoints}" to {_p}
-        #BACK TO MAIN MENU 
-        format gui slot 49 of {_p} with arrow named "&6Go Back" to run function openMenu({_p}, "main")
+        format gui slot 49 of {_p} with arrow named "&cBack" to run function openMenu({_p}, "main")
+        #Diamond Helmet and boots - 800 points
+        #Chestplate and leggings - 1200 points
     #WEAPONS
     else if {_type} is "page 2":
         open virtual chest inventory with size 6 named "&c&lShop &7- &a&lWeapons" to {_p}
         format gui slot (all integers between 0 and 54) of {_p} with light gray stained glass pane named " "
-        #SHARP 1 WOODEN SWORD
-        format gui slot 10 of {_p} with wooden sword of sharpness 1 named "&eWooden Sword" with lore "&6300 points" to run:
-            if {points::%{_up}%} is greater than or equal to 300:
-                remove 300 from {points::%{_up}%}
-                give {_p} wooden sword of sharpness 1
-                send "{@name} &7Successfully bought &6Wooden Sword (Sharpness 1)" to {_p}
-            else:
-                send "{@nopoints}" to {_p}
+        #SHARP 1 WOODEN SWORD - 300
         #STONE SWORD
         format gui slot 12 of {_p} with stone sword named "&eStone Sword" with lore "&6500 points" to run:
             if {points::%{_up}%} is greater than or equal to 500:
@@ -602,14 +574,7 @@ function openMenu(p: Player, type: String):
                 send "{@name} &7Successfully bought &6Stone Sword" to {_p}
             else:
                 send "{@nopoints}" to {_p}
-        #SHARP 1 STONE SWORD
-        format gui slot 21 of {_p} with stone sword of sharpness 1 named "&eStone Sword" with lore "&6700 points" to run:
-            if {points::%{_up}%} is greater than or equal to 700:
-                remove 700 from {points::%{_up}%}
-                give {_p} stone sword of sharpness 1
-                send "{@name} &7Successfully bought &6Stone Sword (Sharpness 1)" to {_p}
-            else:
-                send "{@nopoints}" to {_p}
+        #SHARP 1 STONE SWORD - 700 pts
         #IRON SWORD
         format gui slot 14 of {_p} with iron sword named "&eIron Sword" with lore "&6900 points" to run:
             if {points::%{_up}%} is greater than or equal to 900:
@@ -618,14 +583,7 @@ function openMenu(p: Player, type: String):
                 send "{@name} &7Successfully bought &6Iron Sword" to {_p}
             else:
                 send "{@nopoints}" to {_p}
-        #SHARP 1 IRON SWORD
-        format gui slot 23 of {_p} with iron sword of sharpness 1 named "&eIron Sword" with lore "&61100 points" to run:
-            if {points::%{_up}%} is greater than or equal to 1100:
-                remove 1100 from {points::%{_up}%}
-                give {_p} iron sword of sharpness 1
-                send "{@name} &7Successfully bought &6Iron Sword (Sharpness 1)" to {_p}
-            else:
-                send "{@nopoints}" to {_p}
+        #SHARP 1 IRON SWORD - 1100
         #DIAMOND SWORD
         format gui slot 16 of {_p} with diamond sword named "&eDiamond Sword" with lore "&61500 points" to run:
             if {points::%{_up}%} is greater than or equal to 1500:
@@ -634,14 +592,7 @@ function openMenu(p: Player, type: String):
                 send "{@name} &7Successfully bought &6Diamond Sword" to {_p}
             else:
                 send "{@nopoints}" to {_p}
-        #SHARP 1 DIAMOND SWORD
-        format gui slot 25 of {_p} with diamond sword of sharpness 1 named "&eDiamond Sword" with lore "&65000 points" to run:
-            if {points::%{_up}%} is greater than or equal to 5000:
-                remove 5000 from {points::%{_up}%}
-                give {_p} diamond sword of sharpness 1
-                send "{@name} &7Successfully bought &6Diamond Sword (Sharpness 1)" to {_p}
-            else:
-                send "{@nopoints}" to {_p}
+        #SHARP 1 DIAMOND SWORD - 5000
         #BACK TO MAIN MENU
         format gui slot 49 of {_p} with arrow named "&cBack" to run function openMenu({_p}, "main")
     else if {_type} is "page 3":
@@ -694,14 +645,17 @@ function refreshScoreboard(p: player):
     set {_up} to uuid of {_p}
     wipe {_p}'s sidebar
     set name of sidebar of {_p} to "&6&lSLOGIC"
-    set score "&e&l➜&6&l Player:" in sidebar of {_p} to 7
-    set score "&7%{_p}%" in sidebar of {_p} to 6
-    set score "&7" in sidebar of {_p} to 5
-    set score "&e&l➜&6&l Points:" in sidebar of {_p} to 4
-    set score "&7%{points::%{_up}%}%" in sidebar of {_p} to 3
-    set score "" in sidebar of {_p} to 2
-    set score "&e&l➜&6&l Kills:" in sidebar of {_p} to 1
-    set score "&7%{stats.kills.%{_p}%}%" in sidebar of {_p} to 0
-    set score "&3" in sidebar of {_p} to -1
-    set score "&6&oslogic.minehut.gg" in sidebar of {_p} to -5
-    set score "&7-----------------" in sidebar of {_p} to -6
+    set score "&e&l➜&6&l Player:" in sidebar of {_p} to 13
+    set score "&7%{_p}%" in sidebar of {_p} to 12
+    set score "&7" in sidebar of {_p} to 11
+    set score "&e&l➜&6&l Level:" in sidebar of {_p} to 10
+    set score "&7%{level::%{_up}%}%" in sidebar of {_p} to 9
+    set score " " in sidebar of {_p} to 8
+    set score "&e&l➜&6&l Points:" in sidebar of {_p} to 7
+    set score "&7%{points::%{_up}%}%" in sidebar of {_p} to 6
+    set score "" in sidebar of {_p} to 5
+    set score "&e&l➜&6&l Kills:" in sidebar of {_p} to 4
+    set score "&7%{kills::%{_up}%}%" in sidebar of {_p} to 3
+    set score "&3" in sidebar of {_p} to 2
+    set score "&6&oslogic.minehut.gg" in sidebar of {_p} to 1
+    set score "&7-----------------" in sidebar of {_p} to 0

@@ -1,0 +1,45 @@
+options:
+    statname: &6&lSLOGIC
+    name: &6&lSLOGIC &7|
+
+command /stats [<offline player>]:
+    trigger:
+        if arg-1 is not set:
+            send centered "{@statname} &7| &6%player%&7's stats" to player
+            send "&7Kills: &6%{kills::%uuid of player%}%" to player
+            send "&7Deaths: &6%{deaths::%uuid of player%}%" to player
+            set {_kd} to ({kills::%uuid of player%} / {deaths::%uuid of player%})
+            send "&7KDR: &6%{_kd}%" to player
+            send "&7Level: &6%{level::%uuid of player%}%" to player
+            send "&7Points: &6%{points::%uuid of player%}%" to player
+        else if arg-1 is set:
+            send centered "{@statname} &7| &6%arg-1%&7's stats" to player
+            send "&7Kills: &6%{kills::%uuid of arg-1%}%" to player
+            send "&7Deaths: &6%{deaths::%uuid of arg-1%}%" to player
+            set {_kd} to ({kills::%uuid of arg-1%} / {deaths::%uuid of arg-1%})
+            send "&7KDR: &6%{_kd}%" to player
+            send "&7Level: &6%{level::%uuid of arg-1%}%" to player
+            send "&7Points: &6%{points::%uuid of arg-1%}%" to player
+
+command /lb [<text>]:
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &c/lb <points/kills/levels>"
+        else if arg-1 is "kills":
+            set {_skills::*} to sorted {kills::*} from highest to lowest with format "@index"
+            loop {_skills::*}:
+                set {_p} to loop-value parsed as offline player
+                set {_skills::%loop-index%} to "&6%{_p}%&7: &e%{kills::%loop-value%}%"
+            send centered "{@statname} &7| &e&lKILLS LEADERBOARD" to player
+            loop 10 times:
+                send "&8%loop-value%&8. %formatted {_skills::%loop-value%}%"
+        else if arg-1 is "levels":
+            set {_slevels::*} to sorted {level::*} from highest to lowest with format "@index"
+            loop {_slevels::*}:
+                set {_pl} to loop-index parsed as offline player
+                set {_ul} to {level::%loop-value%}
+                set {_color} to levelColor({_ul})
+                set {_slevels::%loop-value%} to "&6%{_pl}%&7: [<%{_color}%>%{_ul}%&7]"
+            send centered "{@statname} &7| &e&lLEVELS LEADERBOARD" to player
+            loop 10 times:
+                send "&8%loop-value%&8. %formatted {_slevels::%loop-value%}%"
