@@ -125,7 +125,6 @@ command /pay [<offline player>] [<number>]:
                 play sound "ENTITY_ARROW_HIT_PLAYER" to arg-1
 
 command /bank [<text>] [<offline player>] [<number>]:
-    permission: points.admin
     description: Allows you to view your bank and admins to modify 
     trigger:
         if arg-1 is not set:
