@@ -29,6 +29,7 @@ command /level [<text>] [<offline player>] [<integer>]:
                 else if arg-1 is "set":
                     send "{@name} &7Set &6%arg-2%&7 level to &6%arg-3%" to player
                     set {level::%uuid of arg-2%} to arg-3
+        refreshScoreboard(arg-2)
 
 command /axp [<offline player>] [<number>]:
     permission: points.admin
@@ -51,6 +52,7 @@ function addXP(p: player, n: number):
     if {xp::%{_up}%} >= 50:
         set {xp::%{_up}%} to 0
         add 1 to {level::%{_up}%}
+        refreshScoreboard({_p})
         play sound "ENTITY_PLAYER_LEVELUP" to {_p}
         set {Achievements::levelup::%{_up}%} to 0 if {Achievements::levelup::%{_up}%} is not set
         send "&a&kK&r&a>>   &aAchievement Unlocked: &6Levelup!   &a<<&kK&r" to {_p} if {Achievements::levelup::%{_up}%} is not set
