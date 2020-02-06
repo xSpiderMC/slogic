@@ -1,0 +1,8 @@
+on right click:
+    if player's tool is pickaxe:
+        if player is sneaking:
+            open virtual chest inventory with size 3 to player
+            format gui slot (all integers between 0 and 26) of {_p} with gray stained glass pane named " "
+            format gui slot 9 of player with player's tool
+            format gui slot 3 of player with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(some amount of points)"
+            format gui slot 5 of player with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(some amount of points)"
