@@ -1,6 +1,6 @@
 on chat:
     set {_prefix} to coloured the prefix of event-player
-    set {_lvl} to {level::%uuid of player%}
+    set {_lvl} to {level::%uuid of player%} if {level::%uuid of player%} is set else 0
     set {_lvlcolor} to levelColor({_lvl})
     if the group of event-player is "default":
         set chat format to "&7[<%{_lvlcolor}%>%{_lvl}%&7] %{_prefix}%%player's displayname% &8» &7%message%&r"
