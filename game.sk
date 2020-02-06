@@ -119,13 +119,19 @@ on death of player:
                 set {bounty::%uuid of victim%} to 0
                 set {killstreak::%uuid of victim%} to 0
                 refreshScoreboard(attacker)
+            else if {pbounty::%{_u}%} is true:
+                add {bounty::%uuid of victim%} to {points::%uuid of attacker%}
+                refreshScoreboard(attacker)
+                broadcast "&4&lBOUNTY&7 |&6 %attacker%&7 has claimed the &6%{bounty::%uuid of victim%}% &6point &7bounty on &6%victim%&7!"
+                delete {bounty::%uuid of victim%}
+                delete {pbounty::%uuid of victim%}
         else:
             delete {bounty::%uuid of victim%}
             delete {killstreak::%uuid of victim%}
     else:
         if damage was caused by void:
             if {%victim%.lastattacker} is set:
-                if {%victim%.attacktime} was less than 8 seconds ago:
+                if {%victim%.attacktime} was less than 14 seconds ago:
                     send "&6&lDEATH &7by &6%{%victim%.lastattacker}'s name%" to victim
                     set {_u} to uuid of victim
                     set {_au} to uuid of {%victim%.lastattacker}
@@ -176,6 +182,12 @@ on death of player:
                             set {bounty::%uuid of victim%} to 0
                             set {killstreak::%uuid of victim%} to 0
                             refreshScoreboard({%victim%.lastattacker})
+                        else if {pbounty::%{_u}%} is true:
+                            add {bounty::%{_u}%} to {points::%{_au}%}
+                            refreshScoreboard({%victim%.lastattacker})
+                            broadcast "&4&lBOUNTY&7 |&6 %{%victim%.lastattacker}%&7 has claimed the &6%{bounty::%uuid of victim%}% &6point &7bounty on &6%victim%&7!"
+                            delete {bounty::%uuid of victim%}
+                            delete {pbounty::%uuid of victim%}
                 else:
                     delete {%victim%.lastattacker}
                     delete {%victim%.attacktime}

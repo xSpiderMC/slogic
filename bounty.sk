@@ -1,20 +1,20 @@
-command /bounty <player> <integer>:
-    permission: bounty.add
-    trigger:
-        {points::%uuid of executor%} is greater than arg 2:
-            set {bounty::%arg 1%} to arg 2
-            remove arg 2 from {points::%uuid of executor%}
-            broadcast "&6&lBOUNTY&7 | &6%executor%&7 has placed a &$%arg-2%&6 point&7 bounty on &6%arg-1%&7."
-        {points::%uuid of executor%} is equal to arg 2:
-            set {bounty::%arg 1%} to arg 2
-            remove arg 2 from {points::%uuid of executor%}
-            broadcast "&6&lBOUNTY&7 | &6%executor%&7 has placed a &6%arg-2%&6 point&7 bounty on &6%arg-1%&7."
+options:
+    name: &6&lSLOGIC &7|
 
-        {points::%uuid of executor%} is less than arg 2:
-            send "&cYou don't have that many points!" to player
-on death of player:
-    attacker is a player
-    if {bounty::%victim%} is set:
-        add {bounty::%victim%} to the attacker's account
-        broadcast "&6&lBOUNTY&7 |&6 %attacker%&7 has claimed the &6$%{bounty::%victim%}%&7 bounty on &6%victim%&7,"
-        delete {bounty::%victim%}
+command /bounty [<player>] [<integer>]:
+    trigger:
+        if arg 1 is not set:
+            send "{@name} &cYou need to specify a player (/bounty <player> <amount>)"
+        else if arg 2 is not set:
+            send "{@name} &cYou need to specify an amount (/bounty <player> <amount>)"
+        else if arg 2 <= 0:
+            send "{@name} &cYou need to specify a valid amount that is greater than 0 (/bounty <player> <amount>)"
+        else:
+            if {points::%uuid of executor%} >= arg 2:
+                set {bounty::%uuid of arg 1%} to arg 2
+                set {pbounty::%uuid of arg-1%} to true
+                remove arg 2 from {points::%uuid of executor%}
+                refreshScoreboard(executor)
+                broadcast "&4&lBOUNTY&7 | &6%executor%&7 has placed a &6%arg-2% &6point&7 bounty on &6%arg-1%&7."
+            else:
+                send "&cYou don't have that many points!" to player
