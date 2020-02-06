@@ -24,22 +24,38 @@ command /stats [<offline player>]:
 command /lb [<text>]:
     trigger:
         if arg-1 is not set:
-            send "{@name} &c/lb <points/kills/levels>"
+            send "{@name} &c/lb <points/kills/levels>" to player
         else if arg-1 is "kills":
             set {_skills::*} to sorted {kills::*} from highest to lowest with format "@index"
-            loop {_skills::*}:
-                set {_p} to loop-value parsed as offline player
-                set {_skills::%loop-index%} to "&6%{_p}%&7: &e%{kills::%loop-value%}%"
+            set {_ind} to 0
             send centered "{@statname} &7| &e&lKILLS LEADERBOARD" to player
-            loop 10 times:
-                send "&8%loop-value%&8. %formatted {_skills::%loop-value%}%"
+            loop {_skills::*}:
+                if {_ind} < 9:
+                    add 1 to {_ind}
+                    set {_p} to loop-value parsed as offline player
+                    send "&8%{_ind}%&8. &6%{_p}%&7: &e%{kills::%loop-value%}%"
+                else:
+                    exit loop
         else if arg-1 is "levels":
             set {_slevels::*} to sorted {level::*} from highest to lowest with format "@index"
-            loop {_slevels::*}:
-                set {_pl} to loop-index parsed as offline player
-                set {_ul} to {level::%loop-value%}
-                set {_color} to levelColor({_ul})
-                set {_slevels::%loop-value%} to "&6%{_pl}%&7: [<%{_color}%>%{_ul}%&7]"
+            set {_ind} to 0
             send centered "{@statname} &7| &e&lLEVELS LEADERBOARD" to player
-            loop 10 times:
-                send "&8%loop-value%&8. %formatted {_slevels::%loop-value%}%"
+            loop {_slevels::*}:
+                if {_ind} < 9:
+                    add 1 to {_ind}
+                    set {_pl} to "%loop-value%" parsed as offline player
+                    set {_ul} to {level::%loop-value%}
+                    set {_color} to levelColor({_ul})
+                    send "&8%{_ind}%&8. &6%loop-value parsed as offline player%&7: [<%{_color}%>%{_ul}%&7]" to player
+                else:
+                    exit loop
+        else if arg-1 is "points":
+            send "SoonTM"
+        else:
+            send "{@name} &c/lb <points/kills/levels>" to player
+
+command /lbreset:
+    permission: stat.admin
+    trigger:
+        delete {level::*}
+        send "{@name} &cReset"
