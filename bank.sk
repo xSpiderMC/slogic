@@ -14,12 +14,12 @@ on citizen right click:
 function toggleDep(p: player, b: boolean):
     set {_up} to uuid of {_p}
     set {bankdep.%{_up}%} to {_b}
-    send "{@name} How much would you like to deposit? (type cancel to cancel)" to {_p}
+    send "{@name} How much would you like to deposit? (Type all to deposit all, type cancel to cancel)" to {_p}
 
 function toggleWith(p: player, b: boolean):
     set {_up} to uuid of {_p}
     set {bankwith.%{_up}%} to {_b}
-    send "{@name} How much would you like to withdraw? (type cancel to cancel)" to {_p}
+    send "{@name} How much would you like to withdraw? (Type all to withdraw all, type cancel to cancel)" to {_p}
     
 
 function togglePay(p: player):
@@ -32,6 +32,13 @@ on chat:
             send "{@name} &7Canceling"
             delete {bankdep.%uuid of player%} 
             exit
+        if message is "all":
+            send "{@name} &7Deposting &6all (%{points::%uuid of player%}%&6)"
+            add {points::%uuid of player%} to {bankbal::%uuid of player%}
+            set {points::%uuid of player%} to 0
+            refreshScoreboard(player)
+            play sound "ENTITY_ARROW_HIT_PLAYER" to player
+            delete {bankdep.%uuid of player%}
         else:
             set {_in} to message parsed as number
             if {_in} is not set:
@@ -40,6 +47,7 @@ on chat:
                 else:
                     send "{@name} &cPlease provide a valid amount"
             else:
+                set {_in} to abs({_in})
                 if {_in} > {points::%uuid of player%}:
                     play sound "ENTITY_VILLAGER_NO" to player
                     send "{@name} &cThat amount is greater than your current balance"
@@ -48,20 +56,7 @@ on chat:
                 else:
                     set {bankbal::%uuid of player%} to {bankbal::%uuid of player%} + {_in}
                     set {points::%uuid of player%} to {points::%uuid of player%} - {_in}
-                    wipe player's sidebar
-                    set name of sidebar of player to "&6&lSLOGIC"
-                    set score "&e&l➜&6&l Player:" in sidebar of player to 7
-                    set score "&7%player%" in sidebar of player to 6
-                    set score "&7" in sidebar of player to 5
-                    set score "&e&l➜&6&l Points:" in sidebar of player to 4
-                    set score "&7%{points::%uuid of player%}%" in sidebar of player to 3
-                    set score "" in sidebar of player to 2
-                    set score "&e&l➜&6&l Kills:" in sidebar of player to 1
-                    set score "&7%{stats.kills.%player%}%" in sidebar of player to 0
-                    set score "&3" in sidebar of player to -1
-                    set score "&6&oslogic.minehut.gg" in sidebar of player to -5
-                    set score "&7-----------------" in sidebar of player to -6
-                    send "{@name} &7Deposited &6%{_in}% &7points into your bank"
+                    refreshScoreboard(player)
                     play sound "ENTITY_ARROW_HIT_PLAYER" to player
             delete {bankdep.%uuid of player%}
     
@@ -71,6 +66,13 @@ on chat:
             send "{@name} &7Canceling"
             delete {bankdep.%uuid of player%} 
             exit
+        if message is "all":
+            send "{@name} &7Withdrawing &6all (%{bankbal::%uuid of player%}%&6)"
+            add {bankbal::%uuid of player%} to {points::%uuid of player%}
+            set {bankbal::%uuid of player%} to 0
+            refreshScoreboard(player)
+            play sound "ENTITY_ARROW_HIT_PLAYER" to player
+            delete {bankwith.%uuid of player%}
         else:
             set {_in} to message parsed as number
             if {_in} is not set:
@@ -85,22 +87,10 @@ on chat:
                     delete {bankwith.%uuid of player%}
                     exit
                 else:
+                    set {_in} to abs({_in})
                     set {bankbal::%uuid of player%} to {bankbal::%uuid of player%} - {_in}
                     set {points::%uuid of player%} to {points::%uuid of player%} + {_in}
-                    wipe player's sidebar
-                    set name of sidebar of player to "&6&lSLOGIC"
-                    set score "&e&l➜&6&l Player:" in sidebar of player to 7
-                    set score "&7%player%" in sidebar of player to 6
-                    set score "&7" in sidebar of player to 5
-                    set score "&e&l➜&6&l Points:" in sidebar of player to 4
-                    set score "&7%{points::%uuid of player%}%" in sidebar of player to 3
-                    set score "" in sidebar of player to 2
-                    set score "&e&l➜&6&l Kills:" in sidebar of player to 1
-                    set score "&7%{stats.kills.%player%}%" in sidebar of player to 0
-                    set score "&3" in sidebar of player to -1
-                    set score "&6&oslogic.minehut.gg" in sidebar of player to -5
-                    set score "&7-----------------" in sidebar of player to -6
-                    send "{@name} &7Withdrew &6%{_in}% &7points from your bank"
+                    refreshScoreboard(player)
                     play sound "ENTITY_ARROW_HIT_PLAYER" to player
             delete {bankwith.%uuid of player%}
 
@@ -150,3 +140,21 @@ command /bank [<text>] [<offline player>] [<number>]:
                 else if arg-1 is "set":
                     send "{@name} &7Set &6%arg-2%&7's bank points to &6%arg-3%" to player
                     set {bankbal::%uuid of arg-2%} to arg-3
+
+command /plimit:
+    permission: points.admin
+    trigger:
+        loop {points::*}:
+            if loop-value > 100000:
+                send "%loop-index parsed as offline player%: %loop-value%"
+            else if loop-value < 0:
+                send "%loop-index parsed as offline player%: %loop-value%"
+
+command /blimit:
+    permission: points.admin
+    trigger:
+        loop {bankbal::*}:
+            if loop-value > 100000:
+                send "%loop-index parsed as offline player%: %loop-value%"
+            else if loop-value < 0:
+                send "%loop-index parsed as offline player%: %loop-value%"

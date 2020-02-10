@@ -10,11 +10,35 @@ command /bounty [<player>] [<integer>]:
         else if arg 2 <= 0:
             send "{@name} &cYou need to specify a valid amount that is greater than 0 (/bounty <player> <amount>)"
         else:
-            if {points::%uuid of executor%} >= arg 2:
+            if {bounty::%uuid of arg-1%} > 0:
+                send "{@name} &cThis player already has a bounty on them"
+            else if {points::%uuid of executor%} >= arg 2:
                 set {bounty::%uuid of arg 1%} to arg 2
                 set {pbounty::%uuid of arg-1%} to true
                 remove arg 2 from {points::%uuid of executor%}
                 refreshScoreboard(executor)
                 broadcast "&4&lBOUNTY&7 | &6%executor%&7 has placed a &6%arg-2% &6point&7 bounty on &6%arg-1%&7."
             else:
-                send "&cYou don't have that many points!" to player
+                send "{@name} &cYou don't have that many points!" to player
+
+
+
+command /badmin [<text>] [<offline player>] [<integer>]:
+    permission: points.admin
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &c/badmin <show/set> <player> <amount>"
+        else if arg-2 is not set:
+            send "{@name} &c/badmin <show/set> <player> <amount>"
+        else if arg-1 is "show":
+            send "{@name} &6%arg-2% &7has a bounty of &6%{bounty::%uuid of arg-2%}%"
+        else if arg-1 is "reset":
+            delete {bounty::%uuid of arg-2%}
+            delete {pbounty::%uuid of arg-2%}
+            send "{@name} &6%arg-2%&7's bounty has been reset"
+        else if arg-1 is "set":
+            if arg-3 is not set:
+                send "{@name} &c/badmin <show/set/reset> <player> <amount>"
+            else:
+                set {bounty::%uuid of arg-2%} to arg-3
+                send "{@name} &6%arg-2%&6's &7bounty was set to &6%arg-3%"

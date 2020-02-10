@@ -46,14 +46,24 @@ command /lxp:
     trigger:
         send "{@name} &7You currently have &6%{xp::%uuid of player%}% &7xp %nl%{@name} &7You are currently level &6%{level::%uuid of player%}%"
 
+
+command /perks:
+    aliases: perk
+    trigger:
+        open virtual chest inventory with size 3 to player
+        format gui slot (all integers between 0 and 26) of player with air
+        format gui slot 13 of player with skull of ("Spiderlogical" parsed as offline player) named "&6Pranked! Coming soon <3"
+
 function addXP(p: player, n: number):
     set {_up} to uuid of {_p}
     add {_n} to {xp::%{_up}%}
     if {xp::%{_up}%} >= 50:
-        set {xp::%{_up}%} to 0
-        add 1 to {level::%{_up}%}
-        refreshScoreboard({_p})
-        play sound "ENTITY_PLAYER_LEVELUP" to {_p}
+        if {level::%{_up}%} < 100:
+            set {xp::%{_up}%} to 0
+            add 1 to {level::%{_up}%}
+            refreshScoreboard({_p})
+            play sound "ENTITY_PLAYER_LEVELUP" to {_p}
+            send "&e&lLEVELUP &7| You're now level &6%{level::%{_up}%}%" to {_p}
         set {Achievements::levelup::%{_up}%} to 0 if {Achievements::levelup::%{_up}%} is not set
         send "&a&kK&r&a>>   &aAchievement Unlocked: &6Levelup!   &a<<&kK&r" to {_p} if {Achievements::levelup::%{_up}%} is not set
     send action bar "&7Gained &6%{_n}% &7xp" to {_p}

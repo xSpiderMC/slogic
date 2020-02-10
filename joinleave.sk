@@ -15,4 +15,3 @@ on quit:
         set quit message to ""
     else:
         set quit message to "&7[&c-&7] &9%player%"
-    delete {autojoin.%player's uuid%}

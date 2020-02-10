@@ -46,7 +46,7 @@ command /lb [<text>]:
                     set {_pl} to "%loop-value%" parsed as offline player
                     set {_ul} to {level::%loop-value%}
                     set {_color} to levelColor({_ul})
-                    send "&8%{_ind}%&8. &6%loop-value parsed as offline player%&7: [<%{_color}%>%{_ul}%&7]" to player
+                    send "&8%{_ind}%&8. &6%loop-value parsed as offline player%&7: [<reset><%{_color}%>%{_ul}%&7]" to player
                 else:
                     exit loop
         else if arg-1 is "points":

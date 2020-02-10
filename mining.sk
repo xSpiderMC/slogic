@@ -4,20 +4,26 @@ on block break:
             cancel event
         if player's gamemode is survival:
             if event-block is gold ore:
-                set {points::%uuid of player%} to {points::%uuid of player%} + 1.5
+                if player's tool is enchanted with fortune:
+                    set {points::%uuid of player%} to {points::%uuid of player%} + (1.5 + (2 * level of fortune of tool of player))
+                else:
+                    set {points::%uuid of player%} to {points::%uuid of player%} + 1.5
                 set {_xp} to genXP("ore")
                 addXP(player, {_xp})
-                add event-block to {orelist::*}
+                add event-block to {orelist::*} if {orelist::*} does not contain event-block
                 set event-block to bedrock
                 play sound "ENTITY_ARROW_HIT_PLAYER" to player
                 refreshScoreboard(player)
                 wait 5 seconds
                 set event-block to gold ore
             else if event-block is gold block:
-                set {points::%uuid of player%} to {points::%uuid of player%} + 5
+                if player's tool is enchanted with fortune:
+                    set {points::%uuid of player%} to {points::%uuid of player%} + (5 + (2 * level of fortune of tool of player))
+                else:
+                    set {points::%uuid of player%} to {points::%uuid of player%} + 5
                 set {_xp} to genXP("gblock")
                 addXP(player, {_xp})
-                add event-block to {goldblocks::*}
+                add event-block to {goldblocks::*} if {goldblocks::*} does not contain event-block
                 set event-block to bedrock
                 play sound "ENTITY_ARROW_HIT_PLAYER" to player
                 refreshScoreboard(player)
@@ -38,7 +44,8 @@ command /pick:
         if player's inventory contains stone pickaxe:
             send "&6&lSLOGIC &7| &cYou already have a pickaxe!"
         else:
-            give unbreakable stone pickaxe to player
+            set {_item} to stone pickaxe with lore "&7Shift right click to upgrade"
+            give unbreakable {_item} to player
             send "&6&lSLOGIC &7| Here's your pickaxe!"
 
 command /buildmode [<text>]:
@@ -52,3 +59,11 @@ command /buildmode [<text>]:
         else if arg-1 is "off":
             send "&6&lSLOGIC &7| toggled building in arena &6off"
             set {abuild.%player's uuid%} to false
+
+
+command /oreclear:
+    permission: *
+    trigger:
+        send "deleting"
+        delete {goldblocks::*}
+        delete {orelist::*}

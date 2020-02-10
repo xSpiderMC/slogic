@@ -15,7 +15,8 @@ on first join:
     set the leggings of event-player to unbreakable leather leggings
     set the boots of event-player to unbreakable leather boots
     give unbreakable wooden sword to event-player
-    give unbreakable stone pickaxe to event-player
+    set {_item} to stone pickaxe with lore "&7Shift right click to upgrade"
+    give unbreakable {_item} to event-player 
         
 on enter of region "hill":
     set {onhill::%uuid of event-player%} to true
@@ -298,14 +299,6 @@ on tool break:
             give stone sword to player
         else:
             give wooden sword of sharpness 1 to player
-    else if item is diamond helmet:
-        set helmet of player to iron helmet
-    else if item is diamond chestplate:
-        set chestplate of player to iron chestplate
-    else if item is diamond leggings:
-        set leggings of player to iron leggings
-    else if item is diamond boots:
-        set boots of player to iron boots
     else if item is iron helmet:
         set helmet of player to unbreakable leather helmet
     else if item is iron chestplate:
@@ -338,123 +331,87 @@ command /fix <text>:
                 if player's tool is wooden sword:
                     if player's tool is enchanted with sharpness 1:
                         #Sharpness 1 Wooden Sword Repair - 100
-                        if {points::%{_up}%} >= 100:
+                        if {points::%{_up}%} >= 50:
                             repair tool of player
-                            remove 100 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6100 &7points."
+                            remove 50 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &650 &7points."
                         else:
-                            send "{@name} &cInsufficent points: You need 100 points to do this"
+                            send "{@name} &cInsufficent points: You need 50 points to do this"
                     else:
                         exit 1 conditional
                 else if player's held item is stone sword:
                     #Sharp 1 Stone Sword Repair - 200
                     if player's tool is enchanted with sharpness 1:
-                        if {points::%{_up}%} >= 200:
-                            repair tool of player
-                            remove 125 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
-                        else:
-                            send "{@name} &cInsufficent points: You need 200 points to do this"
-                    else:
-                        #Stone Sword Repair
                         if {points::%{_up}%} >= 150:
                             repair tool of player
                             remove 150 from {points::%{_up}%}
                             send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6150 &7points."
                         else:
-                            send "{@name} &cInsufficent points: You need 150 points to do this" 
+                            send "{@name} &cInsufficent points: You need 150 points to do this"
+                    else:
+                        #Stone Sword Repair
+                        if {points::%{_up}%} >= 100:
+                            repair tool of player
+                            remove 100 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6100 &7points."
+                        else:
+                            send "{@name} &cInsufficent points: You need 100 points to do this" 
                 else if player's held item is iron sword:
                     #Sharp 1 Iron Sword Repair  
                     if player's tool is enchanted with sharpness 1:
-                        if {points::%{_up}%} >= 300:
-                            repair tool of player
-                            remove 300 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6300 &7points."
-                        else:
-                            send "{@name} &cInsufficent points: You need 300 points to do this"
-                    else:
-                        #Iron Sword Repair
                         if {points::%{_up}%} >= 250:
                             repair tool of player
-                            remove 300 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6300 &7points."
+                            remove 250 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6250 &7points."
                         else:
-                            send "{@name} &cInsufficent points: You need 300 points to do this"
+                            send "{@name} &cInsufficent points: You need 250 points to do this"
+                    else:
+                        #Iron Sword Repair
+                        if {points::%{_up}%} >= 200:
+                            repair tool of player
+                            remove 200 from {points::%{_up}%}
+                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
+                        else:
+                            send "{@name} &cInsufficent points: You need 200 points to do this"
                 else if player's held item is diamond sword:
-                    #Sharpness 1 Diamond Repair
-                    if player's tool is enchanted with sharpness 1:
-                        if {points::%{_up}%} >= 500:
-                            repair tool of player
-                            remove 800 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6800 &7points."
-                        else:
-                            send "{@name} &cInsufficent points: You need 800 points to do this"
+                    #Diamond Sword Repair
+                    if {points::%{_up}%} >= 350:
+                        repair tool of player
+                        remove 350 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6350 &7points."
                     else:
-                        #Diamond Sword Repair
-                        if {points::%{_up}%} >= 450:
-                            repair tool of player
-                            remove 500 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
-                        else:
-                            send "{@name} &cInsufficent points: You need 500 points to do this"
+                        send "{@name} &cInsufficent points: You need 350 points to do this"
                 #Armor
-                else if player's held item is diamond helmet:
-                    if {points::%{_up}%} >= 500:
-                        repair tool of player
-                        remove 500 from {points::%{_up}%}
-                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
-                    else:
-                        send "{@name} &cInsufficent points: You need 500 points to do this"
-                else if player's held item is diamond chestplate:
-                    if {points::%{_up}%} >= 500:
-                        repair tool of player
-                        remove 500 from {points::%{_up}%}
-                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
-                    else:
-                        send "{@name} &cInsufficent points: You need 500 points to do this"
-                else if player's held item is diamond leggings:
-                    if {points::%{_up}%} >= 500:
-                        repair tool of player
-                        remove 500 from {points::%{_up}%}
-                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
-                    else:
-                        send "{@name} &cInsufficent points: You need 500 points to do this"
-                else if player's held item is diamond boots:
-                    if {points::%{_up}%} >= 500:
-                        repair tool of player
-                        remove 500 from {points::%{_up}%}
-                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6500 &7points."
-                    else:
-                        send "{@name} &cInsufficent points: You need 500 points to do this"
+
                 #Iron Armor
                 else if player's held item is iron helmet:
-                    if {points::%{_up}%} >= 200:
+                    if {points::%{_up}%} >= 150:
                         repair tool of player
-                        remove 200 from {points::%{_up}%}
-                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
+                        remove 150 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6150 &7points."
                     else:
                         send "{@name} &cInsufficent points: You need 200 points to do this"
                 else if player's held item is iron chestplate:
-                    if {points::%{_up}%} >= 250:
-                        repair tool of player
-                        remove 250 from {points::%{_up}%}
-                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6250 &7points."
-                    else:
-                        send "{@name} &cInsufficent points: You need 250 points to do this"
-                else if player's held item is iron leggings:
-                    if {points::%{_up}%} >= 250:
-                        repair tool of player
-                        remove 250 from {points::%{_up}%}
-                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6250 &7points."
-                    else:
-                        send "{@name} &cInsufficent points: You need 250 points to do this"
-                else if player's held item is iron boots:
                     if {points::%{_up}%} >= 200:
                         repair tool of player
                         remove 200 from {points::%{_up}%}
                         send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
                     else:
                         send "{@name} &cInsufficent points: You need 200 points to do this"
+                else if player's held item is iron leggings:
+                    if {points::%{_up}%} >= 200:
+                        repair tool of player
+                        remove 200 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 200 points to do this"
+                else if player's held item is iron boots:
+                    if {points::%{_up}%} >= 150:
+                        repair tool of player
+                        remove 150 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6150 &7points."
+                    else:
+                        send "{@name} &cInsufficent points: You need 150 points to do this"
                 else:
                     send "{@name} &cThis item cannot be repaired."
                     stop
@@ -634,7 +591,7 @@ function tutorial(p: Player):
     wait 5 seconds
     send title "&6&lGaining points" with subtitle "&7The more people on the hill, the less points you'll get" to {_p} for 5 seconds if {intutorial.%{_up}%} is true 
     wait 5 seconds
-    teleport {_p} to location(-27.4, 65, -6.5, world "Arena", -150, 20) if {intutorial.%{_up}%} is true
+    teleport {_p} to location(-27.5, 65, -6.3, world "Arena", -145, 25) if {intutorial.%{_up}%} is true
     send title "&6&lGaining points" with subtitle "&7Just starting out? You can mine some ore!" to {_p} for 5 seconds if {intutorial.%{_up}%} is true 
     wait 5 seconds
     send title "&6&lSpending points" with subtitle "&7Use &6/shop &7to spend your points" to {_p} for 5 seconds if {intutorial.%{_up}%} is true

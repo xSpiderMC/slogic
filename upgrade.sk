@@ -1,8 +1,76 @@
+options:
+    name: &6&lSLOGIC &7|
+    nopoints: &6&lSLOGIC &7| &cYou don't have enough points to purchase this!
+
 on right click:
     if player's tool is pickaxe:
         if player is sneaking:
             open virtual chest inventory with size 3 to player
-            format gui slot (all integers between 0 and 26) of {_p} with gray stained glass pane named " "
+            format gui slot (all integers between 0 and 26) of player with light gray stained glass pane named " "
+            format gui slot 0, and 1, and 10, and 18, and 19 of player with gray stained glass pane named " "
             format gui slot 9 of player with player's tool
-            format gui slot 3 of player with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(some amount of points)"
-            format gui slot 5 of player with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(some amount of points)"
+            set {_cost} to 50 + (50 * level of efficiency of the player's tool)
+            if level of efficiency of tool is set:
+                if level of efficiency of tool of player < 4:
+                    format gui slot 3 of player with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff(player, {_cost})
+                else:
+                    format gui slot 3 of player with enchanted book of efficiency 1 named "&7Enchant with Efficiency &c[MAXED]" with lore "&cMAXED" to do nothing
+            else:
+                format gui slot 3 of player with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff(player, {_cost})
+            set {_fcost} to 100 + (50 * level of fortune of the player's tool)
+            if level of fortune of tool is set:
+                if level of fortune of tool of player < 3:
+                    format gui slot 5 of player with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_fcost}%)" to run function enchantFortune(player, {_fcost})
+                else:
+                    format gui slot 5 of player with enchanted book of fortune 1 named "&7Enchant with Fortune &c[MAXED]" with lore "&cMAXED" to run function enchantFortune(player, {_cost})
+            else:
+                format gui slot 5 of player with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_fcost}%)" to run function enchantFortune(player, {_fcost})
+
+function enchantEff(p: player, cost: integer):
+    set {_up} to uuid of {_p}
+    if {points::%{_up}%} >= {_cost}:
+        if tool of {_p} is not enchanted with efficiency:
+            enchant tool of {_p} with efficiency
+            send "{@name} &7Successfully upgraded your pickaxe with &6Efficiency" to {_p}
+            set {points::%{_up}%} to {points::%{_up}%} - {_cost}
+            refreshScoreboard({_p})
+            set {_cost} to 50 + (50 * level of efficiency of tool of {_p})
+            format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff({_p}, {_cost})
+        else:
+            set {_elvl} to (level of efficiency of tool of {_p} + 1)
+            if {_elvl} < 5:
+                enchant tool of {_p} with "efficiency %{_elvl}%" parsed as enchantment type
+                send "{@name} &7Successfully upgraded your pickaxe with &6Efficiency" to {_p}
+                set {points::%{_p}%} to {points::%{_up}%} - {_cost}
+                refreshScoreboard({_p})
+                set {_cost} to 50 + (50 * level of efficiency of tool of {_p})
+                format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff({_p}, {_cost})
+            else:
+                format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency &c[MAXED]" with lore "&cMAXED UPGRADE" to do nothing
+    else:
+        send "{@nopoints} &cYou need %{_cost}% &cfor this" to {_p}
+
+
+function enchantFortune(p: player, cost: integer):
+    set {_up} to uuid of {_p}
+    if {points::%{_up}%} >= {_cost}:
+        if tool of {_p} is not enchanted with fortune:
+            enchant tool of {_p} with fortune
+            send "{@name} &7Successfully upgraded your pickaxe with &6Fortune" to {_p}
+            set {points::%{_up}%} to {points::%{_up}%} - {_cost}
+            refreshScoreboard({_p})
+            set {_cost} to 100 + (50 * level of fortune of tool of {_p})
+            format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Fortune" with lore "&6(%{_cost}%)" to run function enchantFortune({_p}, {_cost})
+        else:
+            set {_elvl} to (level of fortune of tool of {_p} + 1)
+            if {_elvl} < 4:
+                enchant tool of {_p} with "fortune %{_elvl}%" parsed as enchantment type
+                send "{@name} &7Successfully upgraded your pickaxe with &6Fortune" to {_p}
+                set {points::%{_p}%} to {points::%{_up}%} - {_cost}
+                refreshScoreboard({_p})
+                set {_cost} to 100 + (50 * level of fortune of tool of {_p})
+                format gui slot 3 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_cost}%)" to run function enchantFortune({_p}, {_cost})
+            else:
+                format gui slot 3 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune &c[MAXED]" with lore "&cMAXED UPGRADED" to do nothing
+    else:
+        send "{@nopoints} &cYou need %{_cost}% &cfor this" to {_p}
