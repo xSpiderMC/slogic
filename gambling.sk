@@ -62,19 +62,22 @@ command /gamble:
 		open virtual chest inventory named "&6Gamble" with size 3 to player
 		loop 10 times:
 			format gui slot (loop-value - 1) of player with gray stained glass pane named "&7" to do nothing
-		format gui slot 10 of player with sunflower named "&6Coinflip" with lore "&7Double your money!" and "&7(Click to gamble)" to run:
+		format gui slot 10 of player with sunflower named "&6Coinflip" with lore "&7Double your points with this simple game of chance!" and "&7(Click to gamble)" to run:
 			close player's inventory
 			send "&c/coinflip <heads/tails> <amount>"
-		format gui slot 11 of player with paper named "&6Lottery" with lore "&7Join the pool!" and "&7(Click to gamble)" to run:
+		format gui slot 11 of player with paper named "&6Lottery" with lore "&7Join the lottery to win a grand prize!" and "&7(Click to gamble)" to run:
 			close player's inventory
 			send "&3---------------&6&lLottery&3---------------"
 			send "&7●&6 /lotto add (number)&7 - Adds to the lotto pool"
 			send "&7●&6 /lotto list&7 - Sends lotto data"
 			send "&7●&6 /lotto help&7 - Sends this help menu"
 			send "&3---------------&6&lLottery&3---------------"
-		format gui slot 12 of player with emerald named "&6What are the odds?" with lore "&7Quadruple your money!" and "&7(Click to gamble)" to run:
+		format gui slot 12 of player with emerald named "&6What are the odds?" with lore "&7Quadruple your points by guessing the right number!" and "&7(Click to gamble)" to run:
 			close player's inventory
 			send "&c/odds <number 1-10> <amount>"
+		format gui slot 13 of player with diamond named "&6Roll it!" with lore "&7Triple your points by guessing the total of 2 rolled dice!" and "&7(Click to gamble)" to run:
+			close player's inventory
+			send "&c/dice <number 2-12> <amount>"
 command /coinflip [<text>] [<text>]:
 	trigger:
 		if arg-1 is not set:
@@ -123,6 +126,41 @@ command /odds [<text>] [<text>]:
 								else:
 									send "&6&lOdds &7| The number was &6%{_rand}%&7! (-$%{_a}%&7)"
 									remove {_a} from {points::%uuid of player%}
+command /dice [<text>] [<text>]:
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a number 2-12"
+		else:
+			set {_o} to arg-1 parsed as an integer
+			if {_o} is not an integer:
+				send "&cInvalid integer!"
+			else:
+				if {_o} is not between 2 and 12:
+					send "&cPlease select a number 1-10"
+				else:
+					if arg-2 is not set:
+						send "&cPlease select an amount!"
+					else:
+						set {_a} to arg-2 parsed as an integer
+						if {_a} is not an integer:
+							send "&cInvalid integer!"
+						else:
+							if {_a} is less than 50:
+								send "&cPlease select a value over 50!"
+							else:
+								dice(player, {_o}, {_a})
+function dice(p: player, s: integer, m: integer): #s = total of both dice, m = stakes
+	set {_rand} to random integer between 1 and 6
+	set {_rand} to ({_rand} + (random integer between 1 and 6))
+	set {_u} to uuid of {_p}
+	send "&6&lDice &7| Rolling..." to {_p}
+	wait 3 seconds
+	if {_rand} is {_s}:
+		send "&6&lDice &7| The number was &6%{_rand}%&7! (+%({_s} * 3)%&7)" to {_p}
+		add ({_s} * 3) to {points::%{_u}%}
+	else:
+		send "&6&lDice &7| The number was &6%{_rand}%&7! (-%{_s}%&7)" to {_p}
+		remove {_s} from {points::%{_u}%}
 function coinflip(p: player, s: integer, side: text): #s = stakes side = heads or tails
 	set {_u} to uuid of {_p}
 	wait 5 ticks
