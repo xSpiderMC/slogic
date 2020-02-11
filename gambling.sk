@@ -1,7 +1,7 @@
 
 every 10 minutes:
 	if {lottery.total} is greater than 1000:
-		broadcast "&6&lLottery&7 | The lottery is being drawn in 10 seconds! &6/lotto buy&7 to join! (%{lottery.total}%&7 pot)"
+		broadcast "&6&lLottery&7 | The lottery is being drawn in 10 seconds! &6/lotto add&7 to join! (%{lottery.total}%&7 pot)"
 		wait 10 seconds
 		set {_ticketValue} to ({lottery.total} / 100)
 		loop {lottery::*}:
@@ -19,34 +19,32 @@ every 10 minutes:
 					chance of {_chance::%loop-value%}:
 						set {_w} to loop-value
 			delete {lottery.%{_u}%}
-		broadcast "&6&lLottery&7 | &6%{_w}%&7 won the lottery! (+$%{lottery.total}%&7)"
+		broadcast "&6&lLottery&7 | &6%{_w}%&7 won the lottery! (+%{lottery.total}%&7)"
 		set {_u} to uuid of {_w}
 		add {lottery.total} to {points::%{_u}%}
+		refreshScoreboard({_w})
 		delete {lottery::*}
 		set {lottery.total} to 0
-command /lotto [<text>] [<text>]:
+
+
+command /lotto [<text>] [<integer>]:
 	trigger:
 		if arg-1 is "add":
 			if arg-2 is not set:
 				send "&cPlease select a point value to add to the lottery"
+			else if arg-2 is less than 50:
+				send "&cPlease select a value greater than 50!"
+			else if {points::%player's uuid%} < arg-2:
+				send "&cYou dont have enough points!"
 			else:
-				set {_n} to arg-2 parsed as an integer
-				if {_n} is not an integer:
-					send "&cInvalid integer!"
-				else:
-					if {_n} is less than 50:
-						send "&cPlease select a value greater than 50!"
-					else:
-						if {points::%player's uuid%} is less than {_n}:
-							send "&cYou dont have enough points!"
-						else:
-							if {lottery::*} does not contain player:
-								add player to {lottery::*}
-							add {_n} to {lottery.%player's uuid%}
-							add {_n} to {lottery.total}
-							broadcast "&6&lLottery&7 | &6%player%&7 added &6%{_n}%&7 points to the lottery! ($%{lottery.total}%&7)"
+				if {lottery::*} does not contain player:
+					add player to {lottery::*}
+				add {_n} to {lottery.%player's uuid%}
+				add {_n} to {lottery.total}
+				refreshScoreboard(player)
+				broadcast "&6&lLottery&7 | &6%player%&7 added &6%{_n}%&7 points to the lottery! (%{lottery.total}%&7)"
 		else if arg-1 is "list":
-			send "&6&lLottery&7 | The total lottery pool is &6$%({lottery.total} ? 0)%&7! You have contributed &6$%({lottery.%player's uuid%} ? 0)%&7!"
+			send "&6&lLottery&7 | The total lottery pool is &6%({lottery.total} ? 0)%&7! You have contributed &6%({lottery.%player's uuid%} ? 0)%&7!"
 		else:
 			send "&3---------------&6&lLottery&3---------------"
 			send "&7●&6 /lotto add (number)&7 - Adds to the lotto pool"
@@ -57,11 +55,11 @@ on npc right click:
 	if citizen is named "&6&lGamble":
 		make player execute command "/gamble"
 		cancel event
+
 command /gamble:
 	trigger:
 		open virtual chest inventory named "&6Gamble" with size 3 to player
-		loop 10 times:
-			format gui slot (loop-value - 1) of player with gray stained glass pane named "&7" to do nothing
+		format gui slot (all integers between 0 and 26) of player with gray stained glass pane named "&7" to do nothing
 		format gui slot 10 of player with sunflower named "&6Coinflip" with lore "&7Double your points with this simple game of chance!" and "&7(Click to gamble)" to run:
 			close player's inventory
 			send "&c/coinflip <heads/tails> <amount>"
@@ -78,77 +76,59 @@ command /gamble:
 		format gui slot 13 of player with diamond named "&6Roll it!" with lore "&7Triple your points by guessing the total of 2 rolled dice!" and "&7(Click to gamble)" to run:
 			close player's inventory
 			send "&c/dice <number 2-12> <amount>"
-command /coinflip [<text>] [<text>]:
+
+command /coinflip [<text>] [<integer>]:
 	trigger:
 		if arg-1 is not set:
 			send "&cPlease select ""heads"" or ""tails"""
+		else if arg-1 is not "heads" or "tails":
+			send "&cPlease select ""heads"" or ""tails"""
+		else if arg-2 is not set:
+			send "&cPlease select an amount!"
+		else if arg-2 is less than 50:
+			send "&cPlease select an amount over 50!"
+		else if arg-2 > {points::%uuid of player%}:
+			send "&cYou don't have enough points to gamble this!"
 		else:
-			if arg-1 is not "heads" or "tails":
-				send "&cPlease select ""heads"" or ""tails"""
-			else:
-				if arg-2 is not set:
-					send "&cPlease select an amount!"
-				else:
-					set {_a} to arg-2 parsed as an integer
-					if {_a} is not an integer:
-						send "&cInvalid integer!"
-					else:
-						if {_a} is less than 50:
-							send "&cPlease select an amount over 50!"
-						else:
-							coinflip(player, {_a}, arg-1)
-command /odds [<text>] [<text>]:
+			coinflip(player, arg-2, arg-1)
+
+command /odds [<integer>] [<integer>]:
 	trigger:
 		if arg-1 is not set:
 			send "&cPlease select a number 1-10"
+		else if arg-1 is not between 1 and 10:
+			send "&cPlease select a number 1-10"
+		else if arg-2 is not set:
+			send "&cPlease provide an amount"
+		else if arg-2 is less than 50:
+			send "&cPlease select a value over 50!"
+		else if arg-2 > {points::%uuid of player%}:
+			send "&cYou don't have enough points to gamble this!"
 		else:
-			set {_o} to arg-1 parsed as an integer
-			if {_o} is not an integer:
-				send "&cInvalid integer!"
+			set {_rand} to random integer between 1 and 10
+			if {_rand} is arg-1:
+				send "&6&LOdds &7| The number was &6%{_rand}%&7! (+%(arg-2 * 4)%&7)"
+				add (arg-2 * 4) to {points::%uuid of player%}
 			else:
-				if {_o} is not between 1 and 10:
-					send "&cPlease select a number 1-10"
-				else:
-					if arg-2 is not set:
-						send "&cPlease select an amount!"
-					else:
-						set {_a} to arg-2 parsed as an integer
-						if {_a} is not an integer:
-							send "&cInvalid integer!"
-						else:
-							if {_a} is less than 50:
-								send "&cPlease select a value over 50!"
-							else:
-								set {_rand} to random integer between 1 and 10
-								if {_rand} is {_o}:
-									send "&6&LOdds &7| The number was &6%{_rand}%&7! (+$%({_a} * 4)%&7)"
-									add ({_a} * 4) to {points::%uuid of player%}
-								else:
-									send "&6&lOdds &7| The number was &6%{_rand}%&7! (-$%{_a}%&7)"
-									remove {_a} from {points::%uuid of player%}
-command /dice [<text>] [<text>]:
+				send "&6&lOdds &7| The number was &6%{_rand}%&7! (-%arg-2%&7)"
+				remove arg-2 from {points::%uuid of player%}
+			refreshScoreboard({_p})
+
+command /dice [<integer>] [<integer>]:
 	trigger:
 		if arg-1 is not set:
 			send "&cPlease select a number 2-12"
+		else if arg-1 is not between 2 and 12:
+			send "&cPlease select a number 1-10"
+		else if arg-2 is not set:
+			send "&cPlease select an amount!"
+		else if arg-2 is less than 50:
+			send "&cPlease select a value over 50!"
+		else if arg-2 > {points::%uuid of player%}:
+			send "&cYou don't have enough points to gamble this!"
 		else:
-			set {_o} to arg-1 parsed as an integer
-			if {_o} is not an integer:
-				send "&cInvalid integer!"
-			else:
-				if {_o} is not between 2 and 12:
-					send "&cPlease select a number 1-10"
-				else:
-					if arg-2 is not set:
-						send "&cPlease select an amount!"
-					else:
-						set {_a} to arg-2 parsed as an integer
-						if {_a} is not an integer:
-							send "&cInvalid integer!"
-						else:
-							if {_a} is less than 50:
-								send "&cPlease select a value over 50!"
-							else:
-								dice(player, {_o}, {_a})
+			dice(player, arg-1, arg-2)
+
 function dice(p: player, s: integer, m: integer): #s = total of both dice, m = stakes
 	set {_rand} to random integer between 1 and 6
 	set {_rand} to ({_rand} + (random integer between 1 and 6))
@@ -161,6 +141,8 @@ function dice(p: player, s: integer, m: integer): #s = total of both dice, m = s
 	else:
 		send "&6&lDice &7| The number was &6%{_rand}%&7! (-%{_s}%&7)" to {_p}
 		remove {_s} from {points::%{_u}%}
+	refreshScoreboard({_p})
+
 function coinflip(p: player, s: integer, side: text): #s = stakes side = heads or tails
 	set {_u} to uuid of {_p}
 	wait 5 ticks
@@ -171,8 +153,9 @@ function coinflip(p: player, s: integer, side: text): #s = stakes side = heads o
 	else:
 		set {_decider} to "tails"
 	if {_decider} is {_side}:
-		send "&6&lSLOGIC&7 | It was &6%{_decider}%&7! (+$%{_s}%&7)" to {_p}
+		send "&6&lSLOGIC&7 | It was &6%{_decider}%&7! (+%{_s}%&7)" to {_p}
 		add {_s} to {points::%{_u}%}
 	else:
-		send "&6&lSLOGIC&7 | It was &6%{_decider}%&7! (-$%{_s}%&7)" to {_p}
+		send "&6&lSLOGIC&7 | It was &6%{_decider}%&7! (-%{_s}%&7)" to {_p}
 		remove {_s} from {points::%{_u}%}
+	refreshScoreboard({_p})
