@@ -1,0 +1,1403 @@
+options:
+	name: &6&lSLOGIC &7|
+	helpname: &6&lSLOGIC
+	plugin: "PEX"
+# specify which permissions plugin you are using to ensure the ranks portion works. Either "PEX" or "Luckperms"
+function textToTimespan(t: string) :: timespan:
+	if {_t} contains "day":
+		set {_t::*} to {_t} split at "day"
+		set {_type} to "day"
+		set {_num} to {_t::1}
+	else if {_t} contains "minute":
+		set {_t::*} to {_t} split at "minute"
+		set {_type} to "minute"
+		set {_num} to {_t::1}
+	else if {_t} contains "hour":
+		set {_t::*} to {_t} split at "hour"
+		set {_type} to "hour"
+		set {_num} to {_t::1}
+	else if {_t} contains "week":
+		set {_t::*} to {_t} split at "week"
+		set {_type} to "day"
+		set {_num} to ("%{_t::1}%" parsed as an integer * 7)
+	else if {_t} contains "month":
+		set {_t::*} to {_t} split at "month"
+		set {_type} to "day"
+		set {_num} to ("%{_t::1}%" parsed as an integer * 30)
+	else if {_t} contains "year":
+		set {_t::*} to {_t} split at "year"
+		set {_type} to "day"
+		set {_num} to ("%{_t::1}%" parsed as an integer * 365)
+	return "%{_num}% %{_type}%" parsed as a timespan
+function warn(p: offline player, s: offline player, r: text, q: boolean): #p: target, s: sender, r: reason, q: silent
+	if {warn::%{_p}%} is not set:
+		set {warn::%{_p}%} to 0
+	add 1 to {warn::%{_p}%}
+	set {warn.reason.%{warn::%{_p}%}%::%{_p}%} to {_r}
+	set {warn.issued.%{warn::%{_p}%}%::%{_p}%} to {_s}
+	if {_q} is true:
+		send "" to {_p}
+		send "{@name} You have been warned by a staff member for &6%{_r}%&7!" to {_p}
+		send "" to {_p}
+		loop all players:
+			if loop-player has permission "staff.silent.view":
+				send "" to loop-player
+				send "&7(Silent) {@name} &6%{_s}%&7 warned &6%{_p}%&7 for &6%{_r}%&7!" to loop-player
+				send "" to loop-player
+	else:
+		send "" to {_p}
+		send "{@name} You have been warned by &6%{_s}%&7 for &6%{_r}%&7!" to {_p}
+		send "" to {_p}
+		broadcast ""
+		broadcast "{@name} &6%{_s}%&7 warned &6%{_p}%&7 for &6%{_r}%&7!"
+		broadcast ""
+
+
+function kick(p: offline player, s: offline player, r: text, q: boolean):
+	if {kick::%{_p}%} is not set:
+		set {kick::%{_p}%} to 0
+	add 1 to {kick::%{_p}%}
+	set {kick.reason.%{kick::%{_p}%}%::%{_p}%} to {_r}
+	set {kick.issued.%{kick::%{_p}%}%::%{_p}%} to {_s}
+	if {_q} is true:
+		kick {_p} due to "{@name} You have been kicked by a staff member for &6%{_r}%&7!"
+		loop all players:
+			if loop-player has permission "staff.silent.view":
+				send "" to loop-player
+				send "&7(Silent) {@name} &6%{_s}%&7 kicked &6%{_p}%&7 for &6%{_r}%&7!" to loop-player
+				send "" to loop-player
+	else:
+		kick {_p} due to "{@name} You have been kicked by &6%{_s}%&7 for &6%{_r}%&7!"
+		broadcast ""
+		broadcast "{@name} &6%{_s}%&7 kicked &6%{_p}%&7 for &6%{_r}%&7!"
+		broadcast ""
+
+function mute(p: offline player, s: offline player, r: text, q: boolean, l: text): #p: target, s: sender, r: reason, q: silent, l: length
+	if {_l} is not "FOREVER":
+		set {_length} to "%{_l}%" parsed as a timespan
+	else:
+		set {_length} to {_l}
+	if {mute::%{_p}%} is not set:
+		set {mute::%{_p}%} to 0
+	add 1 to {mute::%{_p}%}
+	set {mute.reason.%{mute::%{_p}%}%::%{_p}%} to {_r}
+	set {mute.issued.%{mute::%{_p}%}%::%{_p}%} to {_s}
+	set {mute.length.%{mute::%{_p}%}%::%{_p}%} to {_length}
+	if {muted::*} does not contain {_p}:
+		add {_p} to {muted::*}
+	if {_length} is not "FOREVER":
+		set {mute.now.%{mute::%{_p}%}%::%{_p}%} to now
+	if {_q} is true:
+		if {_length} is not "FOREVER":
+			send "" to {_p}
+			send "{@name} You have been temporarily muted by a staff member for &6%{_length}%&7 due to &6%{_r}%&7!" to {_p}
+			send "" to {_p}
+		else:
+			send "" to {_p}
+			send "{@name} You have been permanently muted by a staff member due to &6%{_r}%&7!" to {_p}
+			send "" to {_p}
+		loop all players:
+			if loop-player has permission "staff.silent.view":
+				if {_length} is "FOREVER":
+					send "" to loop-player
+					send "&7(Silent) {@name} &6%{_s}%&7 permanently muted &6%{_p}%&7 due to &6%{_r}%&7!" to loop-player
+					send "" to loop-player
+				else:
+					send "" to loop-player
+					send "&7(Silent) {@name} &6%{_s}%&7 temporarily muted &6%{_p}%&7 for &6%{_length}%&7 due to &6%{_r}%&7!" to loop-player
+					send "" to loop-player
+	else:
+		if {_length} is "FOREVER":
+			send "" to {_p}
+			send "{@name} You have been permanently muted by &6%{_s}%&7 due to &6%{_r}%&7!" to {_p}
+			send "" to {_p}
+			broadcast ""
+			broadcast "{@name} &6%{_s}%&7 permanently muted &6%{_p}%&7 due to &6%{_r}%&7!"
+			broadcast ""
+		else:
+			send "" to {_p}
+			send "{@name} You have been temporarily muted by &6%{_s}%&7 for &6%{_length}%&7 due to &6%{_r}%&7!" to {_p}
+			send "" to {_p}
+			broadcast ""
+			broadcast "{@name} &6%{_s}%&7 temporarily muted &6%{_p}%&7 for &6%{_length}%&7 due to &6%{_r}%&7!"
+			broadcast ""
+function unmute(p: offline player, s: offline player, q: boolean): #p: target, s: sender, q: Silent
+	remove {_p} from {muted::*}
+	if {_q} is true:
+		send "" to {_p}
+		send "{@name} &7You have been unmuted!" to {_p}
+		send "" to {_p}
+		loop all players:
+			if loop-player has permission "staff.silent.view":
+				send "" to loop-player
+				send "&7(Silent) {@name} &6%{_s}%&7 has unmuted &6%{_p}%&7!" to loop-player
+				send "" to loop-player
+	else:
+		send "" to {_p}
+		send "{@name} &7You have been unmuted by &6%{_s}%&7!" to {_p}
+		send "" to {_p}
+		broadcast ""
+		broadcast "{@name} &6%{_s}%&7 has unmuted &6%{_p}%&7!"
+		broadcast ""
+every minute:
+	loop {muted::*}:
+		if {mute.now.%{mute::%loop-value%}%::%loop-value%} is set:
+			if difference between {mute.now.%{mute::%loop-value%}%::%loop-value%} and now is greater than {mute.length.%{mute::%loop-value%}%::%loop-value%}:
+				remove loop-value from {muted::*}
+				broadcast ""
+				broadcast "{@name} &6%loop-value%&7 has been unmuted by &6console&7!"
+				broadcast ""
+				send "" to loop-value
+				send "{@name} &7You have been unmuted!" to loop-value
+				send "" to loop-value
+on chat:
+	if {muted::*} contains player:
+		cancel event
+		send "&7You cannot talk while muted!"
+
+function ban(p: offline player, s: offline player, r: text, q: boolean, l: text): #p: target, s: sender, r: reason, q: silent, l: length
+	if {_l} is not "FOREVER":
+		set {_length} to "%{_l}%" parsed as a timespan
+	else:
+		set {_length} to {_l}
+	if {ban::%{_p}%} is not set:
+		set {ban::%{_p}%} to 0
+	add 1 to {ban::%{_p}%}
+	set {ban.reason.%{ban::%{_p}%}%::%{_p}%} to {_r}
+	set {ban.issued.%{ban::%{_p}%}%::%{_p}%} to {_s}
+	set {ban.length.%{ban::%{_p}%}%::%{_p}%} to {_length}
+	add {_p} to {banned::*}
+	if {_length} is not "FOREVER":
+		set {ban.now.%{ban::%{_p}%}%::%{_p}%} to now
+	if {_q} is true:
+		if {_length} is not "FOREVER":
+			ban {_p} due to "{@name} You have been temporarily banned by a staff member for &6%{_length}%&7 due to &6%{_r}%&7!"
+			kick {_p} due to "{@name} You have been temporarily banned by a staff member for &6%{_length}%&7 due to &6%{_r}%&7!"
+
+		else:
+			ban {_p} due to "{@name} You have been permanently banned by a staff member due to &6%{_r}%&7!"
+			kick {_p} due to "{@name} You have been permanently banned by a staff member due to &6%{_r}%&7!"
+		loop all players:
+			if loop-player has permission "staff.silent.view":
+				if {_length} is "FOREVER":
+					send "" to loop-player
+					send "&7(Silent) {@name} &6%{_s}%&7 permanently banned &6%{_p}%&7 due to &6%{_r}%&7!" to loop-player
+					send "" to loop-player
+				else:
+					send "" to loop-player
+					send "&7(Silent) {@name} &6%{_s}%&7 temporarily banned &6%{_p}%&7 for &6%{_length}%&7 due to &6%{_r}%&7!" to loop-player
+					send "" to loop-player
+	else:
+		if {_length} is "FOREVER":
+			ban {_p} due to "{@name} You have been permanently banned by &6%{_s}%&7 due to &6%{_r}%&7!"
+			kick {_p} due to "{@name} You have been permanently banned by &6%{_s}%&7 due to &6%{_r}%&7!"
+			broadcast ""
+			broadcast "{@name} &6%{_s}%&7 permanently banned &6%{_p}%&7 due to &6%{_r}%&7!"
+			broadcast ""
+		else:
+			ban {_p} due to "{@name} You have been temporarily banned by &6%{_s}%&7 for &6%{_length}%&7 due to &6%{_r}%&7!"
+			kick {_p} due to "{@name} You have been temporarily banned by &6%{_s}%&7 for &6%{_length}%&7 due to &6%{_r}%&7!"
+			broadcast ""
+			broadcast "{@name} &6%{_s}%&7 temporarily banned &6%{_p}%&7 for &6%{_length}%&7 due to &6%{_r}%&7!"
+			broadcast ""
+function unban(p: offline player, s: offline player, q: boolean): #p: target, s: sender, q: Silent
+	remove {_p} from {banned::*}
+	if {_q} is true:
+		unban {_p}
+		loop all players:
+			if loop-player has permission "staff.silent.view":
+				send "" to loop-player
+				send "&7(Silent) {@name} &6%{_s}%&7 has unbanned &6%{_p}%&7!" to loop-player
+				send "" to loop-player
+	else:
+		unban {_p}
+		broadcast ""
+		broadcast "{@name} &6%{_s}%&7 has unbanned &6%{_p}%&7!"
+		broadcast ""
+every minute:
+	loop {banned::*}:
+		if {ban.now.%{ban::%loop-value%}%::%loop-value%} is set:
+			if difference between {ban.now.%{ban::%loop-value%}%::%loop-value%} and now is greater than {ban.length.%{ban::%loop-value%}%::%loop-value%}:
+				remove loop-value from {banned::*}
+				broadcast ""
+				broadcast "{@name} &6%loop-value%&7 has been unbanned by &6console&7!"
+				broadcast ""
+				unban loop-value
+function blacklist(p: offline player, s: offline player, r: text, q: boolean): #p: target, s: sender, r: reason, q: silent
+	if {ban::%{_p}%} is not set:
+		set {ban::%{_p}%} to 0
+		add 1 to {ban::%{_p}%}
+	set {ban.reason.%{ban::%{_p}%}%::%{_p}%} to {_r}
+	set {ban.issued.%{ban::%{_p}%}%::%{_p}%} to {_s}
+	set {ban.length.%{ban::%{_p}%}%::%{_p}%} to "&8[&7BLACKLIST&8]"
+	add {_p} to {banned::*}
+	if {_q} is true:
+		kick {_p} due to "{@name} You have been blacklisted by a staff member for &6%{_r}%&7!"
+		ip-ban {_p} due to "{@name} You have been blacklisted by a staff member for &6%{_r}%&7!"
+		loop all players:
+			if loop-player has permission "staff.silent.view":
+				send "" to loop-player
+				send "&7(Silent) {@name} &6%{_s}%&7 blacklisted &6%{_p}%&7 for &6%{_r}%&7!" to loop-player
+				send "" to loop-player
+	else:
+		kick {_p} due to "{@name} You have been blacklisted by &6%{_s}%&7 for &6%{_r}%&7!"
+		ip-ban {_p} due to "{@name} You have been blacklisted by &6%{_s}%&7 for &6%{_r}%&7!"
+		broadcast ""
+		broadcast "{@name} &6%{_s}%&7 blacklisted &6%{_p}%&7 for &6%{_r}%&7!"
+		broadcast ""
+function unblacklist(p: offline player, s: offline player, q: boolean): #p: target, s: sender, q: Silent
+	remove {_p} from {banned::*}
+	if {_q} is true:
+		ip-unban {_p}
+		loop all players:
+			if loop-player has permission "staff.silent.view":
+				send "" to loop-player
+				send "&7(Silent) {@name} &6%{_s}%&7 has unblacklisted &6%{_p}%&7!" to loop-player
+				send "" to loop-player
+	else:
+		ip-unban {_p}
+		broadcast ""
+		broadcast "{@name} &6%{_s}%&7 has unblacklisted &6%{_p}%&7!"
+		broadcast ""
+
+
+command /punish [<offline player>]:
+	permission: staff.punish
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 has permission "staff.nopunish":
+			send "&cYou cannot punish that player!"
+		else:
+			if arg-1 is not set:
+				send "&cPlease select a player!"
+			else:
+				if arg-1 is online:
+					set {_status} to "&aOnline"
+				else:
+					if {banned::*} contains arg-1:
+						set {_status} to "&cBanned"
+					else:
+						set {_status} to "&7Offline"
+				if {alts.%arg-1's ip%::*} is not set:
+					set {_alt} to "&7Unknown"
+				else:
+					if size of {alts.%arg-1's ip%::*} is 1:
+						set {_alt} to "&7None"
+					else:
+						set {_item} to emerald named "&6Alternate accounts" with lore "&7"
+						loop size of {alts.%arg-1's ip%::*} times:
+							if {banned::*} contains {alts.%arg-1's ip%::%loop-value%}:
+								set the line loop-value of {_item}'s lore to "&c● &7%{alts.%arg-1's ip%::%loop-value%}%"
+							else:
+								set the line loop-value of {_item}'s lore to "&a● &7%{alts.%arg-1's ip%::%loop-value%}%"
+				if {skriptRank::%arg-1's uuid%} is not set:
+					set {_rank} to "&7Default"
+				else:
+					set {_rank} to "&6%{skriptRank::%arg-1's uuid%}%"
+				open virtual chest inventory with size 5 named "&6Punish %arg-1%" to player
+				format gui slot 4 of player with skull of arg-1 named "&6%arg-1%" with lore "&7Rank - %{_rank}%" and "&7Status - %{_status}%" to do nothing
+				if {_item} is not set:
+					format gui slot 12 of player with emerald named "&6Alternate accounts" with lore "%{_alt}%" to do nothing
+				else:
+					format gui slot 12 of player with {_item} to do nothing
+				format gui slot 13 of player with paper named "&6Info" with lore "&7(Click to view player information)" to close then run player command "info %arg-1%"
+				format gui slot 20 of player with barrier named "&6Clearchat" with lore "&7(Click to clear the chat)" to close then run player command "cc"
+				if {chat} is false:
+					format gui slot 24 of player with firework rocket named "&6Mutechat" with lore "&7MUTED" and "&7(Click to unmute)" to close then run player command "mc"
+				else:
+					format gui slot 24 of player with glowing firework rocket named "&6Mutechat" with lore "&7UNMUTED" and "&7(Click to mute)" to close then run player command "mc"
+				if {silent::%player%} is not set:
+					format gui slot 22 of player with red terracotta named "&7Silent mode - &cDisabled" with lore "&7(Click to toggle silent mode)" to close then run player command "silent true"
+				else:
+					format gui slot 22 of player with lime terracotta named "&7Silent mode - &aEnabled" with lore "&7(Click to toggle silent mode)" to close then run player command "silent false"
+				set {_warn} to {warn::%arg-1%} ? 0
+				set {_kick} to {kick::%arg-1%} ? 0
+				set {_mute} to {mute::%arg-1%} ? 0
+				set {_ban} to {ban::%arg-1%} ? 0
+				format gui slot 14 of player with diamond named "&6Punishments" with lore "&7 - %{_warn}%&7 Warnings" and "&7 - %{_kick}%&7 Kicks" and "&7 - %{_mute}%&7 Mutes" and "&7 - %{_ban}%&7 Bans" and "&7(Click to view details)" to run function history(arg-1, player)
+				if player has permission "staff.warn":
+					format gui slot 29 of player with glowing lime dye named "&6Warn" with lore "&7(Click to view presets)" to run function warnPreset(arg-1, player)
+				else:
+					format gui slot 29 of player with gray dye named "&6Warn" with lore "&cNo permission" to do nothing
+				if player has permission "staff.kick":
+					format gui slot 30 of player with glowing lime dye named "&6Kick" with lore "&7(Click to view presets)" to run function kickPreset(arg-1, player)
+				else:
+					format gui slot 30 of player with gray dye named "&6Kick" with lore "&cNo permission" to do nothing
+				if player has permission "staff.mute":
+					format gui slot 31 of player with glowing lime dye named "&6Mute" with lore "&7(Click to view presets)" to run function mutePreset(arg-1, player)
+				else:
+					format gui slot 31 of player with gray dye named "&6Mute" with lore "&cNo permission" to do nothing
+				if player has permission "staff.ban":
+					format gui slot 32 of player with glowing lime dye named "&6Ban" with lore "&7(Click to view presets)" to run function banPreset(arg-1, player)
+				else:
+					format gui slot 32 of player with gray dye named "&6Ban" with lore "&cNo permission" to do nothing
+				if player has permission "staff.blacklist":
+					format gui slot 33 of player with glowing lime dye named "&6Blacklist" with lore "&7(Click to view presets)" to run function blacklistPreset(arg-1, player)
+				else:
+					format gui slot 33 of player with gray dye named "&6Blacklist" with lore "&cNo permission" to do nothing
+function history(p: offline player, s: player):
+	if {_s} has permission "staff.puns":
+		open virtual chest inventory with size 6 named "&6%{_p}%'s history" to {_s}
+		format gui slot 53 of {_s} with arrow named "&6Back" to close then run {_s} command "punish %{_p}%"
+		set {_warn} to {warn::%{_p}%} ? 0
+		set {_kick} to {kick::%{_p}%} ? 0
+		set {_mute} to {mute::%{_p}%} ? 0
+		set {_ban} to {ban::%{_p}%} ? 0
+		format gui slot 4 of {_s} with skull of {_p} named "&6%{_p}%" with lore "&7 - %{_warn}%&7 Warnings" and "&7 - %{_kick}%&7 Kicks" and "&7 - %{_mute}%&7 Mutes" and "&7 - %{_ban}%&7 Bans" to do nothing
+		set {_runs} to 8
+		loop {ban::%{_p}%} times:
+			add 1 to {_runs}
+			format gui slot {_runs} of {_s} with red terracotta named "&6Ban" with lore "&7%{ban.reason.%loop-value%::%{_p}%}%" and "&7%{ban.length.%loop-value%::%{_p}%}%" and "&7Issued by &6%{ban.issued.%loop-value%::%{_p}%}%" to do nothing
+		loop {mute::%{_p}%} times:
+			add 1 to {_runs}
+			format gui slot {_runs} of {_s} with orange terracotta named "&6Mute" with lore  "&7%{mute.reason.%loop-value%::%{_p}%}%" and "&7%{mute.length.%loop-value%::%{_p}%}%" and "&7Issued by &6%{mute.issued.%loop-value%::%{_p}%}%" to do nothing
+		loop {kick::%{_p}%} times:
+			add 1 to {_runs}
+			format gui slot {_runs} of {_s} with yellow terracotta named "&6Kick" with lore "&7%{kick.reason.%loop-value%::%{_p}%}%" and "&7Issued by &6%{kick.issued.%loop-value%::%{_p}%}%" to do nothing
+		loop {warn::%{_p}%} times:
+			add 1 to {_runs}
+			format gui slot {_runs} of {_s} with lime terracotta named "&6Warn" with lore "&7%{warn.reason.%loop-value%::%{_p}%}%" and "&7Issued by &6%{warn.issued.%loop-value%::%{_p}%}%" to do nothing
+	else:
+		send "&cNo permission!" to {_s}
+command /puns [<offline player>]:
+	permission: staff.puns
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!"
+		else:
+			history(arg-1, player)
+on join:
+	if {names.%player's uuid%::*} is not set:
+		add name of player to {names.%player's uuid%::*}
+	else:
+		if {names.%player's uuid%::*} does not contain name of player:
+			add name of player to {names.%player's uuid%::*}
+
+on join:
+	if {alts.%player's ip%::*} is not set:
+		add name of player to {alts.%player's ip%::*}
+	else:
+		if {alts.%player's ip%::*} does not contain player:
+			add name of player to {alts.%player's ip%::*}
+on join:
+	set {ip.%player's uuid%} to player's ip
+on join:
+	if {playtime.%player's uuid%} is not set:
+		set {playtime.%player's uuid%} to 0
+	while player is online:
+		add 1 to {playtime.%player's uuid%}
+		wait 1 minute
+on join:
+	if {firstjoin.%player's uuid%} is not set:
+		set {firstjoin.%player's uuid%} to now
+on quit:
+	set {lastseen.%player's uuid%} to now
+
+
+command /info [<offline player>]:
+	permission: staff.info
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease specify a player!"
+		else:
+			if arg-1 has permission "staff.nopunish":
+				send "&cYou cannot view that player's information!"
+			else:
+				send ""
+				send "&7&m---------------&6%arg-1%&7&m---------------"
+				send ""
+				if arg-1 is op:
+					send "&7Op: &6True"
+				else:
+					send "&7Op: &6False"
+				if arg-1 is online:
+					send "&7Gamemode: &6%arg-1's gamemode%"
+				else:
+					send "&7Gamemode: &6Unknown"
+				if arg-1 is online:
+					send "&7Location: &6%arg-1's location%&6 in world ""%world of arg-1%&6"""
+				else:
+					send "&7Location: &6Unknown"
+				send ""
+				send "&7Current Name: &6%arg-1%"
+				if {names.%arg-1's uuid%::*} is set:
+					send "&7Past Known Names: &6%{names.%arg-1's uuid%::*}%"
+				else:
+					send "&7Past Known Names: &6Unknown"
+				send "&7UUID: &6%uuid of arg-1%"
+				if {ip.%arg-1's uuid%} is set:
+					send "&7IP: &6%{ip.%arg-1's uuid%}%"
+				else:
+					send "&7IP: &6Unknown"
+				if {alts.%{ip.%arg-1's uuid%}%::*} is set:
+					send "&7Accounts (A red name indicates a banned account):"
+					loop {alts.%{ip.%arg-1's uuid%}%::*}:
+						if {banned.%loop-value%} is set:
+							send "&7● &c%loop-value%"
+						else:
+							send "&7● &6%loop-value%"
+				else:
+					send "&7Accounts (A red name indicates a banned account): &6Unknown"
+				if {skriptRank::%arg-1's uuid%} is not set:
+					send "&7Rank: &6Default"
+				else:
+					send "&7Rank: &6%{skriptRank::%arg-1's uuid%}%"
+				send ""
+				console command "/tellraw %player% {""text"":""Punishment History (Click to view a more detailed report):"",""color"":""gray"",""clickEvent"":{""action"":""run_command"",""value"":""/puns %arg-1%""}}"
+				send formatted ""
+				if {warnings.%arg-1%} is not set:
+					send "&7- &6Warnings &7| &60"
+				else:
+					send "&7- &6Warnings &7| &6%{warnings.%arg-1%}%"
+				if {kicks.%arg-1%} is not set:
+					send "&7- &6Kicks &7| &60"
+				else:
+					send "&7- &6Kicks &7| &6%{kicks.%arg-1%}%"
+				if {mutes.%arg-1%} is not set:
+					send "&7- &6Mutes &7| &60"
+				else:
+					send "&7- &6Mutes &7| &6%{mutes.%arg-1%}%"
+				if {bans.%arg-1%} is not set:
+					send "&7- &6Bans &7| &60"
+				else:
+					send "&7- &6Bans &7| &6%{bans.%arg-1%}%"
+				if {reports.%arg-1%} is not set:
+					send "&7Reports: &60"
+				else:
+					send "&7Reports: &6%{reports.%arg-1%}%"
+				if {firstjoin.%arg-1's uuid%} is set:
+					send "&7First join: &6%{firstjoin.%arg-1's uuid%}%"
+				else:
+					send "&7First join: &6Unknown"
+				if {banned.%arg-1%} is set:
+					send "&7Status: &cBanned"
+				else if arg-1 is online:
+					send "&7Status: &aOnline"
+				else:
+					if {lastseen.%arg-1's uuid%} is set:
+						send "&7Status: &6Offline &7(Last seen at &6%{lastseen.%arg-1's uuid%}%&7)"
+					else:
+						send "&7Status: &6Offline &7(Last seen at &6Unknown&7)"
+				if {playtime.%arg-1's uuid%} is set:
+					send "&7Playtime: &6%{playtime.%arg-1's uuid%}%&6 minutes"
+				else:
+					send "&7Playtime: &6Unknown"
+				send "&7&m---------------&6%arg-1%&7&m---------------"
+				send "&7Scroll up for more details, this report is very long!"
+command /deletepreset [<text>] [<text>]:
+	permission: staff.presetdelete
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a punishment to delete a preset for!"
+		else:
+			if arg-1 is not "kick" or "mute" or "warn" or "ban" or "blacklist":
+				send "&cInvalid punishment! Options: warn, kick, mute, ban, blacklist"
+			else:
+				if arg-2 is not set:
+					send "&cPlease select a reason to delete!"
+				else:
+					if arg-1 is "kick":
+						if {kickPresets::*} does not contain arg-2:
+							send "&cThat preset does not exist!"
+						else:
+							remove arg-2 from {kickPresets::*}
+							send "&7Preset &6%arg-2%&7 removed!"
+					else if arg-1 is "mute":
+						if {mutePresets::*} does not contain arg-2:
+							send "&cThat preset does not exist!"
+						else:
+							remove arg-2 from {mutePresets::*}
+							delete {mutePreset.%arg-2%}
+							send "&7Preset &6%arg-2%&7 removed!"
+					else if arg-1 is "warn":
+						if {warnPresets::*} does not contain arg-2:
+							send "&cThat preset does not exist!"
+						else:
+							remove arg-2 from {warnPresets::*}
+							send "&7Preset &6%arg-2%&7 removed!"
+					else if arg-1 is "ban":
+						if {banPresets::*} does not contain arg-2:
+							send "&cThat preset does not exist!"
+						else:
+							remove arg-2 from {banPresets::*}
+							send "&7Preset &6%arg-2%&7 removed!"
+							delete {banPreset.%arg-2%}
+					else if arg-1 is "blacklist":
+						if {blacklistPresets::*} does not contain arg-2:
+							send "&cThat preset does not exist!"
+						else:
+							remove arg-2 from {blacklistPresets::*}
+							send "&7Preset &6%arg-2%&7 removed!"	
+on command:
+	if {reqpresetmute.%player%} is set:
+		cancel event
+		send "&cYou cannot use commands while setting a preset"
+	else if {reqpresetban.%player%} is set:
+		cancel event
+		send "&cYou cannot use commands while setting a preset"
+command /preset [<text>] [<text>]:
+	permission: staff.preset
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a punishment to set a preset for!"
+		else:
+			if arg-1 is not "kick" or "mute" or "warn" or "ban" or "blacklist":
+				send "&cInvalid punishment! Options: warn, kick, mute, ban, blacklist"
+			else:
+				if arg-1 is "kick":
+					if arg-2 is not set:
+						send "&cPlease select a preset reason!"
+					else:
+						set {_arg} to arg-2
+						if {kickPresets::*} contains {_arg}:
+							send "&cA preset for that reason already exists!"
+						else:
+							if size of {kickPresets::*} is greater than 6:
+								send "&cToo many presets! Please remove some to add new presets!"
+							else:
+								add {_arg} to {kickPresets::*}
+								send "&7Preset &6%{_arg}%&7 added!"
+				if arg-1 is "blacklist":
+					if arg-2 is not set:
+						send "&cPlease select a preset reason!"
+					else:
+						set {_arg} to arg-2
+						if {blacklistPresets::*} contains {_arg}:
+							send "&cA preset for that reason already exists!"
+						else:
+							if size of {blacklistPresets::*} is greater than 6:
+								send "&cToo many presets! Please remove some to add new presets!"
+							else:
+								add {_arg} to {blacklistPresets::*}
+								send "&7Preset &6%{_arg}%&7 added!"
+				else if arg-1 is "warn":
+					if arg-2 is not set:
+						send "&cPlease select a preset reason!"
+					else:
+						set {_arg} to arg-2
+						if {warnPresets::*} contains {_arg}:
+							send "&cA preset for that reason already exists!"
+						else:
+							if size of {warnPresets::*} is greater than 6:
+								send "&cToo many presets! Please remove some to add new presets!"
+							else:
+								add {_arg} to {warnPresets::*}
+								send "&7Preset &6%{_arg}%&7 added!"
+				else if arg-1 is "mute":
+					if arg-2 is not set:
+						send "&cPlease select a preset reason!"
+					else:
+						if {mutePresets::*} contains arg-2:
+							send "&cA preset for that reason already exists!"
+						else:
+							if size of {mutePresets::*} is greater than 6:
+								send "&cToo many presets! Please remove some to add new presets!"
+							else:
+								add arg-2 to {mutePresets::*}
+								set {reqpresetmute.%player%} to arg-2
+								send "{@name} Please type a timespan or ""FOREVER"" to select a preset length for &6%arg-2%&7!"
+							
+				else if arg-1 is "ban":
+					if arg-2 is not set:
+						send "&cPlease select a preset reason!"
+					else:
+						if {banPresets::*} contains arg-2:
+							send "&cA preset for that reason already exists!"
+						else:
+							if size of {banPresets::*} is greater than 6:
+								send "&cToo many presets! Please remove some to add new presets!"
+							else:
+								add arg-2 to {banPresets::*}
+								set {reqpresetban.%player%} to arg-2
+								send "{@name} Please type a timespan or ""FOREVER"" to select a preset length for &6%arg-2%&7!"
+on chat:
+	if {reqpresetmute.%player%} is set:
+		cancel event
+		set {_m} to message parsed as a timespan
+		if message is "FOREVER":
+			set {mutePreset.%{reqpresetmute.%player%}%} to "FOREVER"
+			send "&7Preset &6%{reqpresetmute.%player%}%&7 added!"
+			delete {reqpresetmute.%player%}
+		else:
+			if {_m} is not a timespan:
+				send "&cInvalid length! Please select a timespan or ""FOREVER"""
+			else:
+				set {mutePreset.%{reqpresetmute.%player%}%} to {_m}
+				send "&7Preset &6%{reqpresetmute.%player%}%&7 added!"
+				delete {reqpresetmute.%player%}
+	else if {reqpresetban.%player%} is set:
+		cancel event
+		set {_m} to message parsed as a timespan
+		if message is "FOREVER":
+			set {banPreset.%{reqpresetban.%player%}%} to "FOREVER"
+			send "&7Preset &6%{reqpresetban.%player%}%&7 added!"
+			delete {reqpresetban.%player%}
+		else:
+			if {_m} is not a timespan:
+				send "&cInvalid length! Please select a timespan or ""FOREVER"""
+			else:
+				set {banPreset.%{reqpresetban.%player%}%} to {_m}
+				send "&7Preset &6%{reqpresetban.%player%}%&7 added!"
+				delete {reqpresetban.%player%}
+
+function kickPreset(p: offline player, s: player):
+	close {_s}'s inventory
+	open virtual chest inventory with size 1 named "&6Kick %{_p}%" to {_s}
+	set {_loop} to 0
+	if {silent::%{_s}%} is true:
+		set {_silent} to true
+	else:
+		set {_silent} to false
+	loop {kickPresets::*}:
+		format gui slot {_loop} of {_s} with lime dye named "&6%loop-value%" with lore "&7(Click to use this reason)" to close then run function kick("%{_p}%" parsed as an offline player, "%{_s}%" parsed as a player, "%loop-value%", {_silent})
+		add 1 to {_loop}
+	format gui slot 8 of {_s} with arrow named "&6Back" with lore "&7(Click to go back)" to run {_s} command "punish %{_p}%"
+	format gui slot 7 of {_s} with glowing lime dye named "&6Custom reason" with lore "&7(Click to set a custom reason)" to run:
+		close {_s}'s inventory
+		send formatted "<suggest command:/kick %{_p}%>&7Click here to punish &6%{_p}%&7 with a custom reason!"
+command /kick [<offline player>] [<text>]:
+	permission: staff.kick
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!"
+		else:
+			if arg-2 is not set:
+				send "&cPlease select a reason!"
+			else:
+				if arg-1 has permission "staff.nopunish":
+					send "&cYou cannot punish that player!"
+				else:
+					kick("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), arg-2, ({silent::%player%} ? false))
+function warnPreset(p: offline player, s: player):
+	close {_s}'s inventory
+	open virtual chest inventory with size 1 named "&6Warn %{_p}%" to {_s}
+	set {_loop} to 0
+	if {silent::%{_s}%} is true:
+		set {_silent} to true
+	else:
+		set {_silent} to false
+	loop {warnPresets::*}:
+		format gui slot {_loop} of {_s} with lime dye named "&6%loop-value%" with lore "&7(Click to use this reason)" to close then run function warn("%{_p}%" parsed as an offline player, "%{_s}%" parsed as a player, "%loop-value%", {_silent})
+		add 1 to {_loop}
+	format gui slot 8 of {_s} with arrow named "&6Back" with lore "&7(Click to go back)" to run {_s} command "punish %{_p}%"
+	format gui slot 7 of {_s} with glowing lime dye named "&6Custom reason" with lore "&7(Click to set a custom reason)" to run:
+		close {_s}'s inventory
+		send formatted "<suggest command:/warn %{_p}%>&7Click here to punish &6%{_p}%&7 with a custom reason!"
+function mutePreset(p: offline player, s: player):
+	close {_s}'s inventory
+	open virtual chest inventory with size 1 named "&6Mute %{_p}%" to {_s}
+	set {_loop} to 0
+	if {silent::%{_s}%} is true:
+		set {_silent} to true
+	else:
+		set {_silent} to false
+	loop {mutePresets::*}:
+		format gui slot {_loop} of {_s} with lime dye named "&6%loop-value%" with lore "&6%{mutePreset.%loop-value%}%" and "&7(Click to use this reason)" to close then run function mute("%{_p}%" parsed as an offline player, "%{_s}%" parsed as a player, "%loop-value%", {_silent}, "%{mutePreset.%loop-value%}%")
+		add 1 to {_loop}
+	format gui slot 8 of {_s} with arrow named "&6Back" with lore "&7(Click to go back)" to run {_s} command "punish %{_p}%"
+	format gui slot 7 of {_s} with glowing lime dye named "&6Custom reason" with lore "&7(Click to set a custom reason)" to run:
+		close {_s}'s inventory
+		send formatted "<suggest command:/mute %{_p}%>&7Click here to punish &6%{_p}%&7 with a custom reason!"
+function banPreset(p: offline player, s: player):
+	close {_s}'s inventory
+	open virtual chest inventory with size 1 named "&6Ban %{_p}%" to {_s}
+	set {_loop} to 0
+	if {silent::%{_s}%} is true:
+		set {_silent} to true
+	else:
+		set {_silent} to false
+	loop {banPresets::*}:
+		format gui slot {_loop} of {_s} with lime dye named "&6%loop-value%" with lore "&6%{banPreset.%loop-value%}%" and "&7(Click to use this reason)" to close then run function ban("%{_p}%" parsed as an offline player, "%{_s}%" parsed as a player, "%loop-value%", {_silent}, "%{banPreset.%loop-value%}%")
+		add 1 to {_loop}
+	format gui slot 8 of {_s} with arrow named "&6Back" with lore "&7(Click to go back)" to run {_s} command "punish %{_p}%"
+	format gui slot 7 of {_s} with glowing lime dye named "&6Custom reason" with lore "&7(Click to set a custom reason)" to run:
+		close {_s}'s inventory
+		send formatted "<suggest command:/ban %{_p}%>&7Click here to punish &6%{_p}%&7 with a custom reason!"
+function blacklistPreset(p: offline player, s: player):
+	close {_s}'s inventory
+	open virtual chest inventory with size 1 named "&6Blacklist %{_p}%" to {_s}
+	set {_loop} to 0
+	if {silent::%{_s}%} is true:
+		set {_silent} to true
+	else:
+		set {_silent} to false
+	loop {blacklistPresets::*}:
+		format gui slot {_loop} of {_s} with lime dye named "&6%loop-value%" with lore "&7(Click to use this reason)" to close then run function blacklist("%{_p}%" parsed as an offline player, "%{_s}%" parsed as a player, "%loop-value%", {_silent})
+		add 1 to {_loop}
+	format gui slot 8 of {_s} with arrow named "&6Back" with lore "&7(Click to go back)" to run {_s} command "punish %{_p}%"
+	format gui slot 7 of {_s} with glowing lime dye named "&6Custom reason" with lore "&7(Click to set a custom reason)" to run:
+		close {_s}'s inventory
+		send formatted "<suggest command:/blacklist %{_p}%>&7Click here to punish &6%{_p}%&7 with a custom reason!"
+command /warn [<offline player>] [<text>]:
+	permission: staff.warn
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!"
+		else:
+			if arg-2 is not set:
+				send "&cPlease select a reason!"
+			else:
+				if arg-1 has permission "staff.nopunish":
+					send "&cYou cannot punish that player!"
+				else:
+					warn("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), arg-2, ({silent::%player%} ? false))
+command /mute [<offline player>] [<text>] [<text>]:
+	permission: staff.mute
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!"
+		else:
+			if arg-1 has permission "staff.nopunish":
+				send "&cYou cannot punish that player!"
+			else:
+				if arg-2 is not set:
+					send "&cPlease select a timespan or ""FOREVER""!"
+				else:
+					if arg-2 is "FOREVER":
+						if arg-3 is not set:
+							send "&cPlease select a reason!"
+						else:
+							mute("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), arg-3, ({silent::%player%} ? false), "FOREVER")
+					else:
+						set {_a} to textToTimespan(arg-2)
+						if {_a} is not a timespan:
+							send "&cPlease select a proper timespan!"
+						else:
+							if arg-3 is not set:
+								send "&cPlease select a reason!"
+							else:
+								mute("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), arg-3, ({silent::%player%} ? false), "%textToTimespan(arg-2)%")
+command /ban [<offline player>] [<text>] [<text>]:
+	permission: staff.ban
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!"
+		else:
+			if arg-1 has permission "staff.nopunish":
+				send "&cYou cannot punish that player!"
+			else:
+				if arg-2 is not set:
+					send "&cPlease select a timespan or ""FOREVER""!"
+				else:
+					if arg-2 is "FOREVER":
+						if arg-3 is not set:
+							send "&cPlease select a reason!"
+						else:
+							ban("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), arg-3, ({silent::%player%} ? false), "FOREVER")
+					else:
+						set {_a} to textToTimespan(arg-2)
+						if {_a} is not a timespan:
+							send "&cPlease select a proper timespan!"
+						else:
+							if arg-3 is not set:
+								send "&cPlease select a reason!"
+							else:
+								ban("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), arg-3, ({silent::%player%} ? false), "%textToTimespan(arg-2)%")
+
+
+command /blacklist [<offline player>] [<text>]:
+	permission: staff.blacklist
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!"
+		else:
+			if arg-2 is not set:
+				send "&cPlease select a reason!"
+			else:
+				if arg-1 has permission "staff.nopunish":
+					send "&cYou cannot punish that player!"
+				else:
+					blacklist("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), arg-2, ({silent::%player%} ? false))
+
+command /unmute [<offline player>]:
+	permission: staff.unmute
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!"
+		else:
+			if arg-1 has permission "staff.nopunish":
+				send "&cYou cannot punish that player!"
+			else:
+				unmute("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), ({silent::%player%} ? false))
+command /unban [<offline player>]:
+	permission: staff.unban
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!"
+		else:
+			if arg-1 has permission "staff.nopunish":
+				send "&cYou cannot punish that player!"
+			else:
+				unban("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), ({silent::%player%} ? false))
+command /unblacklist [<offline player>]:
+	permission: staff.unblacklist
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!"
+		else:
+			if arg-1 has permission "staff.nopunish":
+				send "&cYou cannot punish that player!"
+			else:
+				unblacklist("%arg-1%" parsed as an offline player, (player ? "CONSOLE" parsed as an offline player), ({silent::%player%} ? false))
+command /silent [<text>]:
+	permission: staff.silent
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select true or false!"
+		else if arg-1 is not "true" or "false":
+			send "&cPlease select true or false!"
+		else:
+			if arg-1 is "true":
+				set {silent::%player%} to true
+				send ""
+				send "{@name} Silent punishments enabled!"
+				send ""
+			else:
+				delete {silent::%player%}
+				send ""
+				send "{@name} Silent punishments disabled!"
+				send ""
+command /rank [<offline player>]:
+	aliases: grant
+	permission: staff.rank
+	permission message: &cYou don't have permission!
+	trigger:
+		if {skriptRank::%arg-1's uuid%} is not set:
+			set {skriptRank::%arg-1's uuid%} to "Default"
+		if arg-1 is not set:
+			send "&cPlease specify a player!"
+		else:
+
+			open virtual chest inventory with size 3 named "&6Set %arg-1%&6's rank" to player
+			set {_loop} to 0
+			loop 9 times:
+				format gui slot {_loop} of player with gray stained glass pane named "&7" to do nothing
+				add 1 to {_loop}
+			if {skriptRank::%arg-1's uuid%} is "Default":
+				format gui slot 4 of player with skull of arg 1 named "&e%arg-1%" with lore "&7Default" to do nothing
+			else:
+				format gui slot 4 of player with skull of arg 1 named "&e%arg-1%" with lore "%{skriptRank::%arg-1's uuid%}%" to do nothing
+			format gui slot 9 of player with gray stained glass pane named "&7" to do nothing
+			format gui slot 10 of player with cyan terracotta named "&6Default" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "default")
+			format gui slot 11 of player with lime terracotta named "&6[HELPER]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "helper")
+			format gui slot 12 of player with magenta terracotta named "&6[BUILDER]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "builder")
+			format gui slot 13 of player with yellow terracotta named "&6[MOD]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "moderator")
+			format gui slot 14 of player with orange terracotta named "&6[ADMIN]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "admin")
+			format gui slot 15 of player with light blue terracotta named "&6[MANAGER]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "manager")
+			format gui slot 16 of player with red terracotta named "&6[OWNER]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "owner")
+			format gui slot 17 of player with gray stained glass pane named "&7" to do nothing
+			set {_loop} to 18
+			loop 9 times:
+				format gui slot {_loop} of player with gray stained glass pane named "&7" to do nothing
+				add 1 to {_loop}
+on join:
+	if {skriptRank::%player's uuid%} is not set:
+		set {skriptRank::%player's uuid%} to "Default"
+function confirmRank(s: player, p: offline player, r: text):
+	wait 0.5 seconds
+	open virtual chest inventory with size 5 named "&6Confirm rank set" to {_s}
+	set {_loop} to 0
+	set {_u} to uuid of {_p}
+	loop 9 times:
+		format gui slot {_loop} of {_s} with gray stained glass pane named "&7" to do nothing
+		add 1 to {_loop}
+	format gui slot 4 of {_s} with skull of {_p} named "&6%{_p}%" with lore "&7%{skriptRank::%{_u}%}%&7 » &6%{_r}%" to do nothing
+	format gui slot 9 of {_s} with gray stained glass pane named "&7" to do nothing
+	format gui slot 18 of {_s} with gray stained glass pane named "&7" to do nothing
+	format gui slot 27 of {_s} with gray stained glass pane named "&7" to do nothing
+	format gui slot 17 of {_s} with gray stained glass pane named "&7" to do nothing
+	format gui slot 26 of {_s} with gray stained glass pane named "&7" to do nothing
+	format gui slot 35 of {_s} with gray stained glass pane named "&7" to do nothing
+	set {_loop} to 36
+	loop 9 times:
+		format gui slot {_loop} of {_s} with gray stained glass pane named "&7" to do nothing
+		add 1 to {_loop}
+	format gui slot 13 of {_s} with gray stained glass pane named "&7" to do nothing
+	format gui slot 22 of {_s} with gray stained glass pane named "&7" to do nothing
+	format gui slot 31 of {_s} with gray stained glass pane named "&7" to do nothing
+	set {_loop} to 10
+	loop 3 times:
+		format gui slot {_loop} of {_s} with lime terracotta named "&aConfirm" to run {_S} command "confirmranksetbecauseskriptisbroken ,%{_p}%,%{_s}%,%{_r}%"
+		add 1 to {_loop}
+	set {_loop} to 19
+	loop 3 times:
+		format gui slot {_loop} of {_s} with lime terracotta named "&aConfirm" to run {_s} command "confirmranksetbecauseskriptisbroken ,%{_p}%,%{_s}%,%{_r}%"
+		add 1 to {_loop}
+	set {_loop} to 28
+	loop 3 times:
+		format gui slot {_loop} of {_s} with lime terracotta named "&aConfirm" to run {_s} command "confirmranksetbecauseskriptisbroken ,%{_p}%,%{_s}%,%{_r}%"
+		add 1 to {_loop}
+	set {_loop} to 14
+	loop 3 times:
+		format gui slot {_loop} of {_s} with red terracotta named "&cCancel" to close
+		add 1 to {_loop}
+	set {_loop} to 23
+	loop 3 times:
+		format gui slot {_loop} of {_s} with red terracotta named "&cCancel" to close
+		add 1 to {_loop}
+	set {_loop} to 32
+	loop 3 times:
+		format gui slot {_loop} of {_s} with red terracotta named "&cCancel" to close
+		add 1 to {_loop}
+on command "confirmranksetbecauseskriptisbroken":
+	cancel event
+	if player does not have permission "staff.rank":
+		send "&cNo permission!"
+		stop
+	set {_s::*} to full command split at ","
+	set {_p} to "%{_s::2}%" parsed as an offline player
+	set {_s} to "%{_s::3}%" parsed as a player
+	set {_r} to "%{_s::4}%"
+	close {_s}'s inventory
+	set {_u} to uuid of {_p}
+	execute console command "lp user %{_p}% parent set %{_r}%"
+	if {_r} is "Default":
+		set {_rank} to "default"
+	else if {_r} is "helper":
+		set {_rank} to "HELPER"
+	else if {_r} is "builder":
+		set {_rank} to "BUILDER"
+	else if {_r} is "moderator":
+		set {_rank} to "MOD"
+	else if {_r} is "admin":
+		set {_rank} to "ADMIN"
+	else if {_r} is "manager":
+		set {_rank} to "MANAGER"
+	else if {_r} is "owner":
+		set {_rank} to "OWNER"
+	send "" to {_p}
+	send "{@name} Your rank has been set to &6%{_rank}%&7 by &6%{_s}%&7!" to {_p}
+	send "" to {_p}
+	send "" to {_s}
+	send "{@name} You set &6%{_p}%&7's rank to &6%{_rank}%&7!" to {_s}
+	send "" to {_s}
+	if {_rank} is "Default":
+		set {skriptRank::%{_u}%} to "Default"
+	else:
+		set {skriptRank::%{_u}%} to "&6[%{_rank}%&6]"
+on chat:
+	if {staffchat.%player%} is set:
+		set {_staffmsg} to colored message
+		cancel event
+		loop all players:
+			if loop-player has permission "staff.staffchat":
+				send "&6Staff Chat &7» &6%player's display name%&f: %{_staffmsg}%" to loop-player
+	else:
+		if message starts with "!":
+			if player has permission "staff.staffchat":
+				set {_staffmsg} to message
+				replace all "!" with "" in {_staffmsg}
+				cancel event
+				loop all players:
+					if loop-player has permission "staff.staffchat":
+						send "&6Staff Chat &7» &6%player's display name%&f: %{_staffmsg}%" to loop-player
+
+command /staffchat [<text>]:
+	aliases: /sc, /staffc
+	permission: staff.staffchat
+	permission message: &cYou don't have permission!
+	trigger:
+		if arg-1 is set:
+			if arg-1 is "on" or "enable":
+				set {staffchat.%player%} to true
+				send ""
+				send "{@name} &7Staffchat has been &6enabled&7!" to player
+				send ""
+			else if arg-1 is "off" or "disable":
+				delete {staffchat.%player%}
+				send ""
+				send "{@name} &7Staffchat has been &6disabled&7!" to player
+				send ""
+			else:
+				loop all players:
+					if loop-player has permission "staff.staffchat":
+						send "&6Staff Chat &7» &6%player's display name%&f: %colored arg-1%" to loop-player
+		else:
+			send "&c/staffchat [<on/off>|<message>]"
+command /clearchat:
+	aliases: /cc
+	permission: staff.clearchat
+	permission message: &cYou don't have permission!
+	trigger:
+		loop 50 times:
+			broadcast ""
+			broadcast ""
+		if {silent::%player%} is set:
+			broadcast ""
+			broadcast "{@name} &7Chat has been cleaned by a staff member"
+			broadcast ""
+		else:
+			broadcast ""
+			broadcast "{@name} &7Chat has been cleaned by &6%(player ? ""CONSOLE"" parsed as an offline player)%"
+			broadcast ""
+command /mutechat:
+	aliases: /mc
+	permission: staff.mutechat
+	permission message: &cYou don't have permission!
+	trigger:
+		if {chat} is false:
+			wait 5 ticks
+			delete {chat}
+			if {silent::%player%} is not set:
+				broadcast ""
+				broadcast "{@name} &7Chat has been &6unmuted&7 by &6%(player ? ""CONSOLE"" parsed as an offline player)%"
+				broadcast ""
+			else:
+				broadcast ""
+				broadcast "{@name} &7Chat has been &6unmuted&7 by a staff member"
+				broadcast ""
+		else:
+			wait 5 ticks
+			set {chat} to false
+			if {silent::%player%} is not set:
+				broadcast ""
+				broadcast "{@name} &7Chat has been &6muted&7 by &6%(player ? ""CONSOLE"" parsed as an offline player)%"
+				broadcast ""
+			else:
+				broadcast ""
+				broadcast "{@name} &7Chat has been &6muted&7 by a staff member"
+				broadcast ""
+on chat:
+	if {chat} is false:
+		if player does not have permission "staff.mutechat.bypass":
+			cancel event
+			wait 1 tick
+			send "&7You cannot talk while the chat is muted!"
+command /broadcast [<text>]:
+	permission: staff.broadcast
+	permission message: &cYou don't have permission!
+	aliases: a, bc, announce, announcement
+	trigger:
+		if arg-1 is not set:
+			send "&cImproper usage! /broadcast <message>"
+		else:
+			broadcast ""
+			broadcast "&6&lANNOUNCEMENT &7| %colored arg-1%"
+			broadcast ""
+command /report [<offline player>] [<text>]:
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a player!" to player
+		else:
+			if arg-2 is not set:
+				send "&cPlease select a reason!" to player
+			else:
+				send ""
+				send "&6&l[REPORT] &7» Thank you for your report! Staff members have been notified!"
+				send ""
+				send "**Report** -%nl%```User %arg-1% has been reported by %player% for %arg-2%```" to channel with id "{@channel}" with "{@bot}"
+
+				loop all players:
+					if loop-player has permission "staff.reports.view":
+						send "" to loop-player
+						send "&6&l[REPORT] &7» &6%arg-1%&7 was reported by &6%player%&7 for &6%arg-2%" to loop-player
+						send "" to loop-player
+command /hide:
+	trigger:
+		togglePrefix(player)
+function togglePrefix(p: player):
+	if {_p} does not have permission "staff.hideprefix":
+		send "&cNo permission!" to {_p}
+	else:
+		set {_u} to {_p}'s uuid
+		if {hidden::%{_u}%} is not set:
+			set {hidden::%{_u}%} to true
+			send "" to {_p}
+			send "{@name} Your chat prefix is now hidden!" to {_p}
+			send "" to {_p}
+		else:
+			delete {hidden::%{_u}%}
+			send "" to {_p}
+			send "{@name} Your chat prefix is now visible!" to {_p}
+			send "" to {_p}
+on join:
+	if {chatColor::%player's uuid%} is not set:
+		if {skriptRank::%player's uuid%} is not "Default":
+			set {chatColor::%player's uuid%} to "&f"
+		else:
+			set {chatColor::%player's uuid%} to "&7"
+	if {skriptRank::%player's uuid%} is not set:
+		set {skriptRank::%player's uuid%} to "Default"
+	if {formatting::%player's uuid%} is not set:
+		set {formatting::%player's uuid%} to ""
+on chat:
+	if message contains "[Item]":
+		cancel event
+		if player is holding air:
+			send "&cYour item cannot be air!"
+		else:
+			set {_count} to amount of player's held item in player's inventory
+			if player's tool is enchanted:
+				if line 1 of lore of player's tool is set:
+					set {_message} to "&7(<tooltip:&6%tool's name ? type of tool% &7(&6%{_count}%x&7)%nl%&7%tool's enchantments%%nl%&6%tool's lore%>&6%{_count}%x %name of tool ? type of tool%&7)&7"
+				else:
+					set {_message} to "&7(<tooltip:&6%tool's name ? type of tool% &7(&6%{_count}%x&7)%nl%%tool's enchantments%%nl%&7No lores>&6%{_count}%x %name of tool ? type of tool%&7)&7"
+			else:
+				if line 1 of lore of player's tool is set:
+					set {_message} to "&7(<tooltip:&6%tool's name ? type of tool% &7(&6%{_count}%x&7)%nl%&7No enchantments%nl%&6%tool's lore%>&6%{_count}%x %name of tool ? type of tool%&7)&7"
+				else:
+					set {_message} to "&7(<tooltip:&6%tool's name ? type of tool% &7(&6%{_count}%x&7)%nl%&7No enchantments%nl%&7No lores>&6%{_count}%x %name of tool ? type of tool%&7)&7"
+			if {skriptRank::%player's uuid%} is "Default":
+				send formatted "%player's display name%&f: &7Take a look at my %{_message}%" to all players
+			else:
+				if {hidden::%player's uuid%} is not set:
+					send formatted "%{skriptRank::%player's uuid%}% %player's display name%&f: Take a look at my %{_message}%" to all players
+				else:
+					send formatted "%player's display name%&f: Take a look at my %{_message}%" to all players
+	if {formatting::%player's uuid%} is "":
+		set {_color} to "%{chatColor::%player's uuid%}%"
+	else:
+		set {_color} to "%{chatColor::%player's uuid%}% %{formatting::%player's uuid%}%"
+	if {skriptRank::%player's uuid%} is "Default":
+		set chat format to "%player's display name%&f:%{_color}% %message%"
+	else if {hidden::%player's uuid%} is not set:
+		set chat format to "%{skriptRank::%player's uuid%}% %player's display name%&f:%{_color}% %colored message%"
+	else:
+		set chat format to "%player's display name%&f:%{_color}% %colored message%"
+command /chatcolor:
+	permission: staff.chatcolor
+	permission message: &cNo permission!
+	trigger:
+		open virtual chest inventory with size 4 named "&6Select a chatcolor" to player
+		set {_loop} to 0
+		loop 36 times:
+			format gui slot {_loop} of player with gray stained glass pane named "&7" to do nothing
+			add 1 to {_loop}
+		set {_color} to "White" if {chatColor::%player's uuid%} is "&f"
+		set {_color} to "Yellow" if {chatColor::%player's uuid%} is "&e"
+		set {_color} to "Orange" if {chatColor::%player's uuid%} is "&6"
+		set {_color} to "Red" if {chatColor::%player's uuid%} is "&c"
+		set {_color} to "Dark Red" if {chatColor::%player's uuid%} is "&4"
+		set {_color} to "Pink" if {chatColor::%player's uuid%} is "&d"
+		set {_color} to "Magenta" if {chatColor::%player's uuid%} is "&5"
+		set {_color} to "Gray" if {chatColor::%player's uuid%} is "&7"
+		set {_color} to "Teal" if {chatColor::%player's uuid%} is "&6"
+		set {_color} to "Aqua" if {chatColor::%player's uuid%} is "&b"
+		set {_color} to "Blue" if {chatColor::%player's uuid%} is "&9"
+		set {_color} to "Lime" if {chatColor::%player's uuid%} is "&a"
+		set {_color} to "Green" if {chatColor::%player's uuid%} is "&2"
+		set {_color} to "Black" if {chatColor::%player's uuid%} is "&8"
+		format gui slot 4 of player with skull of player named "&e%player%" with lore "&6%{_color}%" to do nothing
+		if {_color} is "White":
+			format gui slot 10 of player with glowing white terracotta named "&fWhite" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.white":
+				format gui slot 10 of player with white terracotta named "&fWhite" with lore "&7(Click to activate)" to close then run function chatColor(player, "&f", "White")
+			else:
+				format gui slot 10 of player with white terracotta named "&fWhite" with lore "&cNo permission!" to do nothing
+		if {_color} is "Yellow":
+			format gui slot 11 of player with glowing yellow terracotta named "&eYellow" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.yellow":
+				format gui slot 11 of player with yellow terracotta named "&eYellow" with lore "&7(Click to activate)" to close then run function chatColor(player, "&e", "Yellow")
+			else:
+				format gui slot 11 of player with yellow terracotta named "&eYellow" with lore "&cNo permission!" to do nothing
+		if {_color} is "Orange":
+			format gui slot 12 of player with glowing orange terracotta named "&6Orange" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.orange":
+				format gui slot 12 of player with orange terracotta named "&6Orange" with lore "&7(Click to activate)" to close then run function chatColor(player, "&6", "Orange")
+			else:
+				format gui slot 12 of player with orange terracotta named "&6Orange" with lore "&cNo permission!" to do nothing
+		if {_color} is "Red":
+			format gui slot 13 of player with glowing pink terracotta named "&cRed" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.red":
+				format gui slot 13 of player with pink terracotta named "&cRed" with lore "&7(Click to activate)" to close then run function chatColor(player, "&c", "Red")
+			else:
+				format gui slot 13 of player with pink terracotta named "&cRed" with lore "&cNo permission!" to do nothing
+		if {_color} is "Dark Red":
+			format gui slot 14 of player with glowing red terracotta named "&4Dark Red" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.darkred":
+				format gui slot 14 of player with red terracotta named "&4Dark Red" with lore "&7(Click to activate)" to close then run function chatColor(player, "&4", "Dark Red")
+			else:
+				format gui slot 14 of player with red terracotta named "&4Dark Red" with lore "&cNo permission!" to do nothing
+		if {_color} is "Pink":
+			format gui slot 15 of player with glowing magenta terracotta named "&dPink" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.pink":
+				format gui slot 15 of player with magenta terracotta named "&dPink" with lore "&7(Click to activate)" to close then run function chatColor(player, "&d", "Pink")
+			else:
+				format gui slot 15 of player with magenta terracotta named "&dPink" with lore "&cNo permission!" to do nothing
+		if {_color} is "Magenta":
+			format gui slot 16 of player with glowing purple terracotta named "&5Magenta" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.magenta":
+				format gui slot 16 of player with purple terracotta named "&5Magenta" with lore "&7(Click to activate)" to close then run function chatColor(player, "&5", "Magenta")
+			else:
+				format gui slot 16 of player with purple terracotta named "&5Magenta" with lore "&cNo permission!" to do nothing
+		if {_color} is "Gray":
+			format gui slot 19 of player with glowing cyan terracotta named "&7Gray" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.gray":
+				format gui slot 19 of player with cyan terracotta named "&7Gray" with lore "&7(Click to activate)" to close then run function chatColor(player, "&7", "Gray")
+			else:
+				format gui slot 19 of player with cyan terracotta named "&7Gray" with lore "&cNo permission!" to do nothing
+		if {_color} is "Teal":
+			format gui slot 20 of player with glowing cyan concrete named "&6Teal" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.teal":
+				format gui slot 20 of player with cyan concrete named "&6Teal" with lore "&7(Click to activate)" to close then run function chatColor(player, "&6", "Teal")
+			else:
+				format gui slot 20 of player with cyan concrete named "&6Teal" with lore "&cNo permission!" to do nothing
+		if {_color} is "Aqua":
+			format gui slot 21 of player with glowing light blue terracotta named "&bAqua" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.aqua":
+				format gui slot 21 of player with light blue terracotta named "&bAqua" with lore "&7(Click to activate)" to close then run function chatColor(player, "&b", "Aqua")
+			else:
+				format gui slot 21 of player with light blue terracotta named "&bAqua" with lore "&cNo permission!" to do nothing
+		if {_color} is "Blue":
+			format gui slot 22 of player with glowing blue terracotta named "&9Blue" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.blue":
+				format gui slot 22 of player with blue terracotta named "&9Blue" with lore "&7(Click to activate)" to close then run function chatColor(player, "&9", "Blue")
+			else:
+				format gui slot 22 of player with blue terracotta named "&9Blue" with lore "&cNo permission!" to do nothing
+		if {_color} is "Lime":
+			format gui slot 23 of player with glowing lime terracotta named "&aLime" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.lime":
+				format gui slot 23 of player with lime terracotta named "&aLime" with lore "&7(Click to activate)" to close then run function chatColor(player, "&a", "Lime")
+			else:
+				format gui slot 23 of player with lime terracotta named "&aLime" with lore "&cNo permission!" to do nothing
+		if {_color} is "Green":
+			format gui slot 24 of player with glowing green terracotta named "&2Green" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.green":
+				format gui slot 24 of player with green terracotta named "&2Green" with lore "&7(Click to activate)" to close then run function chatColor(player, "&2", "Green")
+			else:
+				format gui slot 24 of player with green terracotta named "&2Green" with lore "&cNo permission!" to do nothing
+		if {_color} is "Black":
+			format gui slot 25 of player with glowing gray terracotta named "&8Black" with lore "&aActive" to close
+		else:
+			if player has permission "chatcolor.black":
+				format gui slot 25 of player with gray terracotta named "&8Black" with lore "&7(Click to activate)" to close then run function chatColor(player, "&8", "Black")
+			else:
+				format gui slot 25 of player with gray terracotta named "&8Black" with lore "&cNo permission!" to do nothing
+		if {formatting::%player's uuid%} contains "&l":
+			format gui slot 9 of player with lime dye named "&6&lBold" with lore "&aActive" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&l")
+		else:
+			if player does not have permission "chatcolor.bold":
+				format gui slot 9 of player with gray dye named "&6&lBold" with lore "&cNo permission!" to do nothing
+			else:
+				format gui slot 9 of player with gray dye named "&6&lBold" with lore "&cDisabled" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&l")
+		if {formatting::%player's uuid%} contains "&m":
+			format gui slot 17 of player with lime dye named "&6&mStrikethrough" with lore "&aActive" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&m")
+		else:
+			if player does not have permission "chatcolor.strikethrough":
+				format gui slot 17 of player with gray dye named "&6&mStrikethrough" with lore "&cNo permission!" to do nothing
+			else:
+				format gui slot 17 of player with gray dye named "&6&mStrikethrough" with lore "&cDisabled" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&m")
+		if {formatting::%player's uuid%} contains "&o":
+			format gui slot 18 of player with lime dye named "&6&oItalics" with lore "&aActive" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&o")
+		else:
+			if player does not have permission "chatcolor.italic":
+				format gui slot 18 of player with gray dye named "&6&oItalics" with lore "&cNo permission!" to do nothing
+			else:
+				format gui slot 18 of player with gray dye named "&6&oItalics" with lore "&cDisabled" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&o")
+		if {formatting::%player's uuid%} contains "&n":
+			format gui slot 26 of player with lime dye named "&6&nUnderline" with lore "&aActive" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&n")
+		else:
+			if player does not have permission "chatcolor.underline":
+				format gui slot 26 of player with gray dye named "&6&nUnderline" with lore "&cNo permission!" to do nothing
+			else:
+				format gui slot 26 of player with gray dye named "&6&nUnderline" with lore "&cDisabled" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&n")
+function chatColor(p: player, c: text, n: text):
+	set {_u} to uuid of {_p}
+	set {chatColor::%{_u}%} to {_c}
+	send "" to {_p}
+	send "{@name} You set your chat color to %{_c}%%{_n}%&7!" to {_p}
+	send "" to {_p}
+function toggleFormatting(p: player, f: text):
+	set {_u} to the uuid of {_p}
+	if {formatting::%{_u}%} contains "%{_f}%":
+		replace all "%{_f}%" with "" in {formatting::%{_u}%}
+		send "" to {_p}
+		send "{@name} Formatting adjusted!" to {_p}
+		send "" to {_p}
+	else:
+		set {formatting::%{_u}%} to "%{formatting::%{_u}%}%%{_f}%"
+		send "" to {_p}
+		send "{@name} Formatting adjusted!" to {_p}
+		send "" to {_p}
+
+command /staffhelp:
+	permission: staff.help
+	permission message: &cNo permission!
+	trigger:
+		send "&7&m---------------{@helpname}&7&m---------------"
+		send "&7●&6 Say ""[Item]"" in chat&7 - Sends your held item for the server to see"
+		send "&7●&6 /punish (player)&7 - Opens the punishment GUI"
+		send "&7●&6 /info (player)&7 - Sends player information"
+		send "&7●&6 /rank (player)&7 - Opens the rank GUI"
+		send "&7●&6 /silent (true/false)&7 - Toggles silent punishment mode"
+		send "&7●&6 /hide &7 - Toggles hidden chat prefixes"
+		send "&7●&6 /chatcolor &7 - Opens the chat color gui"	
+		send "&7●&6 /staffchat (on/of|message)&7 or&6 ! (message)&7 - Sends a message to the staff chat"
+		send "&7●&6 /puns (player)&7 - Opens the punishment GUI"
+		send "&7●&6 /preset (punishment) (text) (text)&7 - Creates a punishment preset"
+		send "&7●&6 /deletepreset (punishment) (name)&7 - Deletes a punishment preset"
+		send "&7●&6 /warn (player) (reason)&7 - Warns a player"
+		send "&7●&6 /kick (player) (reason)&7 - Kicks a player"
+		send "&7●&6 /mute (player) (timespan) (reason)&7 - Mutes a player"
+		send "&7●&6 /ban (player) (timespan) (reason)&7 - Bans a player"
+		send "&7●&6 /blacklist (player) (reason)&7 - Blacklists a player"
+		send "&7●&6 /unmute (player)&7 - Unmutes a player"
+		send "&7●&6 /unban (player)&7 - Unbans a player"
+		send "&7●&6 /unblacklist (player)&7 - Unblacklists a player"
+		send "&7●&6 /clearchat&7 - Clears the chat"
+		send "&7●&6 /mutechat&7 - Toggles the mutechat"
+		send "&7●&6 /broadcast (text)&7 - Broadcasts a message to the entire server"
+		send "&7●&6 /report (player) (reason)&7 - Reports a player to online staff members (for all players)"
+		send "&7●&6 /staffhelp&7 - Sends this help message"
+		send "&7●&6 /staffperms&7 - Sends a permissions help menu"
+		send "&7&m---------------{@helpname}&7&m---------------"
+command /staffperms:
+	permission: staff.perms
+	permission message: &cNo permission!
+	trigger:
+		send "&7&m---------------{@helpname}&7&m---------------"
+		send "&7●&6 staff.punish &7(Helper)"
+		send "&7●&6 staff.info &7(Mod)"
+		send "&7●&6 staff.rank &7(Manager)"
+		send "&7●&6 staff.silent &7(Mod)"
+		send "&7●&6 staff.hideprefix &7(Helper)"
+		send "&7●&6 staff.chatcolor &7(Helper)"
+		send "&7●&6 staff.staffchat &7(Helper)"
+		send "&7●&6 staff.puns &7(Mod)"
+		send "&7●&6 staff.preset &7(Admin)"
+		send "&7●&6 staff.presetdelete &7(Admin)"
+		send "&7●&6 staff.warn &7(Helper)"
+		send "&7●&6 staff.kick &7(Helper)"
+		send "&7●&6 staff.mute &7(Helper)"
+		send "&7●&6 staff.ban &7(Mod)"
+		send "&7●&6 staff.blacklist &7(Admin)"
+		send "&7●&6 staff.unmute &7(Helper)"
+		send "&7●&6 staff.unban &7(Mod)"
+		send "&7●&6 staff.unblacklist &7(Admin)"
+		send "&7●&6 staff.clearchat &7(Admin)"
+		send "&7●&6 staff.mutechat &7(Admin)"
+		send "&7●&6 staff.broadcast &7(Mod)"
+		send "&7●&6 staff.help &7(Helper)"
+		send "&7●&6 staff.perms &7(Manager)"
+		send "&7●&6 chatcolor.<color> &7(Helper) - Allows a player to use specific colors and formats in /chatcolor"
+		send "&7●&6 staff.nopunish &7(Admin) - Exempts a player from punishment"
+		send "&7●&6 staff.silent.view &7(Helper) - Allows a player to see silent punishments"
+		send "&7●&6 staff.mutechat.bypass &7(Helper) - Allows a player to bypass a muted chat"
+		send "&7●&6 staff.reports.view &7(Helper) - Allows a player to view player reports"
+		send "&7&m---------------{@helpname}&7&m---------------"
