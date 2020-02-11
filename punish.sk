@@ -1098,31 +1098,11 @@ command /report [<offline player>] [<text>]:
 				send ""
 				send "&6&l[REPORT] &7» Thank you for your report! Staff members have been notified!"
 				send ""
-				send "**Report** -%nl%```User %arg-1% has been reported by %player% for %arg-2%```" to channel with id "{@channel}" with "{@bot}"
-
 				loop all players:
 					if loop-player has permission "staff.reports.view":
 						send "" to loop-player
 						send "&6&l[REPORT] &7» &6%arg-1%&7 was reported by &6%player%&7 for &6%arg-2%" to loop-player
 						send "" to loop-player
-command /hide:
-	trigger:
-		togglePrefix(player)
-function togglePrefix(p: player):
-	if {_p} does not have permission "staff.hideprefix":
-		send "&cNo permission!" to {_p}
-	else:
-		set {_u} to {_p}'s uuid
-		if {hidden::%{_u}%} is not set:
-			set {hidden::%{_u}%} to true
-			send "" to {_p}
-			send "{@name} Your chat prefix is now hidden!" to {_p}
-			send "" to {_p}
-		else:
-			delete {hidden::%{_u}%}
-			send "" to {_p}
-			send "{@name} Your chat prefix is now visible!" to {_p}
-			send "" to {_p}
 on join:
 	if {chatColor::%player's uuid%} is not set:
 		if {skriptRank::%player's uuid%} is not "Default":
@@ -1133,221 +1113,16 @@ on join:
 		set {skriptRank::%player's uuid%} to "Default"
 	if {formatting::%player's uuid%} is not set:
 		set {formatting::%player's uuid%} to ""
-on chat:
-	if message contains "[Item]":
-		cancel event
-		if player is holding air:
-			send "&cYour item cannot be air!"
-		else:
-			set {_count} to amount of player's held item in player's inventory
-			if player's tool is enchanted:
-				if line 1 of lore of player's tool is set:
-					set {_message} to "&7(<tooltip:&6%tool's name ? type of tool% &7(&6%{_count}%x&7)%nl%&7%tool's enchantments%%nl%&6%tool's lore%>&6%{_count}%x %name of tool ? type of tool%&7)&7"
-				else:
-					set {_message} to "&7(<tooltip:&6%tool's name ? type of tool% &7(&6%{_count}%x&7)%nl%%tool's enchantments%%nl%&7No lores>&6%{_count}%x %name of tool ? type of tool%&7)&7"
-			else:
-				if line 1 of lore of player's tool is set:
-					set {_message} to "&7(<tooltip:&6%tool's name ? type of tool% &7(&6%{_count}%x&7)%nl%&7No enchantments%nl%&6%tool's lore%>&6%{_count}%x %name of tool ? type of tool%&7)&7"
-				else:
-					set {_message} to "&7(<tooltip:&6%tool's name ? type of tool% &7(&6%{_count}%x&7)%nl%&7No enchantments%nl%&7No lores>&6%{_count}%x %name of tool ? type of tool%&7)&7"
-			if {skriptRank::%player's uuid%} is "Default":
-				send formatted "%player's display name%&f: &7Take a look at my %{_message}%" to all players
-			else:
-				if {hidden::%player's uuid%} is not set:
-					send formatted "%{skriptRank::%player's uuid%}% %player's display name%&f: Take a look at my %{_message}%" to all players
-				else:
-					send formatted "%player's display name%&f: Take a look at my %{_message}%" to all players
-	if {formatting::%player's uuid%} is "":
-		set {_color} to "%{chatColor::%player's uuid%}%"
-	else:
-		set {_color} to "%{chatColor::%player's uuid%}% %{formatting::%player's uuid%}%"
-	if {skriptRank::%player's uuid%} is "Default":
-		set chat format to "%player's display name%&f:%{_color}% %message%"
-	else if {hidden::%player's uuid%} is not set:
-		set chat format to "%{skriptRank::%player's uuid%}% %player's display name%&f:%{_color}% %colored message%"
-	else:
-		set chat format to "%player's display name%&f:%{_color}% %colored message%"
-command /chatcolor:
-	permission: staff.chatcolor
-	permission message: &cNo permission!
-	trigger:
-		open virtual chest inventory with size 4 named "&6Select a chatcolor" to player
-		set {_loop} to 0
-		loop 36 times:
-			format gui slot {_loop} of player with gray stained glass pane named "&7" to do nothing
-			add 1 to {_loop}
-		set {_color} to "White" if {chatColor::%player's uuid%} is "&f"
-		set {_color} to "Yellow" if {chatColor::%player's uuid%} is "&e"
-		set {_color} to "Orange" if {chatColor::%player's uuid%} is "&6"
-		set {_color} to "Red" if {chatColor::%player's uuid%} is "&c"
-		set {_color} to "Dark Red" if {chatColor::%player's uuid%} is "&4"
-		set {_color} to "Pink" if {chatColor::%player's uuid%} is "&d"
-		set {_color} to "Magenta" if {chatColor::%player's uuid%} is "&5"
-		set {_color} to "Gray" if {chatColor::%player's uuid%} is "&7"
-		set {_color} to "Teal" if {chatColor::%player's uuid%} is "&6"
-		set {_color} to "Aqua" if {chatColor::%player's uuid%} is "&b"
-		set {_color} to "Blue" if {chatColor::%player's uuid%} is "&9"
-		set {_color} to "Lime" if {chatColor::%player's uuid%} is "&a"
-		set {_color} to "Green" if {chatColor::%player's uuid%} is "&2"
-		set {_color} to "Black" if {chatColor::%player's uuid%} is "&8"
-		format gui slot 4 of player with skull of player named "&e%player%" with lore "&6%{_color}%" to do nothing
-		if {_color} is "White":
-			format gui slot 10 of player with glowing white terracotta named "&fWhite" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.white":
-				format gui slot 10 of player with white terracotta named "&fWhite" with lore "&7(Click to activate)" to close then run function chatColor(player, "&f", "White")
-			else:
-				format gui slot 10 of player with white terracotta named "&fWhite" with lore "&cNo permission!" to do nothing
-		if {_color} is "Yellow":
-			format gui slot 11 of player with glowing yellow terracotta named "&eYellow" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.yellow":
-				format gui slot 11 of player with yellow terracotta named "&eYellow" with lore "&7(Click to activate)" to close then run function chatColor(player, "&e", "Yellow")
-			else:
-				format gui slot 11 of player with yellow terracotta named "&eYellow" with lore "&cNo permission!" to do nothing
-		if {_color} is "Orange":
-			format gui slot 12 of player with glowing orange terracotta named "&6Orange" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.orange":
-				format gui slot 12 of player with orange terracotta named "&6Orange" with lore "&7(Click to activate)" to close then run function chatColor(player, "&6", "Orange")
-			else:
-				format gui slot 12 of player with orange terracotta named "&6Orange" with lore "&cNo permission!" to do nothing
-		if {_color} is "Red":
-			format gui slot 13 of player with glowing pink terracotta named "&cRed" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.red":
-				format gui slot 13 of player with pink terracotta named "&cRed" with lore "&7(Click to activate)" to close then run function chatColor(player, "&c", "Red")
-			else:
-				format gui slot 13 of player with pink terracotta named "&cRed" with lore "&cNo permission!" to do nothing
-		if {_color} is "Dark Red":
-			format gui slot 14 of player with glowing red terracotta named "&4Dark Red" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.darkred":
-				format gui slot 14 of player with red terracotta named "&4Dark Red" with lore "&7(Click to activate)" to close then run function chatColor(player, "&4", "Dark Red")
-			else:
-				format gui slot 14 of player with red terracotta named "&4Dark Red" with lore "&cNo permission!" to do nothing
-		if {_color} is "Pink":
-			format gui slot 15 of player with glowing magenta terracotta named "&dPink" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.pink":
-				format gui slot 15 of player with magenta terracotta named "&dPink" with lore "&7(Click to activate)" to close then run function chatColor(player, "&d", "Pink")
-			else:
-				format gui slot 15 of player with magenta terracotta named "&dPink" with lore "&cNo permission!" to do nothing
-		if {_color} is "Magenta":
-			format gui slot 16 of player with glowing purple terracotta named "&5Magenta" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.magenta":
-				format gui slot 16 of player with purple terracotta named "&5Magenta" with lore "&7(Click to activate)" to close then run function chatColor(player, "&5", "Magenta")
-			else:
-				format gui slot 16 of player with purple terracotta named "&5Magenta" with lore "&cNo permission!" to do nothing
-		if {_color} is "Gray":
-			format gui slot 19 of player with glowing cyan terracotta named "&7Gray" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.gray":
-				format gui slot 19 of player with cyan terracotta named "&7Gray" with lore "&7(Click to activate)" to close then run function chatColor(player, "&7", "Gray")
-			else:
-				format gui slot 19 of player with cyan terracotta named "&7Gray" with lore "&cNo permission!" to do nothing
-		if {_color} is "Teal":
-			format gui slot 20 of player with glowing cyan concrete named "&6Teal" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.teal":
-				format gui slot 20 of player with cyan concrete named "&6Teal" with lore "&7(Click to activate)" to close then run function chatColor(player, "&6", "Teal")
-			else:
-				format gui slot 20 of player with cyan concrete named "&6Teal" with lore "&cNo permission!" to do nothing
-		if {_color} is "Aqua":
-			format gui slot 21 of player with glowing light blue terracotta named "&bAqua" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.aqua":
-				format gui slot 21 of player with light blue terracotta named "&bAqua" with lore "&7(Click to activate)" to close then run function chatColor(player, "&b", "Aqua")
-			else:
-				format gui slot 21 of player with light blue terracotta named "&bAqua" with lore "&cNo permission!" to do nothing
-		if {_color} is "Blue":
-			format gui slot 22 of player with glowing blue terracotta named "&9Blue" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.blue":
-				format gui slot 22 of player with blue terracotta named "&9Blue" with lore "&7(Click to activate)" to close then run function chatColor(player, "&9", "Blue")
-			else:
-				format gui slot 22 of player with blue terracotta named "&9Blue" with lore "&cNo permission!" to do nothing
-		if {_color} is "Lime":
-			format gui slot 23 of player with glowing lime terracotta named "&aLime" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.lime":
-				format gui slot 23 of player with lime terracotta named "&aLime" with lore "&7(Click to activate)" to close then run function chatColor(player, "&a", "Lime")
-			else:
-				format gui slot 23 of player with lime terracotta named "&aLime" with lore "&cNo permission!" to do nothing
-		if {_color} is "Green":
-			format gui slot 24 of player with glowing green terracotta named "&2Green" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.green":
-				format gui slot 24 of player with green terracotta named "&2Green" with lore "&7(Click to activate)" to close then run function chatColor(player, "&2", "Green")
-			else:
-				format gui slot 24 of player with green terracotta named "&2Green" with lore "&cNo permission!" to do nothing
-		if {_color} is "Black":
-			format gui slot 25 of player with glowing gray terracotta named "&8Black" with lore "&aActive" to close
-		else:
-			if player has permission "chatcolor.black":
-				format gui slot 25 of player with gray terracotta named "&8Black" with lore "&7(Click to activate)" to close then run function chatColor(player, "&8", "Black")
-			else:
-				format gui slot 25 of player with gray terracotta named "&8Black" with lore "&cNo permission!" to do nothing
-		if {formatting::%player's uuid%} contains "&l":
-			format gui slot 9 of player with lime dye named "&6&lBold" with lore "&aActive" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&l")
-		else:
-			if player does not have permission "chatcolor.bold":
-				format gui slot 9 of player with gray dye named "&6&lBold" with lore "&cNo permission!" to do nothing
-			else:
-				format gui slot 9 of player with gray dye named "&6&lBold" with lore "&cDisabled" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&l")
-		if {formatting::%player's uuid%} contains "&m":
-			format gui slot 17 of player with lime dye named "&6&mStrikethrough" with lore "&aActive" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&m")
-		else:
-			if player does not have permission "chatcolor.strikethrough":
-				format gui slot 17 of player with gray dye named "&6&mStrikethrough" with lore "&cNo permission!" to do nothing
-			else:
-				format gui slot 17 of player with gray dye named "&6&mStrikethrough" with lore "&cDisabled" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&m")
-		if {formatting::%player's uuid%} contains "&o":
-			format gui slot 18 of player with lime dye named "&6&oItalics" with lore "&aActive" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&o")
-		else:
-			if player does not have permission "chatcolor.italic":
-				format gui slot 18 of player with gray dye named "&6&oItalics" with lore "&cNo permission!" to do nothing
-			else:
-				format gui slot 18 of player with gray dye named "&6&oItalics" with lore "&cDisabled" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&o")
-		if {formatting::%player's uuid%} contains "&n":
-			format gui slot 26 of player with lime dye named "&6&nUnderline" with lore "&aActive" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&n")
-		else:
-			if player does not have permission "chatcolor.underline":
-				format gui slot 26 of player with gray dye named "&6&nUnderline" with lore "&cNo permission!" to do nothing
-			else:
-				format gui slot 26 of player with gray dye named "&6&nUnderline" with lore "&cDisabled" and "&7(Click to toggle)" to close then run function toggleFormatting(player, "&n")
-function chatColor(p: player, c: text, n: text):
-	set {_u} to uuid of {_p}
-	set {chatColor::%{_u}%} to {_c}
-	send "" to {_p}
-	send "{@name} You set your chat color to %{_c}%%{_n}%&7!" to {_p}
-	send "" to {_p}
-function toggleFormatting(p: player, f: text):
-	set {_u} to the uuid of {_p}
-	if {formatting::%{_u}%} contains "%{_f}%":
-		replace all "%{_f}%" with "" in {formatting::%{_u}%}
-		send "" to {_p}
-		send "{@name} Formatting adjusted!" to {_p}
-		send "" to {_p}
-	else:
-		set {formatting::%{_u}%} to "%{formatting::%{_u}%}%%{_f}%"
-		send "" to {_p}
-		send "{@name} Formatting adjusted!" to {_p}
-		send "" to {_p}
 
 command /staffhelp:
 	permission: staff.help
 	permission message: &cNo permission!
 	trigger:
 		send "&7&m---------------{@helpname}&7&m---------------"
-		send "&7●&6 Say ""[Item]"" in chat&7 - Sends your held item for the server to see"
 		send "&7●&6 /punish (player)&7 - Opens the punishment GUI"
 		send "&7●&6 /info (player)&7 - Sends player information"
 		send "&7●&6 /rank (player)&7 - Opens the rank GUI"
 		send "&7●&6 /silent (true/false)&7 - Toggles silent punishment mode"
-		send "&7●&6 /hide &7 - Toggles hidden chat prefixes"
-		send "&7●&6 /chatcolor &7 - Opens the chat color gui"	
 		send "&7●&6 /staffchat (on/of|message)&7 or&6 ! (message)&7 - Sends a message to the staff chat"
 		send "&7●&6 /puns (player)&7 - Opens the punishment GUI"
 		send "&7●&6 /preset (punishment) (text) (text)&7 - Creates a punishment preset"
@@ -1376,8 +1151,6 @@ command /staffperms:
 		send "&7●&6 staff.info &7(Mod)"
 		send "&7●&6 staff.rank &7(Manager)"
 		send "&7●&6 staff.silent &7(Mod)"
-		send "&7●&6 staff.hideprefix &7(Helper)"
-		send "&7●&6 staff.chatcolor &7(Helper)"
 		send "&7●&6 staff.staffchat &7(Helper)"
 		send "&7●&6 staff.puns &7(Mod)"
 		send "&7●&6 staff.preset &7(Admin)"
@@ -1395,7 +1168,6 @@ command /staffperms:
 		send "&7●&6 staff.broadcast &7(Mod)"
 		send "&7●&6 staff.help &7(Helper)"
 		send "&7●&6 staff.perms &7(Manager)"
-		send "&7●&6 chatcolor.<color> &7(Helper) - Allows a player to use specific colors and formats in /chatcolor"
 		send "&7●&6 staff.nopunish &7(Admin) - Exempts a player from punishment"
 		send "&7●&6 staff.silent.view &7(Helper) - Allows a player to see silent punishments"
 		send "&7●&6 staff.mutechat.bypass &7(Helper) - Allows a player to bypass a muted chat"
