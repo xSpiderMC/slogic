@@ -1,7 +1,7 @@
 options:
 	name: &6&lSLOGIC &7|
 	helpname: &6&lSLOGIC
-	plugin: "PEX"
+	plugin: "Luckperms"
 # specify which permissions plugin you are using to ensure the ranks portion works. Either "PEX" or "Luckperms"
 function textToTimespan(t: string) :: timespan:
 	if {_t} contains "day":
@@ -290,10 +290,6 @@ command /punish [<offline player>]:
 								set the line loop-value of {_item}'s lore to "&c● &7%{alts.%arg-1's ip%::%loop-value%}%"
 							else:
 								set the line loop-value of {_item}'s lore to "&a● &7%{alts.%arg-1's ip%::%loop-value%}%"
-				if {skriptRank::%arg-1's uuid%} is not set:
-					set {_rank} to "&7Default"
-				else:
-					set {_rank} to "&6%{skriptRank::%arg-1's uuid%}%"
 				open virtual chest inventory with size 5 named "&6Punish %arg-1%" to player
 				format gui slot 4 of player with skull of arg-1 named "&6%arg-1%" with lore "&7Rank - %{_rank}%" and "&7Status - %{_status}%" to do nothing
 				if {_item} is not set:
@@ -440,10 +436,8 @@ command /info [<offline player>]:
 							send "&7● &6%loop-value%"
 				else:
 					send "&7Accounts (A red name indicates a banned account): &6Unknown"
-				if {skriptRank::%arg-1's uuid%} is not set:
-					send "&7Rank: &6Default"
-				else:
-					send "&7Rank: &6%{skriptRank::%arg-1's uuid%}%"
+				
+				send "&7Rank: &6%group of arg-1%"
 				send ""
 				console command "/tellraw %player% {""text"":""Punishment History (Click to view a more detailed report):"",""color"":""gray"",""clickEvent"":{""action"":""run_command"",""value"":""/puns %arg-1%""}}"
 				send formatted ""
@@ -870,140 +864,18 @@ command /silent [<text>]:
 				send ""
 				send "{@name} Silent punishments disabled!"
 				send ""
-command /rank [<offline player>]:
-	aliases: grant
-	permission: staff.rank
-	permission message: &cYou don't have permission!
-	trigger:
-		if {skriptRank::%arg-1's uuid%} is not set:
-			set {skriptRank::%arg-1's uuid%} to "Default"
-		if arg-1 is not set:
-			send "&cPlease specify a player!"
-		else:
-
-			open virtual chest inventory with size 3 named "&6Set %arg-1%&6's rank" to player
-			set {_loop} to 0
-			loop 9 times:
-				format gui slot {_loop} of player with gray stained glass pane named "&7" to do nothing
-				add 1 to {_loop}
-			if {skriptRank::%arg-1's uuid%} is "Default":
-				format gui slot 4 of player with skull of arg 1 named "&e%arg-1%" with lore "&7Default" to do nothing
-			else:
-				format gui slot 4 of player with skull of arg 1 named "&e%arg-1%" with lore "%{skriptRank::%arg-1's uuid%}%" to do nothing
-			format gui slot 9 of player with gray stained glass pane named "&7" to do nothing
-			format gui slot 10 of player with cyan terracotta named "&6Default" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "default")
-			format gui slot 11 of player with lime terracotta named "&6[HELPER]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "helper")
-			format gui slot 12 of player with magenta terracotta named "&6[BUILDER]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "builder")
-			format gui slot 13 of player with yellow terracotta named "&6[MOD]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "moderator")
-			format gui slot 14 of player with orange terracotta named "&6[ADMIN]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "admin")
-			format gui slot 15 of player with light blue terracotta named "&6[MANAGER]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "manager")
-			format gui slot 16 of player with red terracotta named "&6[OWNER]" to close then run function confirmRank("%player%" parsed as a player, "%arg-1%" parsed as an offline player, "owner")
-			format gui slot 17 of player with gray stained glass pane named "&7" to do nothing
-			set {_loop} to 18
-			loop 9 times:
-				format gui slot {_loop} of player with gray stained glass pane named "&7" to do nothing
-				add 1 to {_loop}
-on join:
-	if {skriptRank::%player's uuid%} is not set:
-		set {skriptRank::%player's uuid%} to "Default"
-function confirmRank(s: player, p: offline player, r: text):
-	wait 0.5 seconds
-	open virtual chest inventory with size 5 named "&6Confirm rank set" to {_s}
-	set {_loop} to 0
-	set {_u} to uuid of {_p}
-	loop 9 times:
-		format gui slot {_loop} of {_s} with gray stained glass pane named "&7" to do nothing
-		add 1 to {_loop}
-	format gui slot 4 of {_s} with skull of {_p} named "&6%{_p}%" with lore "&7%{skriptRank::%{_u}%}%&7 » &6%{_r}%" to do nothing
-	format gui slot 9 of {_s} with gray stained glass pane named "&7" to do nothing
-	format gui slot 18 of {_s} with gray stained glass pane named "&7" to do nothing
-	format gui slot 27 of {_s} with gray stained glass pane named "&7" to do nothing
-	format gui slot 17 of {_s} with gray stained glass pane named "&7" to do nothing
-	format gui slot 26 of {_s} with gray stained glass pane named "&7" to do nothing
-	format gui slot 35 of {_s} with gray stained glass pane named "&7" to do nothing
-	set {_loop} to 36
-	loop 9 times:
-		format gui slot {_loop} of {_s} with gray stained glass pane named "&7" to do nothing
-		add 1 to {_loop}
-	format gui slot 13 of {_s} with gray stained glass pane named "&7" to do nothing
-	format gui slot 22 of {_s} with gray stained glass pane named "&7" to do nothing
-	format gui slot 31 of {_s} with gray stained glass pane named "&7" to do nothing
-	set {_loop} to 10
-	loop 3 times:
-		format gui slot {_loop} of {_s} with lime terracotta named "&aConfirm" to run {_S} command "confirmranksetbecauseskriptisbroken ,%{_p}%,%{_s}%,%{_r}%"
-		add 1 to {_loop}
-	set {_loop} to 19
-	loop 3 times:
-		format gui slot {_loop} of {_s} with lime terracotta named "&aConfirm" to run {_s} command "confirmranksetbecauseskriptisbroken ,%{_p}%,%{_s}%,%{_r}%"
-		add 1 to {_loop}
-	set {_loop} to 28
-	loop 3 times:
-		format gui slot {_loop} of {_s} with lime terracotta named "&aConfirm" to run {_s} command "confirmranksetbecauseskriptisbroken ,%{_p}%,%{_s}%,%{_r}%"
-		add 1 to {_loop}
-	set {_loop} to 14
-	loop 3 times:
-		format gui slot {_loop} of {_s} with red terracotta named "&cCancel" to close
-		add 1 to {_loop}
-	set {_loop} to 23
-	loop 3 times:
-		format gui slot {_loop} of {_s} with red terracotta named "&cCancel" to close
-		add 1 to {_loop}
-	set {_loop} to 32
-	loop 3 times:
-		format gui slot {_loop} of {_s} with red terracotta named "&cCancel" to close
-		add 1 to {_loop}
-on command "confirmranksetbecauseskriptisbroken":
-	cancel event
-	if player does not have permission "staff.rank":
-		send "&cNo permission!"
-		stop
-	set {_s::*} to full command split at ","
-	set {_p} to "%{_s::2}%" parsed as an offline player
-	set {_s} to "%{_s::3}%" parsed as a player
-	set {_r} to "%{_s::4}%"
-	close {_s}'s inventory
-	set {_u} to uuid of {_p}
-	execute console command "lp user %{_p}% parent set %{_r}%"
-	if {_r} is "Default":
-		set {_rank} to "default"
-	else if {_r} is "helper":
-		set {_rank} to "HELPER"
-	else if {_r} is "builder":
-		set {_rank} to "BUILDER"
-	else if {_r} is "moderator":
-		set {_rank} to "MOD"
-	else if {_r} is "admin":
-		set {_rank} to "ADMIN"
-	else if {_r} is "manager":
-		set {_rank} to "MANAGER"
-	else if {_r} is "owner":
-		set {_rank} to "OWNER"
-	send "" to {_p}
-	send "{@name} Your rank has been set to &6%{_rank}%&7 by &6%{_s}%&7!" to {_p}
-	send "" to {_p}
-	send "" to {_s}
-	send "{@name} You set &6%{_p}%&7's rank to &6%{_rank}%&7!" to {_s}
-	send "" to {_s}
-	if {_rank} is "Default":
-		set {skriptRank::%{_u}%} to "Default"
-	else:
-		set {skriptRank::%{_u}%} to "&6[%{_rank}%&6]"
 on chat:
 	if {staffchat.%player%} is set:
 		set {_staffmsg} to colored message
 		cancel event
-		loop all players:
-			if loop-player has permission "staff.staffchat":
-				send "&6Staff Chat &7» &6%player's display name%&f: %{_staffmsg}%" to loop-player
+		send "&6Staff Chat &7» &6%player's display name%&f: %{_staffmsg}%" to all players where [input has permission "staff.staffchat"]
 	else:
 		if message starts with "!":
 			if player has permission "staff.staffchat":
 				set {_staffmsg} to message
 				replace all "!" with "" in {_staffmsg}
 				cancel event
-				loop all players:
-					if loop-player has permission "staff.staffchat":
-						send "&6Staff Chat &7» &6%player's display name%&f: %{_staffmsg}%" to loop-player
+				send "&6Staff Chat &7» &6%player's display name%&f: %{_staffmsg}%" to all players where [input has permission "staff.staffchat"]
 
 command /staffchat [<text>]:
 	aliases: /sc, /staffc
@@ -1022,9 +894,7 @@ command /staffchat [<text>]:
 				send "{@name} &7Staffchat has been &6disabled&7!" to player
 				send ""
 			else:
-				loop all players:
-					if loop-player has permission "staff.staffchat":
-						send "&6Staff Chat &7» &6%player's display name%&f: %colored arg-1%" to loop-player
+				send "&6Staff Chat &7» &6%player's display name%&f: %colored arg-1%" to all players where [input has permission "staff.staffchat"]
 		else:
 			send "&c/staffchat [<on/off>|<message>]"
 command /clearchat:
@@ -1098,50 +968,28 @@ command /report [<offline player>] [<text>]:
 				send ""
 				send "&6&l[REPORT] &7» Thank you for your report! Staff members have been notified!"
 				send ""
-				loop all players:
-					if loop-player has permission "staff.reports.view":
-						send "" to loop-player
-						send "&6&l[REPORT] &7» &6%arg-1%&7 was reported by &6%player%&7 for &6%arg-2%" to loop-player
-						send "" to loop-player
-on join:
-	if {chatColor::%player's uuid%} is not set:
-		if {skriptRank::%player's uuid%} is not "Default":
-			set {chatColor::%player's uuid%} to "&f"
-		else:
-			set {chatColor::%player's uuid%} to "&7"
-	if {skriptRank::%player's uuid%} is not set:
-		set {skriptRank::%player's uuid%} to "Default"
-	if {formatting::%player's uuid%} is not set:
-		set {formatting::%player's uuid%} to ""
+				send "" to all players where [input has permission "staff.reports.view"]
+				send "&6&l[REPORT] &7» &6%arg-1%&7 was reported by &6%player%&7 for &6%arg-2%" to all players where [input has permission "staff.reports.view"]
+				send "" to all players where [input has permission "staff.reports.view"]
 command /vanish:
     aliases: /v
     permission: staff.vanish
     permission message: &cYou don't have permission!
     trigger:
         if {vanish.%player's uuid%} is true:
-            loop all players:
-                loop-value doesn't have permission "staff.vanish"
-                add loop-value to {_vanishto::*}
-
             reveal player from all players
             set {vanish.%player's uuid%} to false
             send "{@name} Vanish has been &cdisabled&7!"
             broadcast "&7[&a+&7] &9%player%"
-            loop all players:
-                if loop-value has permission "staff.vanish":
-                    send "{@name} &7%player%&7 has &6disabled&7 their vanish!" to loop-value
+            send "{@name} &7%player%&7 has &6disabled&7 their vanish!" to all players where [input has permission "staff.vanish"]
         else:
-            loop all players:
-                loop-value doesn't have permission "staff.vanish"
-                add loop-value to {_vanishto::*}
-
+            add all players where [input doesn't have permission "staff.vanish"] to {_vanishto::*}
             hide player from {_vanishto::*}
             set {vanish.%player's uuid%} to true
             send "{@name} Vanish has been &aenabled&7!"
             broadcast "&7[&c-&7] &9%player%"
-            loop all players:
-                if loop-value has permission "staff.vanish":
-                    send "{@name} &7%player%&7 has &6enabled&7 their vanish!" to loop-value
+            set {_s::*} to all players where [input has permission "staff.vanish"]
+            send "{@name} &7%player%&7 has &6enabled&7 their vanish!" to all players where [input has permission "staff.vanish"]
 command /staffhelp:
 	permission: staff.help
 	permission message: &cNo permission!
@@ -1177,7 +1025,6 @@ command /staffperms:
 		send "&7&m---------------{@helpname}&7&m---------------"
 		send "&7●&6 staff.punish &7(Helper)"
 		send "&7●&6 staff.info &7(Mod)"
-		send "&7●&6 staff.rank &7(Manager)"
 		send "&7●&6 staff.silent &7(Mod)"
 		send "&7●&6 staff.staffchat &7(Helper)"
 		send "&7●&6 staff.puns &7(Mod)"

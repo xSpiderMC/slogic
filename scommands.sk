@@ -1,0 +1,300 @@
+#dependency origianlly made this, tweaked it and removed a bunch of things
+#Edit the options to your delight
+options:
+	name: &6&lSLOGIC &7| #The name for chat messages
+	helpname: &6&lSLOGIC # The name for the help page
+	view: "gmc" or "gms" or "gmsp" or "gma" or "gamemode" or "op" or "deop" or "kill" or "pex" or "teleport" or "tp" or "teleporthere" or "tphere" or "vanish" or "ban" or "tempban" or "unban" or "kick" or "warn" or "mute" or "give" or "skript" or "sk" or "gamerule" or "blacklist" or "unblacklist" or "tempmute" or "lp"
+# ^ Defines which commands would set off the "main" command log
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+#CODE - DO NOT EDIT UNLESS YOU KNOW WHAT YOU'RE DOING!
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+#Command Logger
+command /cmdlog [<text>]:
+	permission: staff.cmdlog
+	permission message: &cError! No permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cIncorrect usage! /cmdlog <all/main/disable> (toggles all/main command log)" to player
+			stop
+		if arg-1 is "all":
+			if {cmdlogall::*} contains player:	
+				remove player from {cmdlogall::*}
+				send "{@name} You have disabled command log (all)!"
+				stop
+			else:
+				add player to {cmdlogall::*}
+				remove player from {cmdlogstaff::*}
+				send "{@name} You have enabled command log (all)!"
+				stop
+		else if arg-1 is "main":
+			if {cmdlogstaff::*} contains player:	
+				remove player from {cmdlogstaff::*}
+				send "{@name} You have disabled command log (main)!"
+				stop
+			else:
+				add player to {cmdlogstaff::*}
+				remove player from {cmdlogall::*}
+				send "{@name} You have enabled command log (main)!"
+				stop
+		else:
+			send "&cIncorrect usage! /cmdlog <all/main>" to player
+			stop
+on command:
+	if {@view} is command:
+		send "&7[&e%executor%&7: /%full command%&7]" to all players where [{cmdlogstaff::*} contains input]
+	else:
+		send "&7[&e%executor%&7: /%full command%&7]" to all players where [{cmdlogall::*} contains input]
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+#Spawn
+
+command /setspawn:
+	permission: staff.setspawn
+	permission message: &cYou don't have permission!
+	trigger:
+		set {spawn} to location of player
+		send "{@name}&7 Spawn was set to your location!" to player
+command /spawn:
+	trigger:
+		if {intutorial.%uuid of player%} is true:
+			send "{@name} &cYou can't use this command while in the tutorial"
+		else if player is in world "arena":
+			if player's y location is less than 40:
+				send "{@name} &cYou cannot use this while falling into the void."
+				stop
+			else:
+				teleport player to {spawn}
+				send "{@name}&7 Teleported to spawn!" to player
+		else:
+			teleport player to {spawn}
+			send "{@name}&7 Teleported to spawn!" to player
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+#Gamemode commands
+command /gamemode [<text>] [<player>]:
+	permission: staff.gamemode.self
+	permission message: &cYou don't have permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a valid gamemode!" to player
+		if arg-1 is "survival" or "creative" or "spectator" or "adventure":
+			if arg-2 is not set:
+				if arg-1 is "survival":
+					set player's gamemode to survival
+					send "{@name} &7Your gamemode was set to &3survival&7!" to player
+				if arg-1 is "creative":
+					set player's gamemode to creative
+					send "{@name} &7Your gamemode was set to &3creative&7!" to player
+				if arg-1 is "spectator":
+					set player's gamemode to spectator
+					send "{@name}] &7Your gamemode was set to &3spectator&7!" to player
+				if arg-1 is "adventure":
+					set player's gamemode to adventure
+					send "{@name} &7Your gamemode was set to &3adventure&7!" to player
+			if arg-2 is set:
+				if player has permission "staff.gamemode.other":
+					if arg-1 is "survival":
+						set arg 2's gamemode to survival
+						send "{@name}&7You have set %arg-2%&7's gamemode to &3survival&7!" to player
+						send "{@name} &7Your gamemode was set to &3survival&7!" to arg 2
+					if arg-1 is "creative":
+						set arg 2's gamemode to creative
+						send "{@name} &7You have set %arg-2%&7's gamemode to &3creative&7!" to player
+						send "{@name} &7Your gamemode was set to &3creative&7!" to arg 2
+					if arg-1 is "spectator":
+						set arg 2's gamemode to spectator
+						send "{@name} &7You have set %arg-2%&7's gamemode to &3spectator&7!" to player
+						send "{@name} &7Your gamemode was set to &3spectator&7!" to arg 2
+					if arg-1 is "adventure":
+						set arg 2's gamemode to adventure
+						send "{@name} &7You have set %arg-2%&7's gamemode to &3adventure&7!" to player
+						send "{@name} &7Your gamemode was set to &3adventure&7!" to arg 2
+				else:
+					send "&cYou don't have permission to change the gamemode of another player!" to player
+			else:
+				send "&cPlease select a valid gamemode!"
+
+command /gms [<player>]:
+	permission: staff.gamemode.self
+	permission message: &cYou don't have permission!
+	trigger:
+		if arg-1 is not set:
+			set player's gamemode to survival
+			send "{@name} &7Your gamemode was set to &3survival&7!" to player
+		if arg-1 is set:
+			if player has permission "staff.gamemode.other":
+				set arg-1's gamemode to survival
+				send "{@name} &7You have set %arg-1%&7's gamemode to &3survival&7!" to player
+				send "{@name} &7Your gamemode was set to &3survival&7!" to arg 1
+			else:
+				send "&cYou don't have permission to change the gamemode of another player!" to player
+
+command /gmc [<player>]:
+	permission: staff.gamemode.self
+	permission message: &cYou don't have permission!
+	trigger:
+		if arg-1 is not set:
+			set player's gamemode to creative
+			send "{@name} &7Your gamemode was set to &3creative&7!" to player
+		if arg-1 is set:
+			if player has permission "staff.gamemode.other":
+				set arg-1's gamemode to creative
+				send "{@name} &7You have set %arg-1%&7's gamemode to &3creative&7!" to player
+				send "{@name} &7Your gamemode was set to &3creative&7!" to arg 1
+			else:
+				send "&cYou don't have permission to change the gamemode of another player!" to player
+
+command /gma [<player>]:
+	permission: staff.gamemode.self
+	permission message: &cYou don't have permission!
+	trigger:
+		if arg-1 is not set:
+			set player's gamemode to adventure
+			send "{@name} &7Your gamemode was set to &3adventure&7!" to player
+		if arg-1 is set:
+			if player has permission "staff.gamemode.other":
+				set arg-1's gamemode to adventure
+				send "{@name} &7You have set %arg-1%&7's gamemode to &3adventure&7!" to player
+				send "{@name} &7Your gamemode was set to &3adventure&7!" to arg 1
+			else:
+				send "&cYou don't have permission to change the gamemode of another player!" to player
+
+command /gmsp [<player>]:
+	permission: staff.gamemode.self
+	permission message: &cYou don't have permission!
+	trigger:
+		if arg-1 is not set:
+			set player's gamemode to spectator
+			send "{@name} &7Your gamemode was set to &3spectator&7!" to player
+		if arg-1 is set:
+			if player has permission "staff.gamemode.other":
+				set arg-1's gamemode to spectator
+				send "{@name} &7You have set %arg-1%&7's gamemode to &3spectator&7!" to player
+				send "{@name} &7Your gamemode was set to &3spectator&7!" to arg 1
+			else:
+				send "&cYou don't have permission to change the gamemode of another player!" to player
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+#Teleport
+command /tp [<player>]:
+	aliases: teleport
+	permission: staff.teleport.to
+	permission message: &cYou don't have permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cError! Please select a player to teleport to!" to player
+		if arg-1 is set:
+			teleport player to arg 1
+			send "{@name} Telported to &3%arg-1%&7!" to player
+command /tphere [<player>]:
+	aliases: teleporthere
+	permission: staff.teleport.here
+	permission message: &cYou don't have permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cError! Please select a player to teleport here!" to player
+		if arg-1 is set:
+			teleport arg 1 to player
+			send "{@name} Telported &3%arg-1%&7 to you!" to player
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+#Freeze
+command /freeze [<offline player>]:
+	permission: staff.freeze
+	permission message: &cYou don't have permission!
+	trigger:
+		if arg 1 is set:
+			if {freezed.%arg-1%} is true:
+				if arg 1 does not have permission "staff.freeze.bypass":
+					set {freezed.%arg-1%} to false
+					reset arg 1's walk speed
+					send "{@name} &7You have been &3unfroze&7!" to arg 1
+					send "{@name} &7You have &3unfroze &7%arg-1%&7!" to player
+				else:
+					send "{@name}&7 You cannot &3freeze&7 that player!" to player
+			else:
+				if arg 1 does not have permission "staff.freeze.bypass":
+					set {freezed.%arg-1%} to true
+					set arg-1's walk speed to 0
+					send "{@name} &7You have been &3froze&7!" to arg 1
+					send "{@name} &7You have &3froze &7%arg-1%&7!" to player
+				else:
+					send "{@name}&7 You cannot &3freeze &7that player!" to player
+		else:
+			send "{@name} Please select a player to be &3frozen&7!"
+on any move:
+  if {freezed.%player%} is true:
+    cancel event
+    send "{@name}&7 You cannot move while frozen!" to player
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------------------------------
+#Fly
+command /fly [<player>]:
+    permission: staff.fly
+    permission message: &cYou don't have permission!
+    trigger:
+        if arg-1 is not set:
+            if player can fly:
+                disable fly for player
+                set {flyenable.%player's uuid%} to false
+                send "{@name} &7You have &cdisabled &7flying for yourself"
+            else:
+                enable fly for player
+                set {flyenable.%player's uuid%} to true
+                send "{@name} &7You have &aenabled &7flying for yourself"
+        else:
+            if player has permission "staff.fly.other":
+                if arg-1 can fly:
+                    disable fly for arg-1
+                    set {flyenable.%arg-1's uuid%} to false
+                    send "{@name} &7You have &cdisabled &7flying for %arg-1%" to player
+                    send "{@name} &7%player% has &cdisbled &7flying for you" to arg-1
+                else:
+                    enable fly for arg-1
+                    set {flyenable.%arg-1's uuid%} to true
+                    send "{@name} &7You have &aenabled &7flying for %arg-1%" to player
+                    send "{@name} &7%player% has &aenabled &7flying for you" to arg-1
+            else:
+                send "&cYou don't have permission to enable flying for others"
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------
+#SPEED--------------------------------------------------------------------------------------------------------------------------------------------------------
+command /speed [<number>]:
+    permission: staff.speed
+    permission message:&c You don't have permission!
+    trigger:
+        if arg-1 is not set:
+            send "{@name} &b/speed <amount>"
+        else:
+            if player is flying:
+                set player's flying speed to product(arg-1, 0.1)
+                send "{@name} &7Set your flying speed to &b%arg-1%"
+            else:
+                set player's walking speed to product(arg-1, 0.1)
+                send "{@name} &7Set your walking speed to &b%arg-1%"
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Rules
+command /rules:
+    description: Show the server rules
+    trigger:
+        send "&7&m---------------------{@helpname}&7&m---------------------" to player
+        send "&7&31. &7Hacking or using a modification to gain an advantage is not allowed" to player
+        send "&7&32. &7AFKing/idling on income sources is not allowed" to player
+        send "&7&33. &7Teaming is allowed in duos, any larger teams are not allowed (May change)" to player
+        send "&7&34. &7Disrespect, harrassment, or discrimination towards anyone will not be tolerated" to player
+        send "&7&35. &7Keep swearing to a minimum and do not direct it at other users" to player
+        send "&7&36. &7Spamming, Chat flood, excessive caps, encouraging spam and similar acts are not allowed" to player
+        send "&7&37. &7Exercise common sense" to player
+        send "&7&38. &7Staff have the final say in all situtations. If you have a problem with a decision contact a manager or admin." to player
+        send "&7&m---------------------{@helpname}&7&m---------------------" to player
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+#Player information sheet
+on join:
+	if {flyenable.%player's uuid%} is true:
+		send "{@name} &7Flight is enabled for you"
+		wait 10 tick
+		enable fly for player
