@@ -61,7 +61,7 @@ on respawn:
                 teleport player to location(32.7, 66, -31.7, world "arena", 44.5, 0.5)
         else:
             send "{@name} &cYou have auto join enabled but do not have a color selected, use /join to select a color" to player
-
+    set {sprot.%player's uuid%} to now
 on death of player:
     send "&6&lDEATH &7%victim's name%" to all players where [input is not victim]
     if {onhill::%player's uuid%} is true:
@@ -208,6 +208,11 @@ command /ksset <integer> <integer>:
 
 on damage of player:
     if attacker is player:
+        if {sprot.%victim's uuid%} is set:
+            if difference between {sprot.%victim's uuid%} and now < 3 seconds:
+                cancel event
+            else:
+                delete {sprot.%victim's uuid%}
         set {%victim%.lastattacker} to attacker
         set {%victim%.attacktime} to now
         if {invulnerable.%victim's uuid%} is true:
