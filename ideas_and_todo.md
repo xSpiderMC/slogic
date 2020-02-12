@@ -35,5 +35,5 @@
 - [ ] void death instant
 - [ ] some sort of passive income
 - [ ] be able to just tier up gear instead of buying new things
-- [ ] gamble points
+- [x] gamble points - thanks dependency
 - [ ] duels / other minigames

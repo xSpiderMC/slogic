@@ -291,7 +291,7 @@ command /punish [<offline player>]:
 							else:
 								set the line loop-value of {_item}'s lore to "&a● &7%{alts.%arg-1's ip%::%loop-value%}%"
 				open virtual chest inventory with size 5 named "&6Punish %arg-1%" to player
-				format gui slot 4 of player with skull of arg-1 named "&6%arg-1%" with lore "&7Rank - %{_rank}%" and "&7Status - %{_status}%" to do nothing
+				format gui slot 4 of player with skull of arg-1 named "&6%arg-1%" with lore "&7Rank - %group of arg-1%" and "&7Status - %{_status}%" to do nothing
 				if {_item} is not set:
 					format gui slot 12 of player with emerald named "&6Alternate accounts" with lore "%{_alt}%" to do nothing
 				else:
@@ -997,7 +997,6 @@ command /staffhelp:
 		send "&7&m---------------{@helpname}&7&m---------------"
 		send "&7●&6 /punish (player)&7 - Opens the punishment GUI"
 		send "&7●&6 /info (player)&7 - Sends player information"
-		send "&7●&6 /rank (player)&7 - Opens the rank GUI"
 		send "&7●&6 /silent (true/false)&7 - Toggles silent punishment mode"
 		send "&7●&6 /staffchat (on/of|message)&7 or&6 ! (message)&7 - Sends a message to the staff chat"
 		send "&7●&6 /puns (player)&7 - Opens the punishment GUI"
