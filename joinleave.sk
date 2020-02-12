@@ -1,5 +1,5 @@
 on join:
-    if {vanish.%player%} is true:
+    if {vanish.%player's uuid%} is true:
         set join message to ""
         hide player from all players where [input doesn't have permission "staff.vanish"]
     else:
