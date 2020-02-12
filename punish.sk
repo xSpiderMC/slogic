@@ -1113,7 +1113,35 @@ on join:
 		set {skriptRank::%player's uuid%} to "Default"
 	if {formatting::%player's uuid%} is not set:
 		set {formatting::%player's uuid%} to ""
+command /vanish:
+    aliases: /v
+    permission: staff.vanish
+    permission message: &cYou don't have permission!
+    trigger:
+        if {vanish.%player's uuid%} is true:
+            loop all players:
+                loop-value doesn't have permission "staff.vanish"
+                add loop-value to {_vanishto::*}
 
+            reveal player from all players
+            set {vanish.%player's uuid%} to false
+            send "{@name} Vanish has been &cdisabled&7!"
+            broadcast "&7[&a+&7] &9%player%"
+            loop all players:
+                if loop-value has permission "staff.vanish":
+                    send "{@name} &7%player%&7 has &6disabled&7 their vanish!" to loop-value
+        else:
+            loop all players:
+                loop-value doesn't have permission "staff.vanish"
+                add loop-value to {_vanishto::*}
+
+            hide player from {_vanishto::*}
+            set {vanish.%player's uuid%} to true
+            send "{@name} Vanish has been &aenabled&7!"
+            broadcast "&7[&c-&7] &9%player%"
+            loop all players:
+                if loop-value has permission "staff.vanish":
+                    send "{@name} &7%player%&7 has &6enabled&7 their vanish!" to loop-value
 command /staffhelp:
 	permission: staff.help
 	permission message: &cNo permission!
