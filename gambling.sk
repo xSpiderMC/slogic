@@ -28,6 +28,8 @@ every 10 minutes:
 
 
 command /lotto [<text>] [<integer>]:
+	cooldown: 10 seconds
+	cooldown message: &cYou need to wait before doing this again
 	trigger:
 		if arg-1 is "add":
 			if arg-2 is not set:
@@ -39,10 +41,11 @@ command /lotto [<text>] [<integer>]:
 			else:
 				if {lottery::*} does not contain player:
 					add player to {lottery::*}
-				add {_n} to {lottery.%player's uuid%}
-				add {_n} to {lottery.total}
+				add arg-2 to {lottery.%player's uuid%}
+				add arg-2 to {lottery.total}
+				remove arg-2 from {points::%uuid of player%}
 				refreshScoreboard(player)
-				broadcast "&6&lLottery&7 | &6%player%&7 added &6%{_n}%&7 points to the lottery! (%{lottery.total}%&7)"
+				broadcast "&6&lLottery&7 | &6%player%&7 added &6%arg-2%&7 points to the lottery! (%{lottery.total}%&7)"
 		else if arg-1 is "list":
 			send "&6&lLottery&7 | The total lottery pool is &6%({lottery.total} ? 0)%&7! You have contributed &6%({lottery.%player's uuid%} ? 0)%&7!"
 		else:
@@ -60,7 +63,7 @@ command /gamble:
 	trigger:
 		open virtual chest inventory named "&6Gamble" with size 3 to player
 		format gui slot (all integers between 0 and 26) of player with gray stained glass pane named "&7" to do nothing
-		format gui slot 10 of player with sunflower named "&6Coinflip" with lore "&7Double your points with this simple game of chance!" and "&7(Click to gamble)" to run:
+		format gui slot 10 of player with sunflower named "&6Coinflip" with lore "&7Double your points" and "&7Simple game of chance!" and "&7(Click to gamble)" to run:
 			close player's inventory
 			send "&c/coinflip <heads/tails> <amount>"
 		format gui slot 11 of player with paper named "&6Lottery" with lore "&7Join the lottery to win a grand prize!" and "&7(Click to gamble)" to run:
@@ -70,14 +73,16 @@ command /gamble:
 			send "&7●&6 /lotto list&7 - Sends lotto data"
 			send "&7●&6 /lotto help&7 - Sends this help menu"
 			send "&3---------------&6&lLottery&3---------------"
-		format gui slot 12 of player with emerald named "&6What are the odds?" with lore "&7Quadruple your points by guessing the right number!" and "&7(Click to gamble)" to run:
+		format gui slot 12 of player with emerald named "&6What are the odds?" with lore "&7Quadruple your points" and "&7Just guess the right number!" and "&7(Click to gamble)" to run:
 			close player's inventory
 			send "&c/odds <number 1-10> <amount>"
-		format gui slot 13 of player with diamond named "&6Roll it!" with lore "&7Triple your points by guessing the total of 2 rolled dice!" and "&7(Click to gamble)" to run:
+		format gui slot 13 of player with diamond named "&6Roll it!" with lore "&7Triple your points" and "&7Guess the total of 2 rolled dice!" and "&7(Click to gamble)" to run:
 			close player's inventory
 			send "&c/dice <number 2-12> <amount>"
 
 command /coinflip [<text>] [<integer>]:
+	cooldown: 10 seconds
+	cooldown message: &cYou need to wait before doing this again
 	trigger:
 		if arg-1 is not set:
 			send "&cPlease select ""heads"" or ""tails"""
@@ -93,6 +98,8 @@ command /coinflip [<text>] [<integer>]:
 			coinflip(player, arg-2, arg-1)
 
 command /odds [<integer>] [<integer>]:
+	cooldown: 10 seconds
+	cooldown message: &cYou need to wait before doing this again
 	trigger:
 		if arg-1 is not set:
 			send "&cPlease select a number 1-10"
@@ -115,6 +122,8 @@ command /odds [<integer>] [<integer>]:
 			refreshScoreboard({_p})
 
 command /dice [<integer>] [<integer>]:
+	cooldown: 10 seconds
+	cooldown message: &cYou need to wait before doing this again
 	trigger:
 		if arg-1 is not set:
 			send "&cPlease select a number 2-12"

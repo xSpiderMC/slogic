@@ -33,12 +33,17 @@ on chat:
             delete {bankdep.%uuid of player%} 
             exit
         if message is "all":
-            send "{@name} &7Deposting &6all (%{points::%uuid of player%}%&6)"
-            add {points::%uuid of player%} to {bankbal::%uuid of player%}
-            set {points::%uuid of player%} to 0
-            refreshScoreboard(player)
-            play sound "ENTITY_ARROW_HIT_PLAYER" to player
-            delete {bankdep.%uuid of player%}
+            if {points::%uuid of player%} < 0:
+                play sound "ENTITY_VILLAGER_NO" to player
+                send "{@name} &cYour points are less than 0, contact a manager for your points to be reset!"
+                delete {bankdep.%uuid of player%}
+            else:
+                send "{@name} &7Deposting &6all (%{points::%uuid of player%}%&6)"
+                add {points::%uuid of player%} to {bankbal::%uuid of player%}
+                set {points::%uuid of player%} to 0
+                refreshScoreboard(player)
+                play sound "ENTITY_ARROW_HIT_PLAYER" to player
+                delete {bankdep.%uuid of player%}
         else:
             set {_in} to message parsed as number
             if {_in} is not set:
