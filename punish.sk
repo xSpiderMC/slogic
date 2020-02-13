@@ -868,14 +868,14 @@ on chat:
 	if {staffchat.%player%} is set:
 		set {_staffmsg} to colored message
 		cancel event
-		send "&6Staff Chat &7» &6%player's display name%&f: %{_staffmsg}%" to all players where [input has permission "staff.staffchat"]
+		send "&6Staff Chat &7» %formatted player's prefix%&6%player's display name%&7: &e%{_staffmsg}%" to all players where [input has permission "staff.staffchat"]
 	else:
 		if message starts with "!":
 			if player has permission "staff.staffchat":
 				set {_staffmsg} to message
 				replace all "!" with "" in {_staffmsg}
 				cancel event
-				send "&6Staff Chat &7» &6%player's display name%&f: %{_staffmsg}%" to all players where [input has permission "staff.staffchat"]
+				send "&6Staff Chat &7» %formatted player's prefix%&6%player's display name%&7: &e%{_staffmsg}%" to all players where [input has permission "staff.staffchat"]
 
 command /staffchat [<text>]:
 	aliases: /sc, /staffc
@@ -894,7 +894,7 @@ command /staffchat [<text>]:
 				send "{@name} &7Staffchat has been &6disabled&7!" to player
 				send ""
 			else:
-				send "&6Staff Chat &7» &6%player's display name%&f: %colored arg-1%" to all players where [input has permission "staff.staffchat"]
+				send "&6Staff Chat &7» %formatted player's prefix%&6%player's display name%&7: &e%colored arg-1%" to all players where [input has permission "staff.staffchat"]
 		else:
 			send "&c/staffchat [<on/off>|<message>]"
 command /clearchat:
