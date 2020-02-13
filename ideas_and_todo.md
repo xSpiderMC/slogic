@@ -37,3 +37,6 @@
 - [ ] be able to just tier up gear instead of buying new things
 - [x] gamble points - thanks dependency
 - [ ] duels / other minigames
+- [ ] bot punishments and in game punishments linked
+- [ ] /fix all and a price confirmation
+- [ ] assign each history an id to allow histories to be deleted 
