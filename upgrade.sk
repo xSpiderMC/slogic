@@ -9,22 +9,47 @@ on right click:
             format gui slot (all integers between 0 and 26) of player with light gray stained glass pane named " "
             format gui slot 0, and 1, and 10, and 18, and 19 of player with gray stained glass pane named " "
             format gui slot 9 of player with player's tool
+            format gui slot 22 of player with barrier named "&cClose" to close
             set {_cost} to 50 + (50 * level of efficiency of the player's tool)
             if level of efficiency of tool is set:
                 if level of efficiency of tool of player < 4:
                     format gui slot 3 of player with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff(player, {_cost})
                 else:
-                    format gui slot 3 of player with enchanted book of efficiency 1 named "&7Enchant with Efficiency &c[MAXED]" with lore "&cMAXED" to do nothing
+                    format gui slot 3 of player with book named "&7Enchant with Efficiency &c[MAXED]" with lore "&cMAXED" to do nothing
+                    add 1 to {_maxed}
             else:
                 format gui slot 3 of player with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff(player, {_cost})
             set {_fcost} to 100 + (50 * level of fortune of the player's tool)
             if level of fortune of tool is set:
                 if level of fortune of tool of player < 3:
                     format gui slot 5 of player with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_fcost}%)" to run function enchantFortune(player, {_fcost})
-                else:
-                    format gui slot 5 of player with enchanted book of fortune 1 named "&7Enchant with Fortune &c[MAXED]" with lore "&cMAXED" to run function enchantFortune(player, {_cost})
+                else:        
+                    format gui slot 5 of player with book named "&7Enchant with Fortune &c[MAXED]" with lore "&cMAXED" to run function enchantFortune(player, {_cost})
+                    add 1 to {_maxed}
             else:
                 format gui slot 5 of player with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_fcost}%)" to run function enchantFortune(player, {_fcost})
+            if {_maxed} = 2:
+                if tool of player is stone pickaxe:
+                    format gui slot 17 of player with iron pickaxe with name "&aNext Pickaxe" with lore "&7Click to buy" and "&6(1200 points)" to run:
+                        if {points::%uuid of player%} > 1200:
+                            set player's tool to iron pickaxe
+                            remove 1200 from {points::%uuid of player%}
+                            close player's inventory
+                            send "{@name} Successfully upgraded to a &6Iron Pickaxe"
+                else if tool of player is iron pickaxe:
+                    format gui slot 17 of player with diamond pickaxe with name "&aNext Pickaxe" with lore "&7Click to buy" and "&6(1200 points)" to run:
+                        if {points::%uuid of player%} > 2000:
+                            set player's tool to diamond pickaxe
+                            remove 2000 from {points::%uuid of player%}
+                            close player's inventory
+                            send "{@name} Successfully upgraded to a &6Diamond Pickaxe"
+                if tool of player is not diamond pickaxe:
+                    format gui slot 7, 8, 16, 25, and 26 of player with lime stained glass pane named "&aUpgrade your pick!" to do nothing  
+                else:
+                    format gui slot 7, 8, 16, 17, 25, and 26 of player with red stained glass pane named "&cMaxed Pickaxe Upgrade!" to do nothing
+            else:
+                format gui slot 7, 8, 16, 17, 25, and 26 of player with red stained glass pane named "&cYou cannot upgrade your pickaxe" to do nothing    
+            
 
 function enchantEff(p: player, cost: integer):
     set {_up} to uuid of {_p}
@@ -35,6 +60,7 @@ function enchantEff(p: player, cost: integer):
             set {points::%{_up}%} to {points::%{_up}%} - {_cost}
             refreshScoreboard({_p})
             set {_cost} to 50 + (50 * level of efficiency of tool of {_p})
+            format gui slot 9 of {_p} with tool of {_p}
             format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff({_p}, {_cost})
         else:
             set {_elvl} to (level of efficiency of tool of {_p} + 1)
@@ -44,9 +70,10 @@ function enchantEff(p: player, cost: integer):
                 set {points::%{_p}%} to {points::%{_up}%} - {_cost}
                 refreshScoreboard({_p})
                 set {_cost} to 50 + (50 * level of efficiency of tool of {_p})
+                format gui slot 9 of {_p} with tool of {_p}
                 format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff({_p}, {_cost})
             else:
-                format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency &c[MAXED]" with lore "&cMAXED UPGRADE" to do nothing
+                format gui slot 3 of {_p} with book named "&7Enchant with Efficiency &c[MAXED]" with lore "&cMAXED UPGRADE" to do nothing
     else:
         send "{@nopoints} &cYou need %{_cost}% &cfor this" to {_p}
 
@@ -60,7 +87,8 @@ function enchantFortune(p: player, cost: integer):
             set {points::%{_up}%} to {points::%{_up}%} - {_cost}
             refreshScoreboard({_p})
             set {_cost} to 100 + (50 * level of fortune of tool of {_p})
-            format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Fortune" with lore "&6(%{_cost}%)" to run function enchantFortune({_p}, {_cost})
+            format gui slot 9 of {_p} with tool of {_p}
+            format gui slot 5 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_cost}%)" to run function enchantFortune({_p}, {_cost})
         else:
             set {_elvl} to (level of fortune of tool of {_p} + 1)
             if {_elvl} < 4:
@@ -69,8 +97,9 @@ function enchantFortune(p: player, cost: integer):
                 set {points::%{_p}%} to {points::%{_up}%} - {_cost}
                 refreshScoreboard({_p})
                 set {_cost} to 100 + (50 * level of fortune of tool of {_p})
-                format gui slot 3 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_cost}%)" to run function enchantFortune({_p}, {_cost})
+                format gui slot 9 of {_p} with tool of {_p}
+                format gui slot 5 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_cost}%)" to run function enchantFortune({_p}, {_cost})
             else:
-                format gui slot 3 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune &c[MAXED]" with lore "&cMAXED UPGRADED" to do nothing
+                format gui slot 5 of {_p} with book named "&7Enchant with Fortune &c[MAXED]" with lore "&cMAXED UPGRADED" to do nothing
     else:
         send "{@nopoints} &cYou need %{_cost}% &cfor this" to {_p}

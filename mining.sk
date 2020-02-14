@@ -5,7 +5,7 @@ on block break:
         if player's gamemode is survival:
             if event-block is gold ore:
                 if player's tool is enchanted with fortune:
-                    set {points::%uuid of player%} to {points::%uuid of player%} + (1.5 + (2 * level of fortune of tool of player))
+                    set {points::%uuid of player%} to {points::%uuid of player%} + (1.5 + level of fortune of tool of player)
                 else:
                     set {points::%uuid of player%} to {points::%uuid of player%} + 1.5
                 set {_xp} to genXP("ore")
@@ -18,7 +18,7 @@ on block break:
                 set event-block to gold ore
             else if event-block is gold block:
                 if player's tool is enchanted with fortune:
-                    set {points::%uuid of player%} to {points::%uuid of player%} + (5 + (2 * level of fortune of tool of player))
+                    set {points::%uuid of player%} to {points::%uuid of player%} + (5 + level of fortune of tool of player)
                 else:
                     set {points::%uuid of player%} to {points::%uuid of player%} + 5
                 set {_xp} to genXP("gblock")
