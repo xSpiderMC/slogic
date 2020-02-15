@@ -1,0 +1,37 @@
+function startCombatLog(v: player, a: player): #v= victim, a= attacker
+	set {combatLog::%{_v}%} to {_a}
+	set {_remainingTime} to 10 seconds
+	loop 10 times:
+		if {combatLog::%{_v}%} is {_a}:
+			send action bar "&6&lCOMBAT &7(%{_a}%&7) | &6%{_remainingTime}%" to {_v}
+			remove 1 second from {_remainingTime}
+			wait 1 second
+		else:
+			stop loop
+	send action bar "&6&lCOMBAT &7| You are no longer in combat!" to {_v} if {combatLog::%{_v}%} is {_a}
+	delete {combatLog::%{_v}%} if {combatLog::%{_v}%} is {_a}
+on damage:
+	startCombatLog(victim, attacker)
+	startCombatLog(attacker, victim)
+on command "spawn":
+	send "&cYou cannot teleport while in combat!" if {combatLog::%player%} is set
+	cancel event if {combatLog::%player%} is set
+on quit:
+	if {combatLog::%player%} is set:
+		send "&6&lDEATH &7%player's name%&7 logged out while in combat" to all players where [input is not player]
+		set {_u} to uuid of player
+		set {_au} to uuid of {combatlog::%player%}
+		set {_am} to {points::%{_u}%}
+		set {_removeamt} to product(0.05, {_am})
+		remove {_removeamt} from {points::%{_u}%}
+		add {_removeamt} to {points::%{_au}%}
+		send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to {combatLog::%player%}
+		play sound "ENTITY_ARROW_HIT_PLAYER" to {combatLog::%player%}
+		set {_xp} to genXP("kill")
+		addXP({combatLog::%player%}, {_xp})
+		add 1 to {kills::%{_au}%}
+		add 1 to {deaths::%{_u}%}
+		refreshScoreboard({combatLog::%player%})
+		refreshScoreboard(player)
+		delete {combatLog::%player%}
+		teleport player to {spawn}
