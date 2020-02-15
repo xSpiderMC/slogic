@@ -39,7 +39,7 @@ on right click:
                         else:
                             send "{@nopoints} &cYou need &61200 &cpoints for this" to player
                 else if tool of player is iron pickaxe:
-                    format gui slot 17 of player with diamond pickaxe with name "&aNext Pickaxe" with lore "&7Click to buy" and "&6(1200 points)" to run:
+                    format gui slot 17 of player with diamond pickaxe with name "&aNext Pickaxe" with lore "&7Click to buy" and "&6(2000 points)" to run:
                         if {points::%uuid of player%} > 2000:
                             set player's tool to diamond pickaxe
                             remove 2000 from {points::%uuid of player%}
@@ -61,46 +61,27 @@ function enchantEff(p: player, cost: integer):
         if tool of {_p} is not enchanted with efficiency:
             enchant tool of {_p} with efficiency
             send "{@name} &7Successfully upgraded your pickaxe with &6Efficiency" to {_p}
-            set {points::%{_up}%} to {points::%{_up}%} - {_cost}
+            remove {_cost} from {points::%{_up}%}
             refreshScoreboard({_p})
-            set {_cost} to 50 + (50 * level of efficiency of tool of {_p})
+            set {_ecost} to 50 + (50 * level of efficiency of tool of {_p})
             format gui slot 9 of {_p} with tool of {_p}
-            format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff({_p}, {_cost})
+            format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_ecost}%)" to run function enchantEff({_p}, {_ecost})
         else:
             set {_elvl} to (level of efficiency of tool of {_p} + 1)
             if {_elvl} < 5:
                 enchant tool of {_p} with "efficiency %{_elvl}%" parsed as enchantment type
                 send "{@name} &7Successfully upgraded your pickaxe with &6Efficiency" to {_p}
-                set {points::%{_p}%} to {points::%{_up}%} - {_cost}
+                remove {_cost} from {points::%{_up}%}
                 refreshScoreboard({_p})
-                set {_cost} to 50 + (50 * level of efficiency of tool of {_p})
+                set {_ecost} to 50 + (50 * level of efficiency of tool of {_p})
                 format gui slot 9 of {_p} with tool of {_p}
-                format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_cost}%)" to run function enchantEff({_p}, {_cost})
+                format gui slot 3 of {_p} with enchanted book of efficiency 1 named "&7Enchant with Efficiency" with lore "&6(%{_ecost}%)" to run function enchantEff({_p}, {_ecost})
             else:
                 format gui slot 3 of {_p} with book named "&7Enchant with Efficiency &c[MAXED]" with lore "&cMAXED UPGRADE" to do nothing
                 if level of fortune of tool of {_p} = 3:
                     if tool of {_p} is not diamond pickaxe:
-                        format gui slot 7, 8, 16, 25, and 26 of {_p} with lime stained glass pane named "&aUpgrade your pick!" to do nothing  
-                    else:
-                        format gui slot 7, 8, 16, 17, 25, and 26 of {_p} with red stained glass pane named "&cMaxed Pickaxe Upgrade!" to do nothing
-                    if tool of {_p} is stone pickaxe:
-                        format gui slot 17 of {_p} with iron pickaxe with name "&aNext Pickaxe" with lore "&7Click to buy" and "&6(1200 points)" to run:
-                            if {points::%{_up}%} > 1200:
-                                set tool of {_up} to iron pickaxe
-                                remove 1200 from {points::%{_up}%}
-                                close {_p}'s inventory
-                                send "{@name} Successfully upgraded to a &6Iron Pickaxe" to {_p}
-                            else:
-                                send "{@nopoints} &cYou need &61200 &cpoints for this" to {_p}
-                    else if tool of {_p} is iron pickaxe:
-                        format gui slot 17 of {_p} with diamond pickaxe with name "&aNext Pickaxe" with lore "&7Click to buy" and "&6(1200 points)" to run:
-                            if {points::%{_up}%} > 2000:
-                                set tool of {_p} to diamond pickaxe
-                                remove 2000 from {points::%uuid of player%}
-                                close inventory of {_p}
-                                send "{@name} Successfully upgraded to a &6Diamond Pickaxe" to {_p}
-                            else:
-                                send "{@nopoints} &cYou need &62000 &cpoints for this" to {_p}
+                        send "{@name} Reopen the inventory to continue upgrading" to {_p}
+                    close inventory of {_p}
 
     else:
         send "{@nopoints} &cYou need %{_cost}% &cfor this" to {_p}
@@ -114,43 +95,25 @@ function enchantFortune(p: player, cost: integer):
             send "{@name} &7Successfully upgraded your pickaxe with &6Fortune" to {_p}
             set {points::%{_up}%} to {points::%{_up}%} - {_cost}
             refreshScoreboard({_p})
-            set {_cost} to 100 + (50 * level of fortune of tool of {_p})
+            set {_fcost} to 100 + (50 * level of fortune of tool of {_p})
             format gui slot 9 of {_p} with tool of {_p}
-            format gui slot 5 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_cost}%)" to run function enchantFortune({_p}, {_cost})
+            format gui slot 5 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_fcost}%)" to run function enchantFortune({_p}, {_fcost})
         else:
             set {_elvl} to (level of fortune of tool of {_p} + 1)
             if {_elvl} < 4:
                 enchant tool of {_p} with "fortune %{_elvl}%" parsed as enchantment type
                 send "{@name} &7Successfully upgraded your pickaxe with &6Fortune" to {_p}
-                set {points::%{_p}%} to {points::%{_up}%} - {_cost}
+                remove {_cost} from {points::%{_up}%}
                 refreshScoreboard({_p})
-                set {_cost} to 100 + (50 * level of fortune of tool of {_p})
+                set {_fcost} to 100 + (50 * level of fortune of tool of {_p})
                 format gui slot 9 of {_p} with tool of {_p}
-                format gui slot 5 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_cost}%)" to run function enchantFortune({_p}, {_cost})
+                format gui slot 5 of {_p} with enchanted book of fortune 1 named "&7Enchant with Fortune" with lore "&6(%{_fcost}%)" to run function enchantFortune({_p}, {_fcost})
             else:
                 format gui slot 5 of {_p} with book named "&7Enchant with Fortune &c[MAXED]" with lore "&cMAXED UPGRADED" to do nothing
-                if level of efficiency of tool of {_p} = 3:
+                if level of efficiency of tool of {_p} = 4:
                     if tool of {_p} is not diamond pickaxe:
-                        format gui slot 7, 8, 16, 25, and 26 of {_p} with lime stained glass pane named "&aUpgrade your pick!" to do nothing  
-                    else:
-                        format gui slot 7, 8, 16, 17, 25, and 26 of {_p} with red stained glass pane named "&cMaxed Pickaxe Upgrade!" to do nothing
-                    if tool of {_p} is stone pickaxe:
-                        format gui slot 17 of {_p} with iron pickaxe with name "&aNext Pickaxe" with lore "&7Click to buy" and "&6(1200 points)" to run:
-                            if {points::%{_up}%} > 1200:
-                                set tool of {_up} to iron pickaxe
-                                remove 1200 from {points::%{_up}%}
-                                close {_p}'s inventory
-                                send "{@name} Successfully upgraded to a &6Iron Pickaxe" to {_p}
-                            else:
-                                send "{@nopoints} &cYou need &61200 &cpoints for this" to {_p}
-                    else if tool of {_p} is iron pickaxe:
-                        format gui slot 17 of {_p} with diamond pickaxe with name "&aNext Pickaxe" with lore "&7Click to buy" and "&6(1200 points)" to run:
-                            if {points::%{_up}%} > 2000:
-                                set tool of {_p} to diamond pickaxe
-                                remove 2000 from {points::%uuid of player%}
-                                close inventory of {_p}
-                                send "{@name} Successfully upgraded to a &6Diamond Pickaxe" to {_p}
-                            else:
-                                send "{@nopoints} &cYou need &62000 &cpoints for this" to {_p}
+                        send "{@name} Reopen the inventory to continue upgrading" to {_p}
+                    close inventory of {_p}
+                    
     else:
         send "{@nopoints} &cYou need %{_cost}% &cfor this" to {_p}
