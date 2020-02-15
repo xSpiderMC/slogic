@@ -18,7 +18,7 @@ on command "spawn":
 	cancel event if {combatLog::%player%} is set
 on quit:
 	if {combatLog::%player%} is set:
-		send "&6&lDEATH &7%player's name%&7 logged out while in combat" to all players where [input is not player]
+		send "&6&lDEATH &3%player's name%&7 logged out while in combat" to all players where [input is not player]
 		set {_u} to uuid of player
 		set {_au} to uuid of {combatlog::%player%}
 		set {_am} to {points::%{_u}%}
