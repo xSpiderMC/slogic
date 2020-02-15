@@ -27,7 +27,7 @@
 - [x] ore to get points?
 - [ ] random events to gain points, ex: go to certain area and type what's on sign in chat
 - [ ] ranks names currently are: VIP, (not decided), (notdecided) - could be knight, quuen, king or - Brook, Knight, Bishop, Queen, King [For ranks maybe?] 
-- [ ] combat log
+- [x] combat log
 - [x] fix tutorial (might be buggy)
 - [x] autobroadcast **works but listing position in queue might be funny with removing them**
 - [ ] Balance items, ~~leather armor gets 1 shot by diamond sharpness 1~~
@@ -39,4 +39,4 @@
 - [ ] duels / other minigames
 - [ ] bot punishments and in game punishments linked
 - [ ] /fix all and a price confirmation
-- [ ] assign each history an id to allow histories to be deleted 
+- [x] assign each history an id to allow histories to be deleted 
