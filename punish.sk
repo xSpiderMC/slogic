@@ -369,24 +369,20 @@ on join:
 	else:
 		if {names.%player's uuid%::*} does not contain name of player:
 			add name of player to {names.%player's uuid%::*}
-
-on join:
 	if {alts.%player's ip%::*} is not set:
 		add name of player to {alts.%player's ip%::*}
 	else:
 		if {alts.%player's ip%::*} does not contain player:
 			add name of player to {alts.%player's ip%::*}
-on join:
 	set {ip.%player's uuid%} to player's ip
-on join:
 	if {playtime.%player's uuid%} is not set:
 		set {playtime.%player's uuid%} to 0
 	while player is online:
 		add 1 to {playtime.%player's uuid%}
 		wait 1 minute
-on join:
 	if {firstjoin.%player's uuid%} is not set:
 		set {firstjoin.%player's uuid%} to now
+
 on quit:
 	set {lastseen.%player's uuid%} to now
 
