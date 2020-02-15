@@ -35,6 +35,9 @@ function warn(p: offline player, s: offline player, r: text, q: boolean): #p: ta
 	add 1 to {warn::%{_p}%}
 	set {warn.reason.%{warn::%{_p}%}%::%{_p}%} to {_r}
 	set {warn.issued.%{warn::%{_p}%}%::%{_p}%} to {_s}
+	add 1 to {caseId}
+	set {warn.caseid::%{warn::%{_p}%}%::%{_p}%} to {caseID}
+	set {cases::%{caseId}%} to {warn.caseId::%{warn::%{_p}%}%::%{_p}%}
 	if {_q} is true:
 		send "" to {_p}
 		send "{@name} You have been warned by a staff member for &6%{_r}%&7!" to {_p}
@@ -59,6 +62,9 @@ function kick(p: offline player, s: offline player, r: text, q: boolean):
 	add 1 to {kick::%{_p}%}
 	set {kick.reason.%{kick::%{_p}%}%::%{_p}%} to {_r}
 	set {kick.issued.%{kick::%{_p}%}%::%{_p}%} to {_s}
+	add 1 to {caseId}
+	set {kick.caseid::%{kick::%{_p}%}%::%{_p}%} to {caseID}
+	set {cases::%{caseId}%} to {kick.caseId::%{kick::%{_p}%}%::%{_p}%}
 	if {_q} is true:
 		kick {_p} due to "{@name} You have been kicked by a staff member for &6%{_r}%&7!"
 		loop all players:
@@ -83,6 +89,9 @@ function mute(p: offline player, s: offline player, r: text, q: boolean, l: text
 	set {mute.reason.%{mute::%{_p}%}%::%{_p}%} to {_r}
 	set {mute.issued.%{mute::%{_p}%}%::%{_p}%} to {_s}
 	set {mute.length.%{mute::%{_p}%}%::%{_p}%} to {_length}
+	add 1 to {caseId}
+	set {mute.caseid::%{mute::%{_p}%}%::%{_p}%} to {caseID}
+	set {cases::%{caseId}%} to {mute.caseId::%{mute::%{_p}%}%::%{_p}%}
 	if {muted::*} does not contain {_p}:
 		add {_p} to {muted::*}
 	if {_length} is not "FOREVER":
@@ -166,6 +175,9 @@ function ban(p: offline player, s: offline player, r: text, q: boolean, l: text)
 	set {ban.reason.%{ban::%{_p}%}%::%{_p}%} to {_r}
 	set {ban.issued.%{ban::%{_p}%}%::%{_p}%} to {_s}
 	set {ban.length.%{ban::%{_p}%}%::%{_p}%} to {_length}
+	add 1 to {caseId}
+	set {ban.caseid::%{ban::%{_p}%}%::%{_p}%} to {caseID}
+	set {cases::%{caseId}%} to {ban.caseId::%{ban::%{_p}%}%::%{_p}%}
 	add {_p} to {banned::*}
 	if {_length} is not "FOREVER":
 		set {ban.now.%{ban::%{_p}%}%::%{_p}%} to now
@@ -230,6 +242,9 @@ function blacklist(p: offline player, s: offline player, r: text, q: boolean): #
 	set {ban.reason.%{ban::%{_p}%}%::%{_p}%} to {_r}
 	set {ban.issued.%{ban::%{_p}%}%::%{_p}%} to {_s}
 	set {ban.length.%{ban::%{_p}%}%::%{_p}%} to "&8[&7BLACKLIST&8]"
+	add 1 to {caseId}
+	set {ban.caseid::%{ban::%{_p}%}%::%{_p}%} to {caseID}
+	set {cases::%{caseId}%} to {ban.caseId::%{ban::%{_p}%}%::%{_p}%}
 	add {_p} to {banned::*}
 	if {_q} is true:
 		kick {_p} due to "{@name} You have been blacklisted by a staff member for &6%{_r}%&7!"
@@ -342,19 +357,39 @@ function history(p: offline player, s: player):
 		format gui slot 4 of {_s} with skull of {_p} named "&6%{_p}%" with lore "&7 - %{_warn}%&7 Warnings" and "&7 - %{_kick}%&7 Kicks" and "&7 - %{_mute}%&7 Mutes" and "&7 - %{_ban}%&7 Bans" to do nothing
 		set {_runs} to 8
 		loop {ban::%{_p}%} times:
-			add 1 to {_runs}
-			format gui slot {_runs} of {_s} with red terracotta named "&6Ban" with lore "&7%{ban.reason.%loop-value%::%{_p}%}%" and "&7%{ban.length.%loop-value%::%{_p}%}%" and "&7Issued by &6%{ban.issued.%loop-value%::%{_p}%}%" to do nothing
+			if {cases::*} contains {ban.caseId::%loop-value%::%{_p}%}:
+				add 1 to {_runs}
+				format gui slot {_runs} of {_s} with red terracotta named "&6Ban" with lore "&7%{ban.reason.%loop-value%::%{_p}%}%" and "&7%{ban.length.%loop-value%::%{_p}%}%" and "&7Issued by &6%{ban.issued.%loop-value%::%{_p}%}%" and "&7Case ID &6%{ban.caseId::%loop-value%::%{_p}%}%" to do nothing
 		loop {mute::%{_p}%} times:
-			add 1 to {_runs}
-			format gui slot {_runs} of {_s} with orange terracotta named "&6Mute" with lore  "&7%{mute.reason.%loop-value%::%{_p}%}%" and "&7%{mute.length.%loop-value%::%{_p}%}%" and "&7Issued by &6%{mute.issued.%loop-value%::%{_p}%}%" to do nothing
+			if {cases::*} contains {mute.caseId::%loop-value%::%{_p}%}:
+				add 1 to {_runs}
+				format gui slot {_runs} of {_s} with orange terracotta named "&6Mute" with lore  "&7%{mute.reason.%loop-value%::%{_p}%}%" and "&7%{mute.length.%loop-value%::%{_p}%}%" and "&7Issued by &6%{mute.issued.%loop-value%::%{_p}%}%" and "&7Case ID &6%{mute.caseId::%loop-value%::%{_p}%}%" to do nothing
 		loop {kick::%{_p}%} times:
-			add 1 to {_runs}
-			format gui slot {_runs} of {_s} with yellow terracotta named "&6Kick" with lore "&7%{kick.reason.%loop-value%::%{_p}%}%" and "&7Issued by &6%{kick.issued.%loop-value%::%{_p}%}%" to do nothing
+			if {cases::*} contains {kick.caseId::%loop-value%::%{_p}%}:
+				add 1 to {_runs}
+				format gui slot {_runs} of {_s} with yellow terracotta named "&6Kick" with lore "&7%{kick.reason.%loop-value%::%{_p}%}%" and "&7Issued by &6%{kick.issued.%loop-value%::%{_p}%}%" and "&7Case ID &6%{kick.caseId::%loop-value%::%{_p}%}%" to do nothing
 		loop {warn::%{_p}%} times:
-			add 1 to {_runs}
-			format gui slot {_runs} of {_s} with lime terracotta named "&6Warn" with lore "&7%{warn.reason.%loop-value%::%{_p}%}%" and "&7Issued by &6%{warn.issued.%loop-value%::%{_p}%}%" to do nothing
+			if {cases::*} contains {warn.caseId::%loop-value%::%{_p}%}:
+				add 1 to {_runs}
+				format gui slot {_runs} of {_s} with lime terracotta named "&6Warn" with lore "&7%{warn.reason.%loop-value%::%{_p}%}%" and "&7Issued by &6%{warn.issued.%loop-value%::%{_p}%}%" and "&7Case ID &6%{warn.caseId::%loop-value%::%{_p}%}%" to do nothing
 	else:
 		send "&cNo permission!" to {_s}
+command /delcase [<integer>]:
+	permission: staff.delcase
+	permission message: &cNo permission!
+	trigger:
+		if arg-1 is not set:
+			send "&cPlease select a case ID to delete!"
+		else:
+			if arg-1 is greater than {caseID}:
+				send "&cA case with that ID does not exist!"
+			else:
+				if {cases::*} does not contain arg-1:
+					send "&cThat case does not exist!"
+				else:
+					remove arg-1 from {cases::*}
+					send "{@name} Case with ID&6 %arg-1%&7 deleted!"
+
 command /puns [<offline player>]:
 	permission: staff.puns
 	permission message: &cNo permission!
@@ -968,27 +1003,27 @@ command /report [<offline player>] [<text>]:
 				send "&6&l[REPORT] &7» &6%arg-1%&7 was reported by &6%player%&7 for &6%arg-2%" to all players where [input has permission "staff.reports.view"]
 				send "" to all players where [input has permission "staff.reports.view"]
 command /vanish:
-    aliases: /v
-    permission: staff.vanish
-    permission message: &cYou don't have permission!
-    trigger:
-        if {vanish.%player's uuid%} is true:
-            reveal player from all players
-            set {vanish.%player's uuid%} to false
-            send "{@name} Vanish has been &cdisabled&7!"
-            broadcast "&7[&a+&7] &9%player%"
-            send "{@name} &7%player%&7 has &6disabled&7 their vanish!" to all players where [input has permission "staff.vanish"]
-        else:
-            add all players where [input doesn't have permission "staff.vanish"] to {_vanishto::*}
-            hide player from {_vanishto::*}
-            set {vanish.%player's uuid%} to true
-            send "{@name} Vanish has been &aenabled&7!"
-            broadcast "&7[&c-&7] &9%player%"
-            set {_s::*} to all players where [input has permission "staff.vanish"]
-            send "{@name} &7%player%&7 has &6enabled&7 their vanish!" to all players where [input has permission "staff.vanish"]
-            while {vanish.%player's uuid%} is true:
-            	send action bar "&6&lVANISH &7| You are currently vanished!"
-            	wait 5 seconds
+	aliases: /v
+	permission: staff.vanish
+	permission message: &cYou don't have permission!
+	trigger:
+		if {vanish.%player's uuid%} is true:
+			reveal player from all players
+			set {vanish.%player's uuid%} to false
+			send "{@name} Vanish has been &cdisabled&7!"
+			broadcast "&7[&a+&7] &9%player%"
+			send "{@name} &7%player%&7 has &6disabled&7 their vanish!" to all players where [input has permission "staff.vanish"]
+		else:
+			add all players where [input doesn't have permission "staff.vanish"] to {_vanishto::*}
+			hide player from {_vanishto::*}
+			set {vanish.%player's uuid%} to true
+			send "{@name} Vanish has been &aenabled&7!"
+			broadcast "&7[&c-&7] &9%player%"
+			set {_s::*} to all players where [input has permission "staff.vanish"]
+			send "{@name} &7%player%&7 has &6enabled&7 their vanish!" to all players where [input has permission "staff.vanish"]
+			while {vanish.%player's uuid%} is true:
+				send action bar "&6&lVANISH &7| You are currently vanished!" to player
+				wait 5 seconds
 command /staffhelp:
 	permission: staff.help
 	permission message: &cNo permission!
@@ -1013,6 +1048,7 @@ command /staffhelp:
 		send "&7●&6 /mutechat&7 - Toggles the mutechat"
 		send "&7●&6 /broadcast (text)&7 - Broadcasts a message to the entire server"
 		send "&7●&6 /report (player) (reason)&7 - Reports a player to online staff members (for all players)"
+		send "&7●&6 /delcase (ID)&7 - Removes a punishment case from the history GUI"
 		send "&7●&6 /staffhelp&7 - Sends this help message"
 		send "&7●&6 /staffperms&7 - Sends a permissions help menu"
 		send "&7&m---------------{@helpname}&7&m---------------"
@@ -1039,6 +1075,7 @@ command /staffperms:
 		send "&7●&6 staff.clearchat &7(Admin)"
 		send "&7●&6 staff.mutechat &7(Admin)"
 		send "&7●&6 staff.broadcast &7(Mod)"
+		send "&7●&6 staff.delcase &7(Admin)"
 		send "&7●&6 staff.help &7(Helper)"
 		send "&7●&6 staff.perms &7(Manager)"
 		send "&7●&6 staff.nopunish &7(Admin) - Exempts a player from punishment"
