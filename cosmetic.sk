@@ -1,0 +1,350 @@
+variables:
+	{price.spiral} = 500
+	{price.wings} = 200
+	{price.circle} = 200
+	{price.circle (animated)} = 500
+	{price.large circle} = 300
+	{price.nyan cat} = 200
+	{price.cage} = 500
+	{price.Ring (Rainbow)} = 400
+	{price.Ring (Flame)} = 400
+	{price.tube} = 500
+	{price.heart} = 500
+	{price.cow} = 400
+	{price.sheep} = 400
+	{price.pig} = 400
+	{price.wolf} = 700
+	{price.cat} = 500
+	{price.chicken} = 400
+	{price.fox} = 700
+	{price.mooshroom} = 700
+	{price.panda} = 700
+	{price.turtle} = 700
+	{price.snowball} = 200
+	{price.trampoline} = 1000
+	{price.elytra} = 1000
+	{price.jetpack} = 2000
+
+options:
+	permplugin: "pex" #SET TO "PEX" OR "LUCKPERMS"
+
+command /cosmetics:
+	trigger:
+		if "%region at player%" is not "spawn":
+			send "&cYou may only edit cosmetics at spawn!"
+		else:
+			open virtual chest inventory with size 3 named "&6Cosmetics" to player
+			loop 27 times:
+				format gui slot (loop-number - 1) of player with gray stained glass pane named "&7" to do nothing
+			format gui slot 11 of player with emerald named "&6Particles" to run function particleGUI(player)
+			format gui slot 13 of player with lead named "&6Pets" to run function petGUI(player)
+			format gui slot 15 of player with iron horse armor named "&6Gadgets" to run function gadgetGUI(player)
+on region enter:
+	if "%event-region%" is "arenaspawn" or "innerarena" or "hill":
+		clearGadgets(player)
+function particleGUI(p: player):
+	open virtual chest inventory with size 4 named "&6Particles" to {_p}
+	loop 36 times:
+		format gui slot (loop-number - 1) of {_p} with gray stained glass pane named "&7" to do nothing
+	format gui slot 4 of {_p} with skull of {_p} named "&e%{_p}%" to do nothing
+	format gui slot 35 of {_p} with arrow named "&eBack" to run {_p} command "cosmetics"
+	formatDonorParticle({_p}, 10, "Spiral", "&6&LKNIGHT")
+	formatParticle({_p}, 11, "Wings")
+	formatParticle({_p}, 12, "Circle")
+	formatDonorParticle({_p}, 13, "Circle (Animated)", "&6&lKNIGHT")
+	formatParticle({_p}, 14, "Large Circle")
+	formatParticle({_p}, 15, "Nyan Cat")
+	formatParticle({_p}, 16, "Cage")
+	formatParticle({_p}, 21, "Ring (Rainbow)")
+	formatParticle({_p}, 22, "Ring (Flame)")
+	formatParticle({_p}, 23, "Tube")
+	formatDonorParticle({_p}, 24, "Heart", "&4❤")
+
+function formatParticle(p: player, s: integer, n: text): # s- slot, n- particle name
+	set {_u} to uuid of {_p}
+	if {particle::%{_u}%} is {_n}:
+		format gui slot {_s} of {_p} with emerald named "&6%{_n}%" with lore "&d&LACTIVE" and "&7(Click to deactivate)" to run function disableParticle({_p}, {_n})
+	else if {_p} has permission "particle.%{_n}%":
+		format gui slot {_s} of {_p} with lime dye named "&6%{_n}%" with lore "&a&LUNLOCKED" and "&7(Click to activate)" to run function setParticle({_p}, {_n})
+	else:
+		format gui slot {_s} of {_p} with gray dye named "&6%{_n}%" with lore "&c&LLOCKED" and "&e%{price.%{_n}%}%&e points" and "&7(Click to buy)" to run function buyParticle({_p}, {_n})
+function formatDonorParticle(p: player, s: integer, n: text, r: text):
+	set {_u} to uuid of {_p}
+	if {particle::%{_u}%} is {_n}:
+		format gui slot {_s} of {_p} with emerald named "&6%{_n}%" with lore "&d&lACTIVE" and "&7(Click to deactivate)" to run function disableParticle({_p}, {_n})
+	else if {_p} has permission "particle.%{_n}%":
+		format gui slot {_s} of {_p} with lime dye named "&6%{_n}%" with lore "&a&lUNLOCKED" and "&7(Click to activate)" to run function setParticle({_p}, {_n})
+	else:
+		format gui slot {_s} of {_p} with gray dye named "&6%{_n}%" with lore "&c&lLOCKED" and "&7REQUIRES %{_r}%&7 RANK" to do nothing
+function buyParticle(p: player, t: text):
+	set {_price} to {price.%{_t}%}
+	set {_u} to uuid of {_p}
+	close {_p}'s inventory
+	if {_price} is greater than {points::%{_u}%}:
+		send "&cYou don't have enough points!" to {_p}
+	else:
+		if {@permplugin} is "pex":
+			console command "pex user %{_p}% add particle.%{_t}%"
+		else if {@permplugin} is "luckperms":
+			console command "lp user %{_p}% permission set particle.%{_t}% true"
+		else:
+			broadcast "&6&LALERT | &cUnknown permissions plugin detected in cosmetics skript! Please edit the options!"
+		send "&6&lPARTICLES&7 | Particle &6%{_t}%&7 bought successfully!" to {_p}
+		remove {_price} from {points::%{_u}%}
+		refreshScoreboard({_p})
+
+function setParticle(p: player, t: text):
+	close {_p}'s inventory
+	set {_u} to uuid of {_p}
+	set {particle::%{_u}%} to {_t}
+	stopAllEffects({_p})
+	send "&6&lPARTICLES&7 | Particle &6%{_t}%&7 activated" to {_p}
+	if {_t} is "Spiral":
+		drawComplexSpiral particle "redstone", center {_p}, id "%{_u}%.spiral0", rainbowMode true, clockwise true, scan true, radius 1.1, density 100, height 7, effectMod 0.1, start 0, visibleRange 100
+		drawComplexSpiral particle "redstone", center {_p}, id "%{_u}%.spiral1", rainbowMode true, clockwise false, scan true, radius 1.1, density 100, height 7, effectMod 0.1, start 0, visibleRange 100
+	else if {_t} is "Wings":
+		drawWings style 12, particle1 "redstone", RGB 139, 60, 60, particle2 "redstone", RGB2 255, 153, 51, particle3 "redstone", RGB3 139, 60, 60, center {_p}, id "%{_u}%.wings", angle 110, height 0, space 0.2, visibleRange 100
+	else if {_t} is "Circle":
+		drawHalo particle "redstone", center {_p}, id "%{_u}%.circle", rainbowMode true, solid true, density 10, visibleRange 100
+	else if {_t} is "Circle (Animated)":
+		drawSimpleHalo particle "redstone", center {_p}, id "%{_u}%.circleanimated", rainbowMode true, visibleRange 100
+
+	else if {_t} is "Large Circle":
+		drawComplexCircle particle "redstone", center {_p}, id "%{_u}%.largecircle", rainbowMode true, randomRotation false, radius 1, density 80, start 0, visibleRange 100
+	else if {_t} is "Nyan Cat":
+		drawNyanCat center {_p}, id "%{_u}%.nyancat", visibleRange 100
+	else if {_t} is "Cage":
+		drawSphere style 1, particle "redstone", center {_p}, id "%{_u}%.cage", rainbowMode true, radius 2.5, density 50, visibleRange 100, pulseDelay 1
+	else if {_t} is "Ring (Rainbow)":
+		drawWarpRings style 1, particle "redstone", center {_p}, id "%{_u}%.ringrainbow", rainbowMode true, scan true, height 0, radius 2, ringCount 40, ringDensity 20, visibleRange 100
+	else if {_t} is "Ring (Flame)":
+		drawWarpRings style 1, particle "flame", center {_p}, id "%{_u}%.ringflame", rainbowMode true, scan true, height 0, radius 2, ringCount 40, ringDensity 20, visibleRange 100
+	else if {_t} is "Tube":
+		drawWarpRings style 1, particle "redstone", center {_p}, id "%{_u}%.tube", rainbowMode true, scan true, height 2, radius 1, ringCount 40, ringDensity 10, visibleRange 32
+	else if {_t} is "Heart":
+		drawHeart particle "redstone", center {_p}, id "%{_u}%.heart"
+
+
+function stopAllEffects(p: player):
+	set {_u} to uuid of {_p}
+	stopeffect "%{_u}%.spiral0"
+	stopeffect "%{_u}%.spiral1"
+	stopeffect "%{_u}%.wings"
+	stopeffect "%{_u}%.circle"
+	stopeffect "%{_u}%.circleanimated"
+	stopeffect "%{_u}%.largecircle"
+	stopeffect "%{_u}%.nyancat"
+	stopeffect "%{_u}%.cage"
+	stopeffect "%{_u}%.ringrainbow"
+	stopeffect "%{_u}%.ringflame"
+	stopeffect "%{_u}%.tube"
+	stopeffect "%{_u}%.heart"
+function disableParticle(p: player, t: text):
+	close {_p}'s inventory
+	set {_u} to uuid of {_p}
+	delete {particle::%{_u}%}
+	send "&6&lPARTICLES&7 | Particle &6%{_t}%&7 disabled!" to {_p}
+	stopAllEffects({_p})
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#PETS
+
+function petGUI(p: player):
+	open virtual chest inventory with size 4 named "&6Pets" to {_p}
+	loop 36 times:
+		format gui slot (loop-number - 1) of {_p} with gray stained glass pane named "&7" to do nothing
+	format gui slot 4 of {_p} with skull of {_p} named "&e%{_p}%" to do nothing
+	format gui slot 35 of {_p} with arrow named "&eBack" to run {_p} command "cosmetics"
+	formatPet({_p}, 10, "Cow")
+	formatPet({_p}, 11, "Sheep")
+	formatPet({_p}, 12, "Pig")
+	formatPet({_p}, 13, "Wolf")
+	formatPet({_p}, 14, "Cat")
+	formatPet({_p}, 15, "Chicken")
+	formatPet({_p}, 16, "Fox")
+	formatDonorPet({_p}, 21, "Mooshroom", "&4❤")
+	formatDonorPet({_p}, 22, "Panda", "&6&lKNIGHT")
+	formatDonorPet({_p}, 23, "Turtle", "&6&lKNIGHT")
+
+
+
+function formatPet(p: player, s: integer, n: text): # s- slot, n- particle name
+	set {_u} to uuid of {_p}
+	if {pet::%{_u}%} is {_n}:
+		format gui slot {_s} of {_p} with emerald named "&6%{_n}%" with lore "&d&LACTIVE" and "&7(Click to deactivate)" to run function disablePet({_p}, {_n})
+	else if {_p} has permission "pet.%{_n}%":
+		format gui slot {_s} of {_p} with lime dye named "&6%{_n}%" with lore "&a&LUNLOCKED" and "&7(Click to activate)" to run function setPet({_p}, {_n})
+	else:
+		format gui slot {_s} of {_p} with gray dye named "&6%{_n}%" with lore "&c&LLOCKED" and "&e%{price.%{_n}%}%&e points" and "&7(Click to buy)" to run function buyPet({_p}, {_n})
+function formatDonorPet(p: player, s: integer, n: text, r: text):
+	set {_u} to uuid of {_p}
+	if {particle::%{_u}%} is {_n}:
+		format gui slot {_s} of {_p} with emerald named "&6%{_n}%" with lore "&d&lACTIVE" and "&7(Click to deactivate)" to run function disablePet({_p}, {_n})
+	else if {_p} has permission "particle.%{_n}%":
+		format gui slot {_s} of {_p} with lime dye named "&6%{_n}%" with lore "&a&lUNLOCKED" and "&7(Click to activate)" to run function setPet({_p}, {_n})
+	else:
+		format gui slot {_s} of {_p} with gray dye named "&6%{_n}%" with lore "&c&lLOCKED" and "&7REQUIRES %{_r}%&7 RANK" to do nothing
+function buyPet(p: player, t: text):
+	set {_price} to {price.%{_t}%}
+	set {_u} to uuid of {_p}
+	close {_p}'s inventory
+	if {_price} is greater than {points::%{_u}%}:
+		send "&cYou don't have enough points!" to {_p}
+	else:
+		if {@permplugin} is "pex":
+			console command "pex user %{_p}% add pet.%{_t}%"
+		else if {@permplugin} is "luckperms":
+			console command "lp user %{_p}% permission set pet.%{_t}% true"
+		else:
+			broadcast "&6&LALERT | &cUnknown permissions plugin detected in cosmetics skript! Please edit the options!"
+		send "&6&lPETS&7 | Pet &6%{_t}%&7 bought successfully!" to {_p}
+		remove {_price} from {points::%{_u}%}
+		refreshScoreboard({_p})
+function setPet(p: player, t: text):
+	close {_p}'s inventory
+	set {_u} to uuid of {_p}
+	set {pet::%{_u}%} to {_t}
+	kill {activePet::%{_u}%}
+	send "&6&lPETS&7 | Pet &6%{_t}%&7 activated" to {_p}
+	spawn "%{_t}%" parsed as an entity type at location of {_p}
+	set {activePet::%{_u}%} to last spawned entity
+	set name of last spawned entity to "&6%{_p}%&7's pet &6%{_t}%"
+	while last spawned entity is alive:
+		if distance between {_p} and last spawned entity is greater than 5:
+			teleport last spawned entity to {_p}
+		else:
+			make last spawned entity pathfind to {_p} at speed 1
+		wait 1 second
+
+function disablePet(p: player, t: text):
+	close {_p}'s inventory
+	set {_u} to uuid of {_p}
+	delete {pet::%{_u}%}
+	kill {activePet::%{_u}%}
+	send "&6&lPETS&7 | Pet &6%{_t}%&7 disabled!" to {_p}
+on death:
+	if name of victim contains "'s pet":
+		cancel drops
+on damage:
+	if name of victim contains "'s pet":
+		cancel event
+		send "&cYou cannot damage a pet!" to attacker
+on quit:
+	stopAllEffects(player)
+	delete {particle::%uuid of player%}
+	kill {activePet::%uuid of player%}
+	delete {pet::%uuid of player%}
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#Gadgets
+function gadgetGUI(p: player):
+	set {_u} to uuid of {_p}
+	open virtual chest inventory with size 4 named "&6Gadgets" to {_p}
+	loop 36 times:
+		format gui slot (loop-number - 1) of {_p} with gray stained glass pane named "&7" to do nothing
+	format gui slot 4 of {_p} with skull of {_p} named "&e%{_p}%" to do nothing
+	format gui slot 35 of {_p} with arrow named "&eBack" to run {_p} command "cosmetics"
+	formatGadget({_p}, 10, "Snowball")
+	formatGadget({_p}, 11, "Trampoline")
+	formatGadget({_p}, 12, "Elytra")
+	formatGadget({_p}, 13, "Jetpack")
+
+function formatGadget(p: player, s: integer, n: text): # s- slot, n- particle name
+	set {_u} to uuid of {_p}
+	if {gadget::%{_u}%} is {_n}:
+		format gui slot {_s} of {_p} with emerald named "&6%{_n}%" with lore "&d&LACTIVE" and "&7(Click to deactivate)" to run function disableGadget({_p}, {_n})
+	else if {_p} has permission "gadget.%{_n}%":
+		format gui slot {_s} of {_p} with lime dye named "&6%{_n}%" with lore "&a&LUNLOCKED" and "&7(Click to activate)" to run function setGadget({_p}, {_n})
+	else:
+		format gui slot {_s} of {_p} with gray dye named "&6%{_n}%" with lore "&c&LLOCKED" and "&e%{price.%{_n}%}%&e points" and "&7(Click to buy)" to run function buyGadget({_p}, {_n})
+function buyGadget(p: player, t: text):
+	set {_price} to {price.%{_t}%}
+	set {_u} to uuid of {_p}
+	close {_p}'s inventory
+	if {_price} is greater than {points::%{_u}%}:
+		send "&cYou don't have enough points!" to {_p}
+	else:
+		if {@permplugin} is "pex":
+			console command "pex user %{_p}% add gadget.%{_t}%"
+		else if {@permplugin} is "luckperms":
+			console command "lp user %{_p}% permission set gadget.%{_t}% true"
+		else:
+			broadcast "&6&LALERT | &cUnknown permissions plugin detected in cosmetics skript! Please edit the options!"
+		send "&6&lGadgets&7 | Gadget &6%{_t}%&7 bought successfully!" to {_p}
+		remove {_price} from {points::%{_u}%}
+		refreshScoreboard({_p})
+function setGadget(p: player, t: text):
+	close {_p}'s inventory
+	set {_u} to uuid of {_p}
+	set {gadget::%{_u}%} to {_t}
+	send "&6&lGADGETS&7 | Gadget &6%{_t}%&7 activated" to {_p}
+	clearGadgets({_p})
+	if {_t} is "Snowball":
+		give {_p} snowball named "&7Gadget - &6Snowball"
+	else if {_t} is "Trampoline":
+		give {_p} slime block named "&7Gadget - &6Trampoline" with lore "&7Lasts 1 minute" and "&7Click to place"
+	else if {_t} is "elytra":
+		give {_p} unbreakable elytra named "&7Gadget - &6Elytra"
+		give {_p} firework named "&7Gadget - &6Elytra"
+	else if {_t} is "jetpack":
+		give {_p} feather named "&7Gadget - &6Jetpack" with lore "&7Click to fly"
+
+function disableGadget(p: player, t: text):
+	close {_p}'s inventory
+	set {_u} to uuid of {_p}
+	delete {gadget::%{_u}%}
+	send "&6&lGADGETS&7 | Gadget &6%{_t}%&7 disabled!" to {_p}
+	clearGadgets({_p})
+function clearGadgets(p: player):
+	if {_p}'s inventory contains snowball named "&7Gadget - &6Snowball":
+		remove all snowball named "&7Gadget - &6Snowball" from {_p}'s inventory
+	if {_p}'s inventory contains slime block named "&7Gadget - &6Trampoline" with lore "&7Lasts 1 minute" and "&7Click to place":
+		remove all slime block named "&7Gadget - &6Trampoline" with lore "&7Lasts 1 minute"  and "&7Click to place" from {_p}'s inventory
+	if {_p}'s inventory contains unbreakable elytra named "&7Gadget - &6Elytra":
+		remove all unbreakable elytra named "&7Gadget - &6Elytra" from {_p}'s inventory
+		remove all firework named "&7Gadget - &6Elytra" from {_p}'s inventory
+	if {_p}'s inventory contains feather named "&7Gadget - &6Jetpack" with lore "&7Click to fly":
+		remove all feather named "&7Gadget - &6Jetpack" with lore "&7Click to fly" from {_p}'s inventory
+on drop:
+	set {_item} to "%event-item%"
+	set {_name::*} to {_item} split at "named"
+	if {_name::2} contains "&7Gadget -":
+		cancel event
+		send "&cYou can't drop gadgets!" to player
+on right click:
+	if player's tool is snowball named "&7Gadget - &6Snowball":
+		cancel event
+		shoot snowball from player's head at speed 1
+	else if player's tool is slime block named "&7Gadget - &6Trampoline" with lore "&7Lasts 1 minute" and "&7Click to place":
+		cancel event
+		add block above target block to {_blocks::*}
+		add block 1 left of {_blocks::1} to {_blocks::*}
+		add block 1 right of {_blocks::1} to {_blocks::*}
+		add block 1 north of {_blocks::1} to {_blocks::*}
+		add block 1 left of {_blocks::4} to {_blocks::*}
+		add block 1 right of {_blocks::4} to {_blocks::*}
+		add block 1 south of {_blocks::1} to {_blocks::*}
+		add block 1 right of {_blocks::7} to {_blocks::*}
+		add block 1 left of {_blocks::7} to {_blocks::*}
+		loop {_blocks::*}:
+			if loop-value is not air:
+				set {_safe} to false
+		if {_safe} is false:
+			send "&cYou cannot place a trampoline there!"
+		else:
+			send "&aEnjoy your trampoline!"
+			remove all slime block named "&7Gadget - &6Trampoline" with lore "&7Lasts 1 minute" and "&7Click to place" from player's inventory
+			loop {_blocks::*}:
+				set block at loop-value to slime block
+			wait 1 minute
+			loop {_blocks::*}:
+				set block at loop-value to air
+			send "&cTrampoline expired!"
+	else if player's tool is firework named "&7Gadget - &6Elytra":
+		cancel event
+		push player forward at speed 1
+	else if player's tool is feather named "&7Gadget - &6Jetpack" with lore "&7Click to fly":
+		push player upwards at speed 0.4
+		loop 5 times:
+			console command "execute as %player% at %player% run particle minecraft:smoke ~ ~ ~"
+on walking on slime block:
+	push player upwards at speed 0.5
+
