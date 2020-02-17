@@ -38,6 +38,17 @@ on load:
     else if {goldblocks::*} is set:
         loop {goldblocks::*}:
             set {goldblocks::%loop-value%} to gold block
+    clear {lastdropped::*}
+
+on drop:
+    player's gamemode is not creative
+    if {lastdropped::%uuid of player%} is not event-item:
+        set {lastdropped::%uuid of player%} to event-item
+        cancel event
+        send "&cYou've been stopped from dropping that item. Drop it again if you'd like." to player
+    else:
+        delete {lastdropped::%uuid of player%}
+    
 
 command /pick:
     trigger:
