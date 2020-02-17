@@ -1,15 +1,16 @@
 function startCombatLog(v: player, a: player): #v= victim, a= attacker
-	set {combatLog::%{_v}%} to {_a}
+	set {_rand} to random integer between 1 and 999999
+	set {combatLog::%{_v}%} to "%{_a}% %{_rand}%"
 	set {_remainingTime} to 10 seconds
 	loop 10 times:
-		if {combatLog::%{_v}%} is {_a}:
+		if {combatLog::%{_v}%} is "%{_a}% %{_rand}%":
 			send action bar "&6&lCOMBAT &7(%{_a}%&7) | &6%{_remainingTime}%" to {_v}
 			remove 1 second from {_remainingTime}
 			wait 1 second
 		else:
 			stop loop
-	send action bar "&6&lCOMBAT &7| You are no longer in combat!" to {_v} if {combatLog::%{_v}%} is {_a}
-	delete {combatLog::%{_v}%} if {combatLog::%{_v}%} is {_a}
+	send action bar "&6&lCOMBAT &7| You are no longer in combat!" to {_v} if {combatLog::%{_v}%} is "%{_a}% %{_rand}%"
+	delete {combatLog::%{_v}%} if {combatLog::%{_v}%} is "%{_a}% %{_rand}%"
 on damage:
 	startCombatLog(victim, attacker)
 	startCombatLog(attacker, victim)
