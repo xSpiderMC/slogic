@@ -5,7 +5,7 @@ options:
 on right click:
     if player's tool is pickaxe:
         if player is sneaking:
-            open virtual chest inventory with size 3 to player
+            open virtual chest inventory with size 3 named "&6&lUPGRADE" to player
             format gui slot (all integers between 0 and 26) of player with light gray stained glass pane named " "
             format gui slot 0, and 1, and 10, and 18, and 19 of player with gray stained glass pane named " "
             format gui slot 9 of player with player's tool
