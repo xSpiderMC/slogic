@@ -122,9 +122,7 @@ function setParticle(p: player, t: text):
 	else if {_t} is "Tube":
 		drawWarpRings style 1, particle "redstone", center {_p}, id "%{_u}%.tube", rainbowMode true, scan true, height 2, radius 1, ringCount 40, ringDensity 10, visibleRange 32
 	else if {_t} is "Heart":
-		drawHeart particle "redstone", center {_p}, id "%{_u}%.heart"
-
-
+		drawHeart particle redstone, center {_p}, id "%{_u}%.heart", rainbowMode true, ySpin 0, width 0.5, height 0.5, innerSpike 1, compress 1, density 30, visibleRange 30
 function stopAllEffects(p: player):
 	set {_u} to uuid of {_p}
 	stopeffect "%{_u}%.spiral0"
@@ -177,9 +175,9 @@ function formatPet(p: player, s: integer, n: text): # s- slot, n- particle name
 		format gui slot {_s} of {_p} with gray dye named "&6%{_n}%" with lore "&c&LLOCKED" and "&e%{price.%{_n}%}%&e points" and "&7(Click to buy)" to run function buyPet({_p}, {_n})
 function formatDonorPet(p: player, s: integer, n: text, r: text):
 	set {_u} to uuid of {_p}
-	if {particle::%{_u}%} is {_n}:
+	if {pet::%{_u}%} is {_n}:
 		format gui slot {_s} of {_p} with emerald named "&6%{_n}%" with lore "&d&lACTIVE" and "&7(Click to deactivate)" to run function disablePet({_p}, {_n})
-	else if {_p} has permission "particle.%{_n}%":
+	else if {_p} has permission "pet.%{_n}%":
 		format gui slot {_s} of {_p} with lime dye named "&6%{_n}%" with lore "&a&lUNLOCKED" and "&7(Click to activate)" to run function setPet({_p}, {_n})
 	else:
 		format gui slot {_s} of {_p} with gray dye named "&6%{_n}%" with lore "&c&lLOCKED" and "&7REQUIRES %{_r}%&7 RANK" to do nothing
@@ -208,12 +206,13 @@ function setPet(p: player, t: text):
 	spawn "%{_t}%" parsed as an entity type at location of {_p}
 	set {activePet::%{_u}%} to last spawned entity
 	set name of last spawned entity to "&6%{_p}%&7's pet &6%{_t}%"
-	while last spawned entity is alive:
-		if distance between {_p} and last spawned entity is greater than 5:
-			teleport last spawned entity to {_p}
-		else:
-			make last spawned entity pathfind to {_p} at speed 1
-		wait 1 second
+	set {_animal} to last spawned entity
+	while {_animal} is alive:
+		if distance between {_p} and {_animal} is greater than 10:
+			teleport {_animal} to {_p}
+		else if distance between {_p} and {_animal} is greater than 4:
+			make {_animal} pathfind to {_p} at speed 1
+		wait 2 seconds
 
 function disablePet(p: player, t: text):
 	close {_p}'s inventory
@@ -347,4 +346,3 @@ on right click:
 			console command "execute as %player% at %player% run particle minecraft:smoke ~ ~ ~"
 on walking on slime block:
 	push player upwards at speed 0.5
-
