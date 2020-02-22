@@ -1,12 +1,12 @@
 options:
-    mColor: &e                                  # Main Color
+    mColor: &6                                  # Main Color
     sColor: &7                                  # Secondary Color
-    staff: rank.staff                           # Staff permission
+    staff: staff.reports.view                           # Staff permission
     no-perm: &cYou do not have permission.      # Message given to those who have no permission
     gui-name: &8Reports                         # Name of the reports gui (/reports)
     cmd-cooldown: 15 seconds                    # Command cooldown
     cd-msg: &7Please wait &c%remaining time%    # Command cooldown message
-    prefix: &e[Server]                          # Prefix for the command
+    prefix: &6&lSLOGIC &7|                          # Prefix for the command
 
 command /report [<offline player>] [<text>]:
     cooldown: {@cmd-cooldown}
