@@ -988,20 +988,6 @@ command /broadcast [<text>]:
 			broadcast ""
 			broadcast "&6&lANNOUNCEMENT &7| %colored arg-1%"
 			broadcast ""
-command /report [<offline player>] [<text>]:
-	trigger:
-		if arg-1 is not set:
-			send "&cPlease select a player!" to player
-		else:
-			if arg-2 is not set:
-				send "&cPlease select a reason!" to player
-			else:
-				send ""
-				send "&6&l[REPORT] &7» Thank you for your report! Staff members have been notified!"
-				send ""
-				send "" to all players where [input has permission "staff.reports.view"]
-				send "&6&l[REPORT] &7» &6%arg-1%&7 was reported by &6%player%&7 for &6%arg-2%" to all players where [input has permission "staff.reports.view"]
-				send "" to all players where [input has permission "staff.reports.view"]
 command /vanish:
 	aliases: /v
 	permission: staff.vanish

@@ -1,0 +1,82 @@
+options:
+    mColor: &e                                  # Main Color
+    sColor: &7                                  # Secondary Color
+    staff: rank.staff                           # Staff permission
+    no-perm: &cYou do not have permission.      # Message given to those who have no permission
+    gui-name: &8Reports                         # Name of the reports gui (/reports)
+    cmd-cooldown: 15 seconds                    # Command cooldown
+    cd-msg: &7Please wait &c%remaining time%    # Command cooldown message
+    prefix: &e[Server]                          # Prefix for the command
+
+command /report [<offline player>] [<text>]:
+    cooldown: {@cmd-cooldown}
+    cooldown message: {@cd-msg}
+    trigger:
+        if arg-1 is not set:
+            send "&cUsage: /report <player> <reason>"
+        else:
+            if arg-2 is not set:
+                send "&cUsage: /report <player> <reason>"
+            else:
+                add arg-1 to {reports::list::*}
+                set {reports::reason::%arg-1%} to arg-2
+                set {reports::reporter::%arg-1%} to player
+                
+                send "{@prefix} {@sColor}You have reported {@mColor}%arg-1%&7. Please wait for response." 
+                send "{@prefix} {@mColor}%player% {@sColor}has reported {@mColor}%arg-1%&7. Please check {@mColor}/reports{@sColor}." to all players where [input has permission "{@staff}"]
+
+command /reports [<text>]:
+    permission: {@staff}
+    permission message: {@no-perm}
+    trigger:
+        send "{@prefix} {@sColor}Listing the reports...."
+        wait a tick
+        page(player, 0)
+
+function page(p: player, page: number):
+    set {_u} to uuid of {_p}
+    set {_pageStart} to 45*{_page}
+    set {_i} to 1
+    set {_a} to 0
+    open virtual chest inventory with size 6 named "{@gui-name} &7&o(Page %{_page}+1%&7&o)" to {_p}
+    wait 2 ticks
+    loop {reports::list::*}:
+        (loop-index parsed as integer) > {_pageStart}
+        set {_x} to loop-value
+        format gui slot {_a} of {_p} with skull of ("%{_x}%" parsed as offline player) named "{@mColor}%{_x}%" with lore "{@sColor}Reporter: {@mColor}%{reports::reporter::%{_x}%}%", "{@sColor}Reason: {@mColor}%{reports::reason::%{_x}%}%" and "&7&oClick this for more!" to run:
+            wait a tick
+            feature({_p}, {_x})
+        add 1 to {_a}
+        if {_a} = ((45*{_i})):
+            exit loop
+    format gui slot 49 of {_p} with book named "{@mColor} Clear reports" to run:
+        loop {reports::list::*}:
+            delete {reports::reason::%loop-value%}
+            delete {reports::reporter::%loop-value%}
+        wait a tick
+        clear {reports::list::*}
+        page({_p}, 0)
+    if (amount of {reports::list::*}) > {_pageStart} + 45:
+        
+        format gui slot 53 of {_p} with arrow named "{@mColor} Next Page" to run:
+            set {_page} to {_page} + 1
+            page({_p}, {_page})
+    if {_page} > 0:
+        format gui slot 45 of {_p} with arrow named "{@mColor}Previous Page" to run:
+            set {_page} to {_page} - 1
+            page({_p}, {_page})
+
+function feature(p: player, report: offline player):
+    wait a tick
+    set {_e} to {_report}
+    open virtual chest inventory with size 1 named "&8%{_e}%" to {_p}
+    format gui slot 3 of {_p} with paper named "&aInform" with lore "&7Inform the reporter." to run:
+        set {_player} to {reports::reporter::%{_e}%} parsed as offline player
+        send "{@prefix} {@mColor}%{_p}% {@sColor}has seen your report and will investige. Please be patient." to {_p}
+    format gui slot 5 of {_p} with barrier named "&cRemove" with lore "&7Remove the report." to run:
+        remove {_report} from {reports::list::*}
+        delete {reports::reporter::%{_report}%}
+        delete {reports::reason::%{_report}%}
+        page({_p}, 0)
+    format gui slot 0 of {_p} with arrow named "&cGo back" to run:
+        page({_p}, 0)
