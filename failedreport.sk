@@ -1,0 +1,34 @@
+options:
+	name: &6&lSLOGIC &7|
+
+#Report GUI
+command /reports:
+	description: Shows open reports
+	permission: staff.reports.view
+	trigger:
+		if {reports::*} is not empty:
+			open virtual chest inventory with size 6 named "&c&lActive Reports" to player
+			loop {reports::*}:
+				set {_name::*} to split loop-value at "|"
+				set {_skull} to skull of ("%{_name::1}%" parsed as offline player)
+				format gui slot (9 + loop-index parsed as integer) of player with {_skull}
+		else:
+			send "{@name} &cThere are no active reports to show" to player
+
+
+command /greport [<player>] [<text>]:
+	trigger:
+		if arg-1 or arg-2 is not set:
+			send "{@name} &c/report <player> <reason>"
+		# if player = arg-1:
+		# 	send "{@name} &cYou can't report yourself"
+		if {reports::*} contains arg-1:
+			send "{@name} &cThere is already an active report for this player"
+		else:
+			add "%arg-1% | %arg-2%" to {reports::*}
+			send ""
+			send "&6&l[REPORT] &7» Thank you for your report! Staff members have been notified!"
+			send ""
+			send "" to all players where [input has permission "staff.reports.view"]
+			send "&6&l[REPORT] &7» &6%arg-1%&7 was reported by &6%player%&7 for &6%arg-2%" to all players where [input has permission "staff.reports.view"]
+			send "" to all players where [input has permission "staff.reports.view"]
