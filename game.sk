@@ -217,6 +217,8 @@ on damage of player:
         set {%victim%.attacktime} to now
         if {invulnerable.%victim's uuid%} is true:
             cancel event
+        if {vanish.%uuid of victim%} is true:
+            cancel event
     
 command /tutorial:
     description: Learn how to play the game
