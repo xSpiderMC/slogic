@@ -25,16 +25,12 @@ variables:
 	{price.elytra} = 1000
 	{price.jetpack} = 2000
 
-
-	drawText "hello", particle redstone, center player, id "text", rainbowMode true, scale 2, visibleRange 100
-
-
 options:
-	permplugin: "pex" #SET TO "PEX" OR "LUCKPERMS"
+	permplugin: "luckperms" #SET TO "PEX" OR "LUCKPERMS"
 
 command /cosmetics:
 	trigger:
-		if "%region at player%" is not "spawn":
+		if player is in world "Arena":
 			send "&cYou may only edit cosmetics at spawn!"
 		else:
 			open virtual chest inventory with size 3 named "&6Cosmetics" to player
@@ -43,8 +39,8 @@ command /cosmetics:
 			format gui slot 11 of player with emerald named "&6Particles" to run function particleGUI(player)
 			format gui slot 13 of player with lead named "&6Pets" to run function petGUI(player)
 			format gui slot 15 of player with iron horse armor named "&6Gadgets" to run function gadgetGUI(player)
-on region enter:
-	if "%event-region%" is "arenaspawn" or "innerarena" or "hill":
+on player world change:
+	if event-world is "arena":	
 		clearGadgets(player)
 function particleGUI(p: player):
 	open virtual chest inventory with size 4 named "&6Particles" to {_p}
@@ -52,10 +48,10 @@ function particleGUI(p: player):
 		format gui slot (loop-number - 1) of {_p} with gray stained glass pane named "&7" to do nothing
 	format gui slot 4 of {_p} with skull of {_p} named "&e%{_p}%" to do nothing
 	format gui slot 35 of {_p} with arrow named "&eBack" to run {_p} command "cosmetics"
-	formatDonorParticle({_p}, 10, "Spiral", "&6&LKNIGHT")
+	formatDonorParticle({_p}, 10, "Spiral", "&a&LKNIGHT")
 	formatParticle({_p}, 11, "Wings")
 	formatParticle({_p}, 12, "Circle")
-	formatDonorParticle({_p}, 13, "Circle (Animated)", "&6&lKNIGHT")
+	formatDonorParticle({_p}, 13, "Circle (Animated)", "&a&lKNIGHT")
 	formatParticle({_p}, 14, "Large Circle")
 	formatParticle({_p}, 15, "Nyan Cat")
 	formatParticle({_p}, 16, "Cage")
@@ -86,13 +82,7 @@ function buyParticle(p: player, t: text):
 	close {_p}'s inventory
 	if {_price} is greater than {points::%{_u}%}:
 		send "&cYou don't have enough points!" to {_p}
-	else:
-		if {@permplugin} is "pex":
-			console command "pex user %{_p}% add particle.%{_t}%"
-		else if {@permplugin} is "luckperms":
-			console command "lp user %{_p}% permission set particle.%{_t}% true"
-		else:
-			broadcast "&6&LALERT | &cUnknown permissions plugin detected in cosmetics skript! Please edit the options!"
+		console command "lp user %{_p}% permission set particle.%{_t}% true"
 		send "&6&lPARTICLES&7 | Particle &6%{_t}%&7 bought successfully!" to {_p}
 		remove {_price} from {points::%{_u}%}
 		refreshScoreboard({_p})
@@ -164,8 +154,8 @@ function petGUI(p: player):
 	formatPet({_p}, 15, "Chicken")
 	formatPet({_p}, 16, "Fox")
 	formatDonorPet({_p}, 21, "Mooshroom", "&4❤")
-	formatDonorPet({_p}, 22, "Panda", "&6&lKNIGHT")
-	formatDonorPet({_p}, 23, "Turtle", "&6&lKNIGHT")
+	formatDonorPet({_p}, 22, "Panda", "&a&lKNIGHT")
+	formatDonorPet({_p}, 23, "Turtle", "&a&lKNIGHT")
 
 
 
@@ -192,12 +182,7 @@ function buyPet(p: player, t: text):
 	if {_price} is greater than {points::%{_u}%}:
 		send "&cYou don't have enough points!" to {_p}
 	else:
-		if {@permplugin} is "pex":
-			console command "pex user %{_p}% add pet.%{_t}%"
-		else if {@permplugin} is "luckperms":
-			console command "lp user %{_p}% permission set pet.%{_t}% true"
-		else:
-			broadcast "&6&LALERT | &cUnknown permissions plugin detected in cosmetics skript! Please edit the options!"
+		console command "lp user %{_p}% permission set pet.%{_t}% true"
 		send "&6&lPETS&7 | Pet &6%{_t}%&7 bought successfully!" to {_p}
 		remove {_price} from {points::%{_u}%}
 		refreshScoreboard({_p})
@@ -265,12 +250,7 @@ function buyGadget(p: player, t: text):
 	if {_price} is greater than {points::%{_u}%}:
 		send "&cYou don't have enough points!" to {_p}
 	else:
-		if {@permplugin} is "pex":
-			console command "pex user %{_p}% add gadget.%{_t}%"
-		else if {@permplugin} is "luckperms":
-			console command "lp user %{_p}% permission set gadget.%{_t}% true"
-		else:
-			broadcast "&6&LALERT | &cUnknown permissions plugin detected in cosmetics skript! Please edit the options!"
+		console command "lp user %{_p}% permission set gadget.%{_t}% true"
 		send "&6&lGadgets&7 | Gadget &6%{_t}%&7 bought successfully!" to {_p}
 		remove {_price} from {points::%{_u}%}
 		refreshScoreboard({_p})
