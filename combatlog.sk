@@ -38,3 +38,7 @@ on quit:
 		refreshScoreboard(player)
 		delete {combatLog::%player%}
 		teleport player to {spawn}
+
+on death of player:
+	if {combatLog::%victim%} is set:
+		delete {combatLog::%victim%}
