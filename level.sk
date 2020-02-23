@@ -1,5 +1,6 @@
 options:
     name: &6&lSLOGIC &7|
+    nopoints: &6&lSLOGIC &7| &cYou don't have enough points to purchase this!
 
 
 command /level [<text>] [<offline player>] [<integer>]:
@@ -46,17 +47,16 @@ command /lxp:
     trigger:
         send "{@name} &7You currently have &6%{xp::%uuid of player%}% &7xp %nl%{@name} &7You are currently level &6%{level::%uuid of player%}%"
 
-
-command /perks:
-    aliases: perk
-    trigger:
-        open virtual chest inventory with size 3 to player
-        format gui slot (all integers between 0 and 26) of player with air
-        format gui slot 13 of player with skull of ("Spiderlogical" parsed as offline player) named "&6Pranked! Coming soon <3"
-
+#XP FUNCTIONS
 function addXP(p: player, n: number):
     set {_up} to uuid of {_p}
-    add {_n} to {xp::%{_up}%}
+    if {perks::%{_up}%::student} >= 1:
+        set {_sadd} to 0.2 * {perks::%{_up}%::student}
+        add {_n} + {_sadd} to {xp::%{_up}%}
+        send action bar "&7Gained &6%{_n} + {_sadd}% &7xp" to {_p}
+    else:
+        add {_n} to {xp::%{_up}%}
+        send action bar "&7Gained &6%{_n}% &7xp" to {_p}
     if {xp::%{_up}%} >= 50:
         if {level::%{_up}%} < 100:
             set {xp::%{_up}%} to 0
@@ -66,7 +66,6 @@ function addXP(p: player, n: number):
             send "&e&lLEVELUP &7| You're now level &6%{level::%{_up}%}%" to {_p}
         set {Achievements::levelup::%{_up}%} to 0 if {Achievements::levelup::%{_up}%} is not set
         send "&a&kK&r&a>>   &aAchievement Unlocked: &6Levelup!   &a<<&kK&r" to {_p} if {Achievements::levelup::%{_up}%} is not set
-    send action bar "&7Gained &6%{_n}% &7xp" to {_p}
 
 function genXP(type: text) :: number:
     if {_type} is "ore":
@@ -85,3 +84,74 @@ function genXP(type: text) :: number:
         return random integer between 4 and 6
 
 
+#PERKS
+
+
+command /perks:
+    aliases: perk
+    trigger:
+        if {level::%uuid of player%} < 10:
+            send "{@name} &cYou have to be atleast level 10 to unlock perks"
+        open virtual chest inventory with size 3 to player
+        format gui slot (all integers between 0 and 26) of player with air
+        format gui slot 11 of player with skull of player named "&6My Perks" with lore "&7Click to view your perks" to do nothing
+        format gui slot 13 of player with totem of undying named "&6Perk Shop" with lore "&7Click to open" to run function perk_gui(player)
+        if {prestige::%uuid of player%} > 1:
+            format gui slot 15 of player with nether star named "&6Prestige Perk Shop" with lore "&7Click to open"
+        else:
+            format gui slot 15 of player with end crystal named "&6Prestige Perk Shop" with lore "&cLocked until prestige 1" to run:
+                send "{@name} &cYou must prestige to unlock this shop"
+
+command /myperks:
+    trigger:
+        myPerks(player)
+
+#MENU FUNCTIONS
+
+function perk_gui(p: player):
+    set {_up} to uuid of {_p}
+    open virtual chest inventory with size 4 to {_p}
+    format gui slot (all integers between 0 and 35) of {_p} with air
+    set {_scost} to 2000 + (1500 * {perks::%{_up}%::student})
+    set {perks::%{_up}%::student} to 0 if {perks::%{_up}%::student} is not set
+    set {perks::%{_up}%::angel} to 0 if {perks::%{_up}%::angel} is not set
+    if {perks::%{_up}%::student} < 15:
+        format gui slot 10 of {_p} with book shelf named "&6Student" with lore "&6(Points %{_scost}%)" and "&7Increase the amount of XP gain" and "&7(0.1 for each level). Current Level: %{perks::%{_up}%::student}%" to run function studentPerk({_p})
+    else:
+        format gui slot 10 of {_p} with shiny book shelf named "&6Student &c[MAXED]" with lore "&7Increase the amount of XP gain" and "&7(0.1 for each level). Current Level: %{perks::%{_up}%::student}%" to run:
+            send "{@name} &cYou have already maxed out this perk"
+    if {perks::%{_up}%::angel} < 1:
+        format gui slot 11 of {_p} with apple named "&6Angel" with lore "&6(Points 2500)" and "&7Gain Regeneration on kill" to run function angelPerk({_p})
+    else:
+        format gui slot 11 of {_p} with shiny apple named "&6Student &c[MAXED]" with lore "&7Gain Regeneration on kill" to run:
+            send "{@name} &cYou have already maxed out this perk"
+    
+#PERKS FUNCTIONS
+
+function myPerks(p: player):
+    set {_up} to uuid of {_p}
+    send {perks::%{_up}%::*} to {_p}
+
+function studentPerk(p: player):
+    set {_up} to uuid of {_p}
+    set {_scost} to 2000 + (1500 * {perks::%{_up}%::student})
+    if {_scost} > {points::%{_up}%}:
+        send "{@nopoints}" to {_p}
+    else:
+        add 1 to {perks::%{_up}%::student}
+        remove {_scost} from {points::%{_up}%}
+        refreshScoreboard({_p})
+        perk_gui({_p})
+        # set {_scost} to 2000 + (1500 * {perks::%{_up}%::student})
+        # format gui slot 10 of {_p} with book shelf named "&6Student" with lore "&6(Points %{_scost}%)" and "&7Increase the amount of XP gain" and "&7(0.1 for each level)" to run function studentPerk({_p}, {_scost})
+
+function angelPerk(p: player):
+    set {_up} to uuid of {_p}
+    set {_cost} to 2500
+    if {_cost} > {points::%{_up}%}:
+        send "{@nopoints}" to {_p}
+    else:
+        add 1 to {perks::%{_up}%::angel}
+        remove {_cost} from {points::%{_up}%}
+        refreshScoreboard({_p})
+        perk_gui({_p})

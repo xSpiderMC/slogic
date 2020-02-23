@@ -64,9 +64,9 @@ on respawn:
     set {sprot.%player's uuid%} to now
 on death of player:
     send "&6&lDEATH &7%victim's name%" to all players where [input is not victim]
-    if {onhill::%player's uuid%} is true:
+    if {onhill::%uuid of victim%} is true:
         set {onhillamount} to {onhillamount} - 1
-        delete {onhill::%player's uuid%}
+        delete {onhill::%uuid of victim%}
     if event-damagecause is attack:
         send "&6&lDEATH &7by &6%attacker's name%" to victim
         set {_u} to uuid of victim
@@ -78,6 +78,8 @@ on death of player:
         add {_removeamt} to {points::%{_au}%}
         send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to attacker
         play sound "ENTITY_ARROW_HIT_PLAYER" to attacker
+        if {perks::%uuid of attacker%::angel} >= 1:
+            apply regeneration of tier 2 without any particles to attacker for 3 seconds
         set {_xp} to genXP("kill")
         addXP(attacker, {_xp})
         add 1 to {kills::%uuid of attacker%}
@@ -143,6 +145,8 @@ on death of player:
                     add {_removeamt} to {points::%{_au}%}
                     send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to {%victim%.lastattacker}
                     play sound "ENTITY_ARROW_HIT_PLAYER" to {%victim%.lastattacker}
+                    if {perks::%{_au}%::angel} >= 1:
+                        apply regeneration of tier 2 without any particles to {%victim%.lastattacker} for 3 seconds
                     add 1 to {kills::%{_au}%}
                     add 1 to {deaths::%uuid of victim%}
                     set {_xp} to genXP("kill")
