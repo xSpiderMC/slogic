@@ -1,6 +1,7 @@
 options:
     name: &6&lSLOGIC &7|
     nopoints: &6&lSLOGIC &7| &cYou don't have enough points to purchase this!
+    maxperk: &6&lSLOGIC &7| &cYou have already maxed out this perk
 
 
 command /level [<text>] [<offline player>] [<integer>]:
@@ -86,13 +87,25 @@ function genXP(type: text) :: number:
 
 #PERKS
 
+on load:
+    set {allperks::*} to "xp", and "regen"
+
+    set {perk::10} to experience bottle lored "&7Increase the amount of XP gain||&7(&6+0.2 &7for each level)"
+    set {perkname::10} to "Student"
+
+    set {perk::11} to apple lored "&7Gain Regeneration II for 3 seconds on kill"
+    set {perkname::11} to "Angel"
+
+    set {perkprice::xp::*} to 2000, 3500, 5000, 6500, 8000, 9500, 11000, 12500, 14000, 15500, 17000, 18500, 20000, 21500, and 23000
+    
+    set {perkprice::regen::*} to 2500
 
 command /perks:
     aliases: perk
     trigger:
         if {level::%uuid of player%} < 10:
             send "{@name} &cYou have to be atleast level 10 to unlock perks"
-        open virtual chest inventory with size 3 to player
+        open virtual chest inventory named "&6&lPERKS" with size 3 to player
         format gui slot (all integers between 0 and 26) of player with air
         format gui slot 11 of player with skull of player named "&6My Perks" with lore "&7Click to view your perks" to do nothing
         format gui slot 13 of player with totem of undying named "&6Perk Shop" with lore "&7Click to open" to run function perk_gui(player)
@@ -110,21 +123,59 @@ command /myperks:
 
 function perk_gui(p: player):
     set {_up} to uuid of {_p}
-    open virtual chest inventory with size 4 to {_p}
-    format gui slot (all integers between 0 and 35) of {_p} with air
-    set {_scost} to 2000 + (1500 * {perks::%{_up}%::student})
-    set {perks::%{_up}%::student} to 0 if {perks::%{_up}%::student} is not set
-    set {perks::%{_up}%::angel} to 0 if {perks::%{_up}%::angel} is not set
-    if {perks::%{_up}%::student} < 15:
-        format gui slot 10 of {_p} with book shelf named "&6Student" with lore "&6(Points %{_scost}%)" and "&7Increase the amount of XP gain" and "&7(0.1 for each level). Current Level: %{perks::%{_up}%::student}%" to run function studentPerk({_p})
-    else:
-        format gui slot 10 of {_p} with shiny book shelf named "&6Student &c[MAXED]" with lore "&7Increase the amount of XP gain" and "&7(0.1 for each level). Current Level: %{perks::%{_up}%::student}%" to run:
-            send "{@name} &cYou have already maxed out this perk"
-    if {perks::%{_up}%::angel} < 1:
-        format gui slot 11 of {_p} with apple named "&6Angel" with lore "&6(Points 2500)" and "&7Gain Regeneration on kill" to run function angelPerk({_p})
-    else:
-        format gui slot 11 of {_p} with shiny apple named "&6Student &c[MAXED]" with lore "&7Gain Regeneration on kill" to run:
-            send "{@name} &cYou have already maxed out this perk"
+    # open virtual chest inventory with size 4 to {_p}
+    loop {allperks::*}:
+        add 1 to {_n}
+        set {_type} to {allperks::%{_n}%}
+        set {_max} to size of {perkprice::%{_type}%::*}
+        # loop {perkprice::%{_type}%::*}:
+        #     add 1 to {_max}
+        if {perks::%{_up}%::%{_type}%} > {_max}:
+            set {perks::%{_up}%::%{_type}%} to {_max}
+    delete {_n}
+
+    create gui with virtual chest with size 4 named "&9&lPERK SHOP":
+        loop {perk::*}:
+            add 1 to {_n}
+
+            set {_level} to getPerkLvl({allperks::%{_n}%}, {_up})
+
+            set {_next} to {_level} + 1
+
+            set {_type} to {allperks::%{_n}%}
+
+            delete {_max}
+            set {_max} to size of {perkprice::%{_type}%::*}
+            # loop {perkprice::%{_type}%::*}:
+            #     add 1 to {_max}
+
+            if {_level} < {_max}:
+                set {_lore} to "%lore of loop-value%||||&7Current Level: &6%{_level}%||&7Price for next level: &6%{perkprice::%{_type}%::%{_next}%}%"
+            else:
+                set {_lore} to "%lore of loop-value%||||&7Current level: &6%{_level}%||||&cAlready at maximum level!"
+            
+            set {_slot} to loop-index
+
+            set {_i} to loop-value
+            set {_amount} to 1
+            if {_level} > 0:
+                set {_amount} to {_level}
+            
+            if {points::%{_up}%} < {perkprice::%{_type}%::%{_next}%}:
+                make gui (loop-index parsed as number) with {_amount} of {_i} named "&6%{perkname::%loop-index%}%" lored "%{_lore}%||||&cYou don't have enough points!":
+                    send "{@nopoints}" to {_p}
+            else if {_level} >= {_max}:
+                make gui (loop-index parsed as number) with {_amount} of {_i} named "&6%{perkname::%loop-index%}%" lored {_lore}:
+                    send "{@maxperk}" to {_p}
+            else:
+                make gui (loop-index parsed as number) with {_amount} of {_i} named "&6%{perkname::%loop-index%}%" lored {_lore}:
+                    upgradePerk({perkname::%{_slot}%}, {_type}, {_p})
+                    perk_gui({_p})
+    open last gui to {_p}
+
+            
+    set {_perklvl} to {perks::%{_u}%::student} + 1
+    set {_scost} to "%{perkprice::student::%{_perklvl}%}%"
     
 #PERKS FUNCTIONS
 
@@ -132,26 +183,18 @@ function myPerks(p: player):
     set {_up} to uuid of {_p}
     send {perks::%{_up}%::*} to {_p}
 
-function studentPerk(p: player):
-    set {_up} to uuid of {_p}
-    set {_scost} to 2000 + (1500 * {perks::%{_up}%::student})
-    if {_scost} > {points::%{_up}%}:
-        send "{@nopoints}" to {_p}
-    else:
-        add 1 to {perks::%{_up}%::student}
-        remove {_scost} from {points::%{_up}%}
-        refreshScoreboard({_p})
-        perk_gui({_p})
-        # set {_scost} to 2000 + (1500 * {perks::%{_up}%::student})
-        # format gui slot 10 of {_p} with book shelf named "&6Student" with lore "&6(Points %{_scost}%)" and "&7Increase the amount of XP gain" and "&7(0.1 for each level)" to run function studentPerk({_p}, {_scost})
+function getPerkLvl(type: text, uuid: text) :: number:
+    return {perks::%{_uuid}%::%{_type}%} ? 0
 
-function angelPerk(p: player):
+function upgradePerk(name: text, type: text, p: player):
     set {_up} to uuid of {_p}
-    set {_cost} to 2500
-    if {_cost} > {points::%{_up}%}:
+    set {_next} to getPerkLvl({_type}, {_up}) + 1
+    set {_max} to size of {perkprice::%{_type}%::*}
+    if {_next} - 1 >= {_max}:
+        send "{@maxperk}" to {_p}
+    else if {points::%{_up}%} < {perkprice::%{_type}%::%{_next}%}:
         send "{@nopoints}" to {_p}
     else:
-        add 1 to {perks::%{_up}%::angel}
-        remove {_cost} from {points::%{_up}%}
+        remove {perkprice::%{_type}%::%{_next}%} from {points::%{_up}%}
         refreshScoreboard({_p})
-        perk_gui({_p})
+        add 1 to {perks::%{_up}%::%{_type}%}
