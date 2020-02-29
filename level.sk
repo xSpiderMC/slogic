@@ -51,8 +51,8 @@ command /lxp:
 #XP FUNCTIONS
 function addXP(p: player, n: number):
     set {_up} to uuid of {_p}
-    if {perks::%{_up}%::student} >= 1:
-        set {_sadd} to 0.2 * {perks::%{_up}%::student}
+    if {perks::%{_up}%::xp} >= 1:
+        set {_sadd} to 0.2 * {perks::%{_up}%::xp}
         add {_n} + {_sadd} to {xp::%{_up}%}
         send action bar "&7Gained &6%{_n} + {_sadd}% &7xp" to {_p}
     else:
@@ -88,7 +88,7 @@ function genXP(type: text) :: number:
 #PERKS
 
 on load:
-    set {allperks::*} to "xp", and "regen"
+    set {allperks::*} to "xp", and "regen", "strength", "speed"
 
     set {perk::10} to experience bottle lored "&7Increase the amount of XP gain||&7(&6+0.2 &7for each level)"
     set {perkname::10} to "Student"
@@ -96,9 +96,19 @@ on load:
     set {perk::11} to apple lored "&7Gain Regeneration II for 3 seconds on kill"
     set {perkname::11} to "Angel"
 
+    set {perk::12} to skeleton skull lored "&7Gain Strength I on kill for ||&71 second for each tier"
+    set {perkname::12} to "Bulldozer"
+
+    set {perk::13} to feather lored "&7Gain Speed I on kill for ||&71 second for each tier"
+    set {perkname::13} to "Speed"
+
     set {perkprice::xp::*} to 2000, 3500, 5000, 6500, 8000, 9500, 11000, 12500, 14000, 15500, 17000, 18500, 20000, 21500, and 23000
     
     set {perkprice::regen::*} to 2500
+
+    set {perkprice::strength::*} to 2500, 3500, 6000, 10000, and 10500
+
+    set {perkprice::speed::*} to 500, 1000, 2500, 3500, and 5500 
 
 command /perks:
     aliases: perk
@@ -181,7 +191,14 @@ function perk_gui(p: player):
 
 function myPerks(p: player):
     set {_up} to uuid of {_p}
-    send {perks::%{_up}%::*} to {_p}
+    if {perks::%{_up}%::*} is not set:
+        send "{@name} &7You do not currently have any perks" to {_p}
+    else:
+        send centered "&6&lPERKS" to {_p}
+        loop {perk::*}:
+            add 1 to {_n}  
+            set {_level} to getPerkLvl({allperks::%{_n}%}, {_up})
+            send "&6%{perkname::%loop-index%}%&8: &e%{_level}%" to {_p}
 
 function getPerkLvl(type: text, uuid: text) :: number:
     return {perks::%{_uuid}%::%{_type}%} ? 0

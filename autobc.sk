@@ -74,7 +74,7 @@ command /autobc [<text>] [<text>] [<text>]:
             else:
                 send "{@name} &cNo broadcasts to show" 
 
-every 3 minutes:
+every 2 minutes:
     set {bcindex} to 1 if {bcindex} is not set
     if {broadcasts::*} is not set:
         stop

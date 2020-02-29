@@ -78,8 +78,14 @@ on death of player:
         add {_removeamt} to {points::%{_au}%}
         send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to attacker
         play sound "ENTITY_ARROW_HIT_PLAYER" to attacker
-        if {perks::%uuid of attacker%::angel} >= 1:
-            apply regeneration of tier 2 without any particles to attacker for 3 seconds
+        if {perks::%uuid of attacker%::regen} >= 1:
+            apply regeneration of tier 2 without any particles to attacker for 5 seconds
+        if {perks::%uuid of attacker%::strength} >= 1:
+            set {_time} to "%{perks::%uuid of attacker%::strength}% seconds" parsed as timespan
+            apply strength of tier 1 without any particles to attacker for {_time}
+        if {perks::%uuid of attacker%::speed} >= 1:
+            set {_time} to "%{perks::%uuid of attacker%::speed}% seconds" parsed as timespan
+            apply speed of tier 1 without any particles to attacker for {_time}
         set {_xp} to genXP("kill")
         addXP(attacker, {_xp})
         add 1 to {kills::%uuid of attacker%}
@@ -145,8 +151,14 @@ on death of player:
                     add {_removeamt} to {points::%{_au}%}
                     send "&a&lNICE &7You got &6%{_removeamt}% &7points &6(5%%) &7of their total points" to {%victim%.lastattacker}
                     play sound "ENTITY_ARROW_HIT_PLAYER" to {%victim%.lastattacker}
-                    if {perks::%{_au}%::angel} >= 1:
-                        apply regeneration of tier 2 without any particles to {%victim%.lastattacker} for 3 seconds
+                    if {perks::%{_au}%::regen} >= 1:
+                        apply regeneration of tier 2 without any particles to {%victim%.lastattacker} for 5 seconds
+                    if {perks::%{_au}%::strength} >= 1:
+                        set {_time} to "%{perks::%{_au}%::strength}% seconds" parsed as timespan
+                        apply strength of tier 1 without any particles to {%victim%.lastattacker} for {_time}
+                    if {perks::%{_au}%::speed} >= 1:
+                        set {_time} to "%{perks::%{_au}%::speed}% seconds" parsed as timespan
+                        apply speed of tier 1 without any particles to {%victim%.lastattacker} for {_time}
                     add 1 to {kills::%{_au}%}
                     add 1 to {deaths::%uuid of victim%}
                     set {_xp} to genXP("kill")
@@ -227,13 +239,13 @@ on damage of player:
 command /tutorial:
     description: Learn how to play the game
     trigger:
-        if player is in region "innerarena":
-            send "{@name} &cYou cannot be inside the arena when you use this command"
-            stop
         if {intutorial.%uuid of player%} is true:
             teleport player to {spawn}
             reveal player from all players
             delete {intutorial.%uuid of player%}
+        else if player is in region "innerarena":
+            send "{@name} &cYou cannot be inside the arena when you use this command"
+            stop
         else:
             tutorial(player)
 
@@ -339,51 +351,22 @@ command /fix <text>:
                 send "{@name} &cThis item is already fully repaired" to player
                 stop
             else:
-                if player's tool is wooden sword:
-                    if player's tool is enchanted with sharpness 1:
-                        #Sharpness 1 Wooden Sword Repair - 100
-                        if {points::%{_up}%} >= 50:
-                            repair tool of player
-                            remove 50 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &650 &7points."
-                        else:
-                            send "{@name} &cInsufficent points: You need 50 points to do this"
+                if player's held item is stone sword:
+                    #Stone Sword Repair
+                    if {points::%{_up}%} >= 100:
+                        repair tool of player
+                        remove 100 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6100 &7points."
                     else:
-                        exit 1 conditional
-                else if player's held item is stone sword:
-                    #Sharp 1 Stone Sword Repair - 200
-                    if player's tool is enchanted with sharpness 1:
-                        if {points::%{_up}%} >= 150:
-                            repair tool of player
-                            remove 150 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6150 &7points."
-                        else:
-                            send "{@name} &cInsufficent points: You need 150 points to do this"
-                    else:
-                        #Stone Sword Repair
-                        if {points::%{_up}%} >= 100:
-                            repair tool of player
-                            remove 100 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6100 &7points."
-                        else:
-                            send "{@name} &cInsufficent points: You need 100 points to do this" 
+                        send "{@name} &cInsufficent points: You need 100 points to do this" 
                 else if player's held item is iron sword:
-                    #Sharp 1 Iron Sword Repair  
-                    if player's tool is enchanted with sharpness 1:
-                        if {points::%{_up}%} >= 250:
-                            repair tool of player
-                            remove 250 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6250 &7points."
-                        else:
-                            send "{@name} &cInsufficent points: You need 250 points to do this"
+                    #Iron Sword Repair
+                    if {points::%{_up}%} >= 200:
+                        repair tool of player
+                        remove 200 from {points::%{_up}%}
+                        send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
                     else:
-                        #Iron Sword Repair
-                        if {points::%{_up}%} >= 200:
-                            repair tool of player
-                            remove 200 from {points::%{_up}%}
-                            send "{@name} &7Successfully repaired &6%player's tool%&7. That cost you &6200 &7points."
-                        else:
-                            send "{@name} &cInsufficent points: You need 200 points to do this"
+                        send "{@name} &cInsufficent points: You need 200 points to do this"
                 else if player's held item is diamond sword:
                     #Diamond Sword Repair
                     if {points::%{_up}%} >= 350:
@@ -428,7 +411,7 @@ command /fix <text>:
                     stop
                 refreshScoreboard(player)
         else if arg-1 is "all":
-            send "SoonTM - yell at spiderlogical if it isn't done soon"
+            send "Work in progress"
             stop
         else:
             send "{@name} &cUsage: /fix <hand/all>"
