@@ -39,4 +39,5 @@
 - [ ] duels / other minigames
 - [ ] bot punishments and in game punishments linked
 - [ ] /fix all and a price confirmation
-- [x] assign each history an id to allow histories to be deleted 
+- [x] assign each history an id to allow histories to be deleted
+- [ ] near islands have a passive income source?

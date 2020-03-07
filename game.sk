@@ -9,11 +9,12 @@ on first join:
     set {points::%uuid of event-player%} to 0
     set {kills::%uuid of player%} to 0 if {kills::%uuid of player%} is not set
     set {level::%uuid of player%} to 0 if {level::%uuid of player%} is not set
+    set {prestige::%uuid of player%} to 0
     set {deaths::%uuid of player%} to 0 if {deaths::%uuid of player%} is not set
-    set the helmet of event-player to unbreakable leather helmet
-    set the chestplate of event-player to unbreakable leather chestplate
-    set the leggings of event-player to unbreakable leather leggings
-    set the boots of event-player to unbreakable leather boots
+    equip event-player with unbreakable leather helmet
+    equip event-player with unbreakable leather chestplate
+    equip event-player with unbreakable leather leggings
+    equip event-player with unbreakable leather boots
     give unbreakable wooden sword to event-player
     set {_item} to stone pickaxe with lore "&7Shift right click to upgrade"
     give unbreakable {_item} to event-player 
@@ -28,15 +29,24 @@ on exit of region "hill":
 on load:
     set {onhillamount} to 0
     delete {onhill} if {onhill} is set
+    send nl to all players
+    send centered "&6&lSLOGIC &7| Game Skript Reloaded" to all players
+    send nl to all players
 
 on food level change:
     cancel event
 
 every second:
     set {_nmultiplier} to product(0.1, {onhillamount})
-    loop all players:
+    loop all players in world "arena":
         if {onhill::%uuid of loop-player%} is true:
-            set {points::%uuid of loop-player%} to ({points::%uuid of loop-player%} + 2) if {onhillamount} is 1 else ({points::%uuid of loop-player%} + (2 - {_nmultiplier}))
+            if {multiplier::%uuid of loop-player%} is not set:
+                set {_otheramt} to 2
+            else if {multipler::%uuid of loop-player%} is 0:
+                set {_otheramt} to 2
+            else:
+                set {_otheramt} to (2 + (2 * {multipler::%uuid of loop-player%}))
+            set {points::%uuid of loop-player%} to ({points::%uuid of loop-player%} + {_otheramt}) if {onhillamount} is 1 else {points::%uuid of loop-player%} + ({_otheramt} - {_nmultiplier})
             refreshScoreboard(loop-player)
             set {_xp} to genXP("hill")
             addXP(loop-player, {_xp})
@@ -86,16 +96,17 @@ on death of player:
         if {perks::%uuid of attacker%::speed} >= 1:
             set {_time} to "%{perks::%uuid of attacker%::speed}% seconds" parsed as timespan
             apply speed of tier 1 without any particles to attacker for {_time}
+        if {perks::%uuid of attacker%::jump} >= 1:
+            set {_time} to "%{perks::%uuid of attacker%::jump}% seconds" parsed as timespan
+            apply jump boost of tier 2 without any particles to attacker for {_time}
         set {_xp} to genXP("kill")
         addXP(attacker, {_xp})
         add 1 to {kills::%uuid of attacker%}
         add 1 to {deaths::%uuid of victim%}
-        refreshScoreboard(attacker)
-        refreshScoreboard(victim)
 
         add 1 to {killstreak::%uuid of attacker%}
         if {killstreak::%uuid of attacker%} = 5:
-            send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, you will be rewarded with &6200 points&7!" to all players
+            send "&4&lBOUNTY &7| The king wants &6%attacker% &7killed, you will be rewarded with &6200 points&7!" to all players
             set {bounty::%uuid of attacker%} to 200
             set {_xp} to genXP("bplace")
             addXP(attacker, {_xp})
@@ -105,17 +116,17 @@ on death of player:
                 play sound "ENTITY_ARROW_HIT_PLAYER" to {%victim%.lastattacker}
                 add 100 to {points::%{_au}%}
         else if {killstreak::%uuid of attacker%} = 10:
-            send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, The bounty has been increaed to &6500 points&7!" to all players
+            send "&4&lBOUNTY &7| The king wants &6%attacker% &7killed, The bounty has been increaed to &6500 points&7!" to all players
             set {bounty::%uuid of attacker%} to 500
             set {_xp} to genXP("bplace")
             addXP(attacker, {_xp})
         else if {killstreak::%uuid of attacker%} = 15:
-            send "&4&lBOUNTY &7| The kings men want &6%attacker% &7killed, The bounty has been increaed to &6800 points&7!" to all players
+            send "&4&lBOUNTY &7| The king wants &6%attacker% &7killed, The bounty has been increaed to &6800 points&7!" to all players
             set {bounty::%uuid of attacker%} to 800
             set {_xp} to genXP("bplace")
             addXP(attacker, {_xp})
         else if {killstreak::%uuid of attacker%} = 20:
-            send "&4&lBOUNTY &7| The king has ordered &6%attacker% &7dead, The bounty has been increased to &61100 points&7!" to all players
+            send "&4&lBOUNTY &7| The king has ordered &6%attacker% &7dead immediately , The bounty has been increased to &61100 points&7!" to all players
             set {bounty::%uuid of attacker%} to 1100
             set {_xp} to genXP("bplace")
             addXP(attacker, {_xp})
@@ -127,16 +138,16 @@ on death of player:
                 addXP(attacker, {_xp})
                 set {bounty::%uuid of victim%} to 0
                 set {killstreak::%uuid of victim%} to 0
-                refreshScoreboard(attacker)
             else if {pbounty::%{_u}%} is true:
                 add {bounty::%uuid of victim%} to {points::%uuid of attacker%}
-                refreshScoreboard(attacker)
                 broadcast "&4&lBOUNTY&7 |&6 %attacker%&7 has claimed the &6%{bounty::%uuid of victim%}% &6point &7bounty on &6%victim%&7!"
                 delete {bounty::%uuid of victim%}
                 delete {pbounty::%uuid of victim%}
         else:
             delete {bounty::%uuid of victim%}
             delete {killstreak::%uuid of victim%}
+        refreshScoreboard(attacker)
+        refreshScoreboard(victim)
     else:
         if damage was caused by void:
             if {%victim%.lastattacker} is set:
@@ -159,6 +170,9 @@ on death of player:
                     if {perks::%{_au}%::speed} >= 1:
                         set {_time} to "%{perks::%{_au}%::speed}% seconds" parsed as timespan
                         apply speed of tier 1 without any particles to {%victim%.lastattacker} for {_time}
+                    if {perks::%{_au}%::jump} >= 1:
+                        set {_time} to "%{perks::%{_au}%::jump}% seconds" parsed as timespan
+                        apply jump boost of tier 2 without any particles to {%victim%.lastattacker} for {_time}
                     add 1 to {kills::%{_au}%}
                     add 1 to {deaths::%uuid of victim%}
                     set {_xp} to genXP("kill")
@@ -176,17 +190,17 @@ on death of player:
                             play sound "ENTITY_ARROW_HIT_PLAYER" to {%victim%.lastattacker}
                             add 100 to {points::%{_au}%}
                     else if {killstreak::%{_au}%} = 10:
-                        send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, The bound has been increaed to &6500 points&7!" to all players
+                        send "&4&lBOUNTY &7| The king wants &6%{%victim%.lastattacker}% &7killed, The bound has been increaed to &6500 points&7!" to all players
                         set {bounty::%{_au}%} to 500
                         set {_xp} to genXP("bplace")
                         addXP(attacker, {_xp})
                     else if {killstreak::%{_au}%} = 15:
-                        send "&4&lBOUNTY &7| The kings men want &6%{%victim%.lastattacker}% &7killed, The bounty has been increaed to &6800 points&7!" to all players
+                        send "&4&lBOUNTY &7| The king wants &6%{%victim%.lastattacker}% &7killed, The bounty has been increaed to &6800 points&7!" to all players
                         set {bounty::%{_au}%} to 800
                         set {_xp} to genXP("bplace")
                         addXP(attacker, {_xp})
                     else if {killstreak::%{_au}%} = 20:
-                        send "&4&lBOUNTY &7| The king has ordered &6%{%victim%.lastattacker}% &7dead, The bounty has been increased to &61100 points&7!" to all players
+                        send "&4&lBOUNTY &7| The king has ordered &6%{%victim%.lastattacker}% &7dead immediately, The bounty has been increased to &61100 points&7!" to all players
                         set {bounty::%{_au}%} to 1100
                         set {_xp} to genXP("bplace")
                         addXP(attacker, {_xp})
@@ -470,11 +484,13 @@ command /autojoin:
     executable by: players
     aliases: aj, togglejoin, tj
     trigger:
-        set {autojoin.%player's uuid%} to true if {autojoin.%player's uuid%} is false else false
-        if {autojoin.%player's uuid%} is true:
+        if {autojoin.%player's uuid%} is false:
+            set {autojoin.%player's uuid%} to true
             send "{@name} &7Toggled autojoin &aon" to player
         else:
+            delete {autojoin.%player's uuid%}
             send "{@name} &7Toggled autojoin &coff" to player
+            
 
 function openMenu(p: Player, type: String):
     set {_up} to uuid of {_p}

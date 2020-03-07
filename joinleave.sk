@@ -10,6 +10,7 @@ on join:
     refreshScoreboard(player)
     set {abuild.%player's uuid%} to false
     set {level::%uuid of player%} to 0 if {level::%uuid of player%} is not set
+    set {prestige::%uuid of player%} to 0 if {prestige::%uuid of player%} is not set
     loop all players:
         if {vanish.%loop-player's uuid%} is true:
             hide loop-player from player if player does not have permission "staff.vanish"
