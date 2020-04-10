@@ -1,0 +1,53 @@
+on load:
+    set {fixable::*} to iron sword, iron boots, iron leggings, iron chestplate, iron helmet, and diamond sword, stone sword
+
+    set {_thing} to "iron sword" parsed as item
+    set {rprice::%{_thing}%} to 200
+
+    set {_thing} to "iron boots" parsed as item
+    set {rprice::%{_thing}%} to 150
+
+    set {_thing} to "iron leggings" parsed as item
+    set {rprice::%{_thing}%} to 200
+
+    set {_thing} to "iron chestplate" parsed as item
+    set {rprice::%{_thing}%} to 200
+
+    set {_thing} to "iron helemt" parsed as item
+    set {rprice::%{_thing}%} to 150
+
+command /fixall:
+    permission: points.admin
+    permission message: &cNo. Testing
+    trigger:
+        loop all items in player's inventory:
+            if {fixable::*} contains loop-value:
+                if durability of loop-value is not 0:
+                    add loop-value to {torepair::%player%}
+                    add getPrice(loop-value) to {fprice::%player%}
+        if {torepair::%player%} is empty:
+            send "&6&lSLOGIC &7| There is nothing in your inventory to repair"
+        else:
+            send "&7Would you like to fix all for &6%{fprice::%player%}% &7points? Type /fconfirm to confirm or /fcancel to cancel" to player
+            set {fall::%player%} to true
+
+command /fconfirm:
+    trigger:
+        if {fall::%player%} is true:
+            remove {fprice::%player%} from {points::%uuid of player%}
+            repair {torepair::%player%}
+            send "&6&lSLOGIC &7| Repaired all items, that cost you &6%{fprice::%player%}% &7points"
+            delete {fall::%player%}
+            delete {fprice::%player%}
+            delete {torepair::%player%}
+
+command /fcancel:
+    trigger:
+        if {fall::%player%} is true:
+            send "&6&lSLOGIC &7| &cCanceled"
+            delete {fall::%player%}
+            delete {fprice::%player%}
+            delete {torepair::%player%}
+
+function getPrice(i: item) :: integer:
+    return {rprice::%{_i}%}

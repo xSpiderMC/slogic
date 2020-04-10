@@ -28,7 +28,7 @@ on exit of region "hill":
 
 on load:
     set {onhillamount} to 0
-    delete {onhill} if {onhill} is set
+    delete {onhill::*} if {onhill::*} is set
     send nl to all players
     send centered "&6&lSLOGIC &7| Game Skript Reloaded" to all players
     send nl to all players
@@ -37,19 +37,32 @@ on food level change:
     cancel event
 
 every second:
-    set {_nmultiplier} to product(0.1, {onhillamount})
     loop all players in world "arena":
         if {onhill::%uuid of loop-player%} is true:
-            if {multiplier::%uuid of loop-player%} is not set:
-                set {_otheramt} to 2
-            else if {multipler::%uuid of loop-player%} is 0:
-                set {_otheramt} to 2
-            else:
-                set {_otheramt} to (2 + (2 * {multipler::%uuid of loop-player%}))
-            set {points::%uuid of loop-player%} to ({points::%uuid of loop-player%} + {_otheramt}) if {onhillamount} is 1 else {points::%uuid of loop-player%} + ({_otheramt} - {_nmultiplier})
+            add calcHillIncome(loop-player) to {points::%uuid of loop-player%}
             refreshScoreboard(loop-player)
             set {_xp} to genXP("hill")
             addXP(loop-player, {_xp})
+
+function calcHillIncome(p: player) :: number:
+    set {_nmultiplier} to 0.1 * {onhillamount}
+    set {_u} to uuid of {_p}
+    if {onhillamount} < 2:
+        if {multiplier::%{_u}%} is not set:
+            return 2
+        else if {multiplier::%{_u}%} is 0.0:
+            return 2
+        else:
+            return 2 + (2 * {multiplier::%{_u}%})
+    else:
+        if {multiplier::%{_u}%} is not set:
+            return 2 - {_nmultiplier}
+        else if {multiplier::%{_u}%} is 0.0:
+            return 2 - {_nmultiplier}
+        else:
+            set {_amt} to 2 + (2 * {multiplier::%{_u}%})
+            return {_amt} - {_nmultiplier}
+
 on respawn:
     if {autojoin.%player's uuid%} is true:
         if {autojoincolor.%player's uuid%} is set:
@@ -488,7 +501,7 @@ command /autojoin:
             set {autojoin.%player's uuid%} to true
             send "{@name} &7Toggled autojoin &aon" to player
         else:
-            delete {autojoin.%player's uuid%}
+            set {autojoin.%player's uuid%} to false
             send "{@name} &7Toggled autojoin &coff" to player
             
 

@@ -169,17 +169,18 @@ on load:
 command /perks:
     aliases: perk
     trigger:
-        if {level::%uuid of player%} < 10:
-            send "{@name} &cYou have to be atleast level 10 to unlock perks"
-        open virtual chest inventory named "&6&lPERKS" with size 3 to player
-        format gui slot (all integers between 0 and 26) of player with air
-        format gui slot 11 of player with skull of player named "&6My Perks" with lore "&7Click to view your perks" to do nothing
-        format gui slot 13 of player with totem of undying named "&6Perk Shop" with lore "&7Click to open" to run function perk_gui(player)
-        if {prestige::%uuid of player%} >= 1:
-            format gui slot 15 of player with nether star named "&6Prestige Perk Shop" with lore "&7Click to open"
+        if {level::%uuid of player%} < 5:
+            send "{@name} &cYou have to be atleast level 5 to unlock perks"
         else:
-            format gui slot 15 of player with end crystal named "&6Prestige Perk Shop" with lore "&cLocked until prestige 1" to run:
-                send "{@name} &cYou must prestige to unlock this shop"
+            open virtual chest inventory named "&6&lPERKS" with size 3 to player
+            format gui slot (all integers between 0 and 26) of player with air
+            format gui slot 11 of player with skull of player named "&6My Perks" with lore "&7Click to view your perks" to do nothing
+            format gui slot 13 of player with totem of undying named "&6Perk Shop" with lore "&7Click to open" to run function perk_gui(player)
+            if {prestige::%uuid of player%} >= 1:
+                format gui slot 15 of player with nether star named "&6Prestige Perk Shop" with lore "&7Click to open"
+            else:
+                format gui slot 15 of player with end crystal named "&6Prestige Perk Shop" with lore "&cLocked until prestige 1" to run:
+                    send "{@name} &cYou must prestige to unlock this shop"
 
 command /myperks:
     trigger:
